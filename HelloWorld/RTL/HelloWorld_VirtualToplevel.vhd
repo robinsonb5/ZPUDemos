@@ -180,7 +180,7 @@ begin
 			case mem_addr(31 downto 28) is
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
-						when X"84" => -- UART
+						when X"C0" => -- UART
 							ser_txdata<=mem_write(7 downto 0);
 							ser_txgo<='1';
 							mem_busy<='0';
