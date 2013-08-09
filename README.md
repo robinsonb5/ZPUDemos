@@ -14,7 +14,9 @@ Since ZPUFlex is incorporated as a submodule, you'll need to check out
 the current codebase like so:
 
 > git clone https://github.com/robinsonb5/ZPUDemos.git
+
 > git submodule init
+
 > git submodule update
 
 Each demo's directory contains Quartus project files for each target board
