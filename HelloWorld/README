@@ -1,0 +1,24 @@
+This Hello World project demonstrates using the ZPUFlex processor in its
+simplest form.
+
+In the Makefile we specify the regular ctr0.s (as opposed to the small
+variant) which includes instruction emulation code for the optional
+instructions.  We need this since we use the ZPU in its most compact
+form, which omits many optional instructions.  Since we're using emulation
+we don't ask the compiler to avoid any instructions.
+
+We specify the standalone_simple.ld linkscript, which is suitable when the
+ROM code will appear in low memory.
+
+The Makefile builds an elf binary, converts that to raw binary format, then
+uses the "zpuromgen" command and some sed trickery to create a VHDL ROM file
+that can be included directly in your Quartus project.
+
+
+In the RTL we provide a simple UART (transmitter portion only), and
+instantiate the ZPUFlex core with all the optional features disabled.
+The entire project, including UART, is just 684 logic elements on the DE1.
+
+Quartus projects are provided for the DE1 and MIST boards to date -
+others may well follow.
+

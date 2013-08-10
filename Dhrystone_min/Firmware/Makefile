@@ -14,14 +14,19 @@ STARTUP_DIR = $(ZPUFLEXDIR)/Firmware/startup
 # we fetch ROM prologue / epilogue from here
 RTL_DIR = $(ZPUFLEXDIR)/RTL/
 
+# we use printf from here
+COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
 MINSTARTUP_SRC = $(STARTUP_DIR)/crt0.s
 MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
-MAIN_PRJ = HelloWorld
-MAIN_SRC = main.c uart.c uart.h
+COMMON_SRC = $(COMMON_DIR)/small_printf.c
+COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
+
+MAIN_PRJ = Dhrystone_min
+MAIN_SRC = dhry_1.c dhry_2.c uart.c uart.h
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
@@ -29,9 +34,11 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 
-CFLAGS  = -I. -c -Os -DDISABLE_UART_RX
+ZPUFLAGS = -mno-div
 
-LFLAGS  = -Wl,--relax -nostdlib -Os
+CFLAGS  = -I. -I$(COMMON_DIR)/ -c -O6 $(ZPUFLAGS) -DDISABLE_UART_RX -DPRINTF_HEX_ONLY
+
+LFLAGS  = -nostartfiles -Wl,--relax -Os
 
 
 # Our target.
@@ -68,6 +75,9 @@ $(MAIN_PRJ).elf: $(MINSTARTUP_OBJ) $(MAIN_OBJ)
 	$(LD) $(LFLAGS) -T $(LINKMAP) -o $@ $+ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile
+	$(CC) $(CFLAGS)  -o $@ -c $<
+
+$(BUILD_DIR)/%.o: $(COMMON_DIR)/%.c Makefile
 	$(CC) $(CFLAGS)  -o $@ -c $<
 
 $(BUILD_DIR)/%.o: %.s

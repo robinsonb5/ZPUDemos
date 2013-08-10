@@ -54,6 +54,10 @@ constant uart_divisor : integer := sysclk_hz/1152;
 signal reset : std_logic := '0';
 signal reset_counter : unsigned(15 downto 0) := X"FFFF";
 
+-- Millisecond counter
+signal millisecond_counter : unsigned(31 downto 0) := X"00000000";
+signal millisecond_tick : unsigned(19 downto 0);
+
 -- UART signals
 
 signal ser_txdata : std_logic_vector(7 downto 0);
@@ -99,6 +103,19 @@ begin
 end process;
 
 
+-- Timer
+process(clk)
+begin
+	if rising_edge(clk) then
+		millisecond_tick<=millisecond_tick+1;
+		if millisecond_tick=sysclk_frequency*100 then
+			millisecond_counter<=millisecond_counter+1;
+			millisecond_tick<=X"00000";
+		end if;
+	end if;
+end process;
+
+
 -- UART
 
 myuart : entity work.simple_uart
@@ -123,10 +140,10 @@ myuart : entity work.simple_uart
 
 -- Hello World ROM
 
-	myrom : entity work.HelloWorld_ROM
+	myrom : entity work.Dhrystone_min_ROM
 	generic map
 	(
-		maxAddrBit => 10
+		maxAddrBit => 13
 	)
 	port map (
 		clk => clk,
@@ -149,7 +166,7 @@ myuart : entity work.simple_uart
 		IMPL_XOR => false,
 		REMAP_STACK => false,
 		EXECUTE_RAM => false,
-		maxAddrBitBRAM => 10
+		maxAddrBitBRAM => 13
 	)
 	port map (
 		clk                 => clk,
@@ -202,6 +219,10 @@ begin
 							mem_read<=(others=>'X');
 							mem_read(9 downto 0)<=ser_rxrecv&ser_txready&ser_rxdata;
 							ser_rxrecv<='0';	-- Clear rx flag.
+							mem_busy<='0';
+							
+						when X"C8" => -- Millisecond counter
+							mem_read<=std_logic_vector(millisecond_counter);
 							mem_busy<='0';
 
 						when others =>
