@@ -34,9 +34,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 
-ZPUFLAGS = -mno-div
-
-CFLAGS  = -I. -I$(COMMON_DIR)/ -c -O6 $(ZPUFLAGS) -DDISABLE_UART_RX -DPRINTF_HEX_ONLY
+CFLAGS  = -I. -I$(COMMON_DIR)/ -c -O6 -DDISABLE_UART_RX -DPRINTF_HEX_ONLY
 
 LFLAGS  = -nostartfiles -Wl,--relax -Os
 
