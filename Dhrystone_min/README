@@ -1,0 +1,48 @@
+This is an implementation of the standard Dhrystone benchmark,
+which measures the performance of the ZPU in its smallest configuration.
+
+There are no noteworthy differences in the makefile between this and
+the Hello World project.
+
+I have commented out a large portion of the report at the end of the
+test, just to keep the ROM size down, otherwise making it fit in the
+rather small amout of block RAM available on the DE1 board is tricky.
+Also to keep down the code size, I've used a very simple and compact
+printf implementation which only supports very basic format strings.
+Its size can be reduced even further (and its reliance upon division
+and modulo can be eliminated) by specifying "-DPRINTF_HEX_ONLY" in
+the CFLAGS within the Makefile.
+
+As with Hello World, the Makefile builds an elf binary, converts that 
+to raw binary format, then uses the "zpuromgen" command and some sed 
+trickery to create a VHDL ROM file that can be included directly in
+the Quartus project.
+
+
+The RTL is essentially the same as the Hello World hardware, with the
+addition of a "millisecond counter" register which the firmware uses
+to time the benchmark.
+
+The entire project is 808 logic elements when built for the DE1.
+
+The size of the Dhrystone_min.bin file is 4671 bytes, but this is
+deceptive; the project requires quite a lot of working space which is in
+the uninitialized BSS section.  To make it possible to gauge the required
+RAM size, the Makefile spits out a report, showing the location of the end
+of code, the start of BSS and the end of BSS:
+
+End of code:	00001240 g       *ABS*	00000000 _romend
+Start of BSS:	00001240 g       .bss	00000000 __bss_start__
+End of BSS:	00003b88 g       *ABS*	00000000 __bss_end__
+
+In this case the BSS section ends at 0x3b88.  Any space above this will be
+available for the stack - so we round up to the nearest power of 2 - our
+Block RAM size will be 0x4000 or 16384 bytes, which leaves 0x478 (1144)
+bytes available for the stack.  This should be plenty.
+We require 14 address bits (13 downto 0) to address 16384 bytes of RAM,
+so in the ROM and ZPU instantiations, maxAddrBit and maxAddrBitBRAM,
+respectively, are set to 13.
+
+When clocked at 125MHz, the Dhrystone_min project turns in 1.7 DMIPS, which
+is quite respectable for a CPU that's taking up a mere 599 logic elements!
+

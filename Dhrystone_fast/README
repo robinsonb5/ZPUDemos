@@ -1,0 +1,34 @@
+The Dhrystone_fast project demonstrates increasing the ZPU's speed by
+enabling optional hardware instructions, at the cost of increasing the
+CPU's footprint.
+
+The firmware is identical to that used by the Dhrystone_min project.
+
+The ZPU is configured like so:
+	generic map (
+		IMPL_MULTIPLY => true,
+		IMPL_COMPARISON_SUB => true,
+		IMPL_EQBRANCH => true,
+		IMPL_STOREBH => false,
+		IMPL_LOADBH => false,
+		IMPL_CALL => true,
+		IMPL_SHIFT => true,
+		IMPL_XOR => true,
+		REMAP_STACK => false,
+		EXECUTE_RAM => false,
+		maxAddrBitBRAM => 13
+	)
+
+Notice that we leave STOREBH and LOADBH set to false.
+The reason for this is simply that those instructions aren't yet fully
+implemented.  While they work for external RAM access, they don't currently
+do anything for Block RAM access.  It's possible to specify compiler flags
+in the Makefile (-mno-byteop -mno-shortop) which will make the compiler emit
+load/shift/mask/store code to replace those instructions - this allows, for
+example, a Boot ROM to load a program into SDRAM, and the bootstrapped program
+to benefit from hardware loadb/storeb without breaking the Boot ROM.
+
+Even with emulated loadb/storeb, the fast version of project turns in 5.1
+DMIPS, the whole project being 1135 logic elements on the DE1, and the ZPU
+itself taking up 926.
+

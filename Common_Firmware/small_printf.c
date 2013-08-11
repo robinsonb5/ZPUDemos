@@ -73,6 +73,12 @@ _vprintf(const char *fmt, va_list ap)
 	int nextfmt;
 
 	// Because we haven't implemented loadb from ROM yet, we can't use *<char*>++.
+	// We work around this by reading 32 bits at a time and shift/masking the bytes
+	// individually.
+	// This is only necessary if using the hardware implementation of the
+	// loadb/storeb instructions and running from BlockRAM.  Loadb/storeb from external
+	// RAM is implemented.
+
 	s2=(int*)fmt;
 	nextfmt=0;
 	do
