@@ -1,12 +1,6 @@
 
-#ifdef DEBUG
-#include <stdio.h>
-#include <string.h>
-#include <malloc.h>
-#else
-#include "small_printf.h"
 #include "uart.h"
-#endif
+#include "small_printf.h"
 
 // FIXME - use a smaller LFSR - this one will fail for RAMs smaller than 8 meg.
 #define CYCLE_LFSR {lfsr<<=1; if(lfsr&0x400000) lfsr|=1; if(lfsr&0x200000) lfsr^=1;}
@@ -219,11 +213,6 @@ unsigned int addresscheck(volatile int *base,int cachesize)
 int main(int argc, char **argv)
 {
 	volatile int *base=0;
-#ifdef DEBUG
-	base=(volatile int *)malloc(64*1024*1024);	// Standalone, buildable on Linux for testing
-#else
-	HW_UART(REG_UART_CLKDIV)=UART_115200; // Running on the ZPU
-#endif
 
 	while(1)
 	{

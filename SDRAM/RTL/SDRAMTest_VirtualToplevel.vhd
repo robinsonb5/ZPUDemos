@@ -101,9 +101,7 @@ signal sdram_state : sdram_states;
 
 begin
 
-sdr_cke <='0'; -- Disable SDRAM for now
-sdr_cs <='1'; -- Disable SDRAM for now
-
+sdr_cke <='1';
 
 -- Reset counter.
 
@@ -169,7 +167,43 @@ myuart : entity work.simple_uart
 		to_zpu => zpu_from_rom
 	);
 
+	
+-- SDRAM
+mysdram : entity work.sdram_simple
+	generic map
+	(
+		rows => sdram_rows,
+		cols => sdram_cols
+	)
+	port map
+	(
+	-- Physical connections to the SDRAM
+		sdata => sdr_data,
+		sdaddr => sdr_addr,
+		sd_we	=> sdr_we,
+		sd_ras => sdr_ras,
+		sd_cas => sdr_cas,
+		sd_cs	=> sdr_cs,
+		dqm => sdr_dqm,
+		ba	=> sdr_ba,
 
+	-- Housekeeping
+		sysclk => clk,
+		reset => reset_in,  -- Contributes to reset, so have to use reset_in here.
+		reset_out => sdr_ready,
+
+		datawr1 => sdram_write,
+		addr1 => sdram_addr,
+		req1 => sdram_req,
+		wr1 => sdram_wr, -- active low
+		wrL1 => sdram_wrL, -- lower byte
+		wrU1 => sdram_wrU, -- upper byte
+		wrU2 => sdram_wrU2, -- upper halfword, only written on longword accesses
+		dataout1 => sdram_read,
+		dtack1 => sdram_ack
+	);
+
+	
 -- Main CPU
 
 	zpu: zpu_core 
@@ -225,7 +259,14 @@ begin
 							null;
 					end case;
 				when others => -- SDRAM
-					sdram_state<=write1;
+					sdram_wrL<=mem_writeEnableb and not mem_addr(0);
+					sdram_wrU<=mem_writeEnableb and mem_addr(0);
+					sdram_wrU2<=mem_writeEnableh or mem_writeEnableb; -- Halfword access
+					if mem_writeEnableb='1' then
+						sdram_state<=writeb;
+					else
+						sdram_state<=write1;
+					end if;
 			end case;
 
 		elsif mem_readEnable='1' then -- Read from CPU?
@@ -249,14 +290,7 @@ begin
 					end case;
 
 				when others => -- SDRAM
-					sdram_wrL<=mem_writeEnableb and not mem_addr(0);
-					sdram_wrU<=mem_writeEnableb and mem_addr(0);
-					sdram_wrU2<=mem_writeEnableh or mem_writeEnableb; -- Halfword access
-					if mem_writeEnableb='1' then
-						sdram_state<=writeb;
-					else
-						sdram_state<=write1;
-					end if;
+					sdram_state<=read1;
 			end case;
 		end if;
 
