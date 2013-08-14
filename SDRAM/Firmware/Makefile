@@ -19,22 +19,22 @@ COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
-MINSTARTUP_SRC = $(STARTUP_DIR)/crt0.s
+MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s
 MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
-COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h
+COMMON_SRC = $(COMMON_DIR)/small_printf.c  $(COMMON_DIR)/uart.c  $(COMMON_DIR)/uart.h
 COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
 
-MAIN_PRJ = Dhrystone_fast
-MAIN_SRC = dhry_1.c dhry_2.c
+MAIN_PRJ = SDRAMTest
+MAIN_SRC = memcheck.c
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
-LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
+LINKMAP  = $(ZPUFLEXDIR)/Firmware/boot_standalone_remapped.ld # We use a link script here to make the program run from 0x04000000
 
 
 # Commandline options for each tool.
 
-ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg -mno-div -mno-mod # No-neg requires bugfixed toolchain
+ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg # No-neg requires bugfixed toolchain
 CFLAGS  = -I. -I$(COMMON_DIR)/ -c -O6 $(ZPUOPTS) -DDISABLE_UART_RX # -DPRINTF_HEX_ONLY
 
 LFLAGS  = -nostartfiles -Wl,--relax -Os
