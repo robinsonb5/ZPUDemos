@@ -8,25 +8,20 @@ DUMP    = $(BASE)-objdump
 ZPUFLEXDIR = ../../ZPUFlex
 ROMGEN = $(ZPUFLEXDIR)/Firmware/zpuromgen
 
-# we use crt0.s from here
+# we use mincrt0.s from here
 STARTUP_DIR = $(ZPUFLEXDIR)/Firmware/startup
 
 # we fetch ROM prologue / epilogue from here
 RTL_DIR = $(ZPUFLEXDIR)/RTL/
 
-# we use printf from here
-COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
-STARTUP_SRC = $(STARTUP_DIR)/crt0.s
-STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
+MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s
+MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
-COMMON_SRC = $(COMMON_DIR)/small_printf.c
-COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
-
-MAIN_PRJ = Dhrystone_min
-MAIN_SRC = dhry_1.c dhry_2.c uart.c uart.h
+MAIN_PRJ = HelloTinyROM
+MAIN_SRC = main.c uart.c uart.h
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
@@ -34,7 +29,8 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 
-CFLAGS  = -I. -I$(COMMON_DIR)/ -c -O6 -DDISABLE_UART_RX # -DPRINTF_HEX_ONLY
+ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg # No-neg requires bugfixed toolchain
+CFLAGS  = -I. -c -Os $(ZPUOPTS) -DDISABLE_UART_RX
 
 LFLAGS  = -nostartfiles -Wl,--relax -Os
 
@@ -69,13 +65,10 @@ $(ROMGEN): $(ZPUFLEXDIR)/Firmware/zpuromgen.c
 
 # Link - this produces an ELF binary.
 
-$(MAIN_PRJ).elf: $(STARTUP_OBJ) $(MAIN_OBJ)
+$(MAIN_PRJ).elf: $(MINSTARTUP_OBJ) $(MAIN_OBJ)
 	$(LD) $(LFLAGS) -T $(LINKMAP) -o $@ $+ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile
-	$(CC) $(CFLAGS)  -o $@ -c $<
-
-$(BUILD_DIR)/%.o: $(COMMON_DIR)/%.c Makefile
 	$(CC) $(CFLAGS)  -o $@ -c $<
 
 $(BUILD_DIR)/%.o: %.s

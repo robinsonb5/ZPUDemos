@@ -538,10 +538,9 @@ set_global_assignment -name MUX_RESTRUCTURE ON
 set_global_assignment -name ALLOW_SHIFT_REGISTER_MERGING_ACROSS_HIERARCHIES ALWAYS
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_MAP_LOGIC_TO_MEMORY_FOR_AREA ON
-set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/Dhrystone_fast/fpga/de1/stp1_auto_stripped.stp
-set_global_assignment -name VHDL_FILE ../../Firmware/Dhrystone_fast_ROM.vhd
-set_global_assignment -name VHDL_FILE ../../../Dhrystone_min/Firmware/Dhrystone_min_ROM.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/Dhrystone_fast_VirtualToplevel.vhd
+set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/HelloWorld/fpga/de1/stp1_auto_stripped.stp
+set_global_assignment -name VHDL_FILE ../../Firmware/HelloTinyROM_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/HelloTinyROM_VirtualToplevel.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd

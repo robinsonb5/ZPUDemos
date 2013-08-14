@@ -8,7 +8,7 @@ DUMP    = $(BASE)-objdump
 ZPUFLEXDIR = ../../ZPUFlex
 ROMGEN = $(ZPUFLEXDIR)/Firmware/zpuromgen
 
-# we use mincrt0.s from here
+# we use crt0.s from here
 STARTUP_DIR = $(ZPUFLEXDIR)/Firmware/startup
 
 # we fetch ROM prologue / epilogue from here
@@ -17,8 +17,8 @@ RTL_DIR = $(ZPUFLEXDIR)/RTL/
 
 BUILD_DIR=zpu_obj
 
-MINSTARTUP_SRC = $(STARTUP_DIR)/crt0.s
-MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
+STARTUP_SRC = $(STARTUP_DIR)/crt0.s
+STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
 MAIN_PRJ = HelloWorld
 MAIN_SRC = main.c uart.c uart.h
@@ -64,7 +64,7 @@ $(ROMGEN): $(ZPUFLEXDIR)/Firmware/zpuromgen.c
 
 # Link - this produces an ELF binary.
 
-$(MAIN_PRJ).elf: $(MINSTARTUP_OBJ) $(MAIN_OBJ)
+$(MAIN_PRJ).elf: $(STARTUP_OBJ) $(MAIN_OBJ)
 	$(LD) $(LFLAGS) -T $(LINKMAP) -o $@ $+ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile
