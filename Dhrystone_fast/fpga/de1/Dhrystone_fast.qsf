@@ -531,7 +531,7 @@ set_location_assignment PIN_W20 -to SD_DAT
 set_location_assignment PIN_U20 -to SD_DAT3
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE BALANCED
+set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE AREA
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
 set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS ON
 set_global_assignment -name MUX_RESTRUCTURE ON
@@ -549,6 +549,6 @@ set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneII/PLL.qip
 set_global_assignment -name SIGNALTAP_FILE stp2.stp
 set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/Dhrystone_fast/fpga/de1/stp2_auto_stripped.stp
 set_global_assignment -name SDC_FILE Dhrystone_fast.sdc
-set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
-set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC OFF
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING OFF
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
