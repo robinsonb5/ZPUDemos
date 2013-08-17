@@ -1,0 +1,50 @@
+This variant of the Hello World project demonstrates how to minimise code
+size for the ZPU core.
+
+In the Makefile we specify the minimal minctr0.s (as opposed to the full
+version).  This omits the emulation table for optional instructions, so
+if we use this startup code we must make sure the code doesn't contain any 
+instructions not implemented by the CPU.
+
+This is done by enabling optional instructions when instantiating the ZPU
+core.  In this instance we use:
+		IMPL_MULTIPLY => true,
+		IMPL_COMPARISON_SUB => true,
+		IMPL_EQBRANCH => true,
+		IMPL_STOREBH => false,
+		IMPL_LOADBH => false,
+		IMPL_CALL => true,
+		IMPL_SHIFT => true,
+		IMPL_XOR => true,
+		REMAP_STACK => false,
+		EXECUTE_RAM => false,
+
+(Note: we don't enable hardware LOADB/H or STOREB/H because they currently
+only work when addressing external RAM, and not the internal Boot ROM/Stack
+RAM.)
+
+However, there are still instructions not implemented in hardware
+and we must make sure GCC doesn't emit them, by way of compiler flags.
+
+ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop \
+	-mno-shortop -mno-neg
+
+There are a few pitfalls to be aware of:
+* -no-neg is broken in the binary GCC toolchains available on the net.
+  If you build the toolchain from source using the current repository this
+  won't be a problem.
+
+* Load / Store B/H are problematic for data in the Boot ROM, so we ask GCC
+  to avoid emitting those instructions.
+
+* Division and modulo are a problem.  They're expensive to implement in
+  hardware, and while it's possible to link in software division from libgcc
+  the implementation there uses other instructions that we're trying to avoid
+  - so for now, you can't use division or modulo in code built with mincrt0.s
+
+We still use the standalone_simple.ld linkscript.
+
+The HelloTinyROM code compiles to a mere 268 bytes, and the DE1 example
+project, with optional instructions enabled in the ZPU, takes up 998 logic
+elements.
+
