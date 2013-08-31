@@ -1,5 +1,6 @@
 #include "vga.h"
 #include "uart.h"
+#include "small_printf.h"
 
 // Doesn't actually matter what we use here while the demo runs from block RAM.
 // If we were bootstrapping and then running from SDRAM, we'd need to allocate
@@ -10,7 +11,6 @@
 int main(int argc, char **argv)
 {
 	int c=0;
-	puts("VGATest: Setting up framebuffer...\n");
 
 	HW_VGA(FRAMEBUFFERPTR)=framebuffer_addr;
 

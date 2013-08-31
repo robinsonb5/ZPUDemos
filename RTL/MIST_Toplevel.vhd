@@ -33,9 +33,9 @@ entity MIST_Toplevel is
 
 		VGA_HS		:	 out STD_LOGIC;
 		VGA_VS		:	 out STD_LOGIC;
-		VGA_R		:	 out std_logic_vector(5 downto 0);
-		VGA_G		:	 out std_logic_vector(5 downto 0);
-		VGA_B		:	 out std_logic_vector(5 downto 0);
+		VGA_R		:	 out unsigned(5 downto 0);
+		VGA_G		:	 out unsigned(5 downto 0);
+		VGA_B		:	 out unsigned(5 downto 0);
 
 		AUDIO_L : out std_logic;
 		AUDIO_R : out std_logic
@@ -47,10 +47,6 @@ architecture rtl of MIST_Toplevel is
 signal reset : std_logic;
 signal sysclk : std_logic;
 signal pll_locked : std_logic;
-signal red : unsigned(7 downto 0);
-signal green : unsigned(7 downto 0);
-signal blue : unsigned(7 downto 0);
-signal vga_window : std_logic;
 
 begin
 
@@ -73,7 +69,8 @@ generic map
 (
 	sdram_rows => 12,
 	sdram_cols => 8,
-	sysclk_frequency => 1250
+	sysclk_frequency => 1250,
+	vga_bits => 6
 )
 port map
 (	
@@ -83,10 +80,10 @@ port map
 	-- video
 	vga_hsync => VGA_HS,
 	vga_vsync => VGA_VS,
-	vga_red => red,
-	vga_green => green,
-	vga_blue => blue,
-	vga_window => vga_window,
+	vga_red => VGA_R,
+	vga_green => VGA_G,
+	vga_blue => VGA_B,
+--	vga_window => vga_window,
 	
 	-- sdram
 	sdr_data => DRAM_DQ,

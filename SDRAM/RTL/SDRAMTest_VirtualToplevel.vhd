@@ -8,16 +8,17 @@ entity VirtualToplevel is
 	generic (
 		sdram_rows : integer := 12;
 		sdram_cols : integer := 8;
-		sysclk_frequency : integer := 1000 -- Sysclk frequency * 10
+		sysclk_frequency : integer := 1000; -- Sysclk frequency * 10
+		vga_bits : integer := 4
 	);
 	port (
 		clk 			: in std_logic;
 		reset_in 	: in std_logic;
 
 		-- VGA
-		vga_red 		: out unsigned(7 downto 0);
-		vga_green 	: out unsigned(7 downto 0);
-		vga_blue 	: out unsigned(7 downto 0);
+		vga_red 		: out unsigned(vga_bits-1 downto 0);
+		vga_green 	: out unsigned(vga_bits-1 downto 0);
+		vga_blue 	: out unsigned(vga_bits-1 downto 0);
 		vga_hsync 	: out std_logic;
 		vga_vsync 	: buffer std_logic;
 		vga_window	: out std_logic;
