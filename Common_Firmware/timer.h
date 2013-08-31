@@ -1,7 +1,7 @@
-#ifndef UART_H
-#define UART_H
+#ifndef TIMER_H
+#define TIMER_H
 
-/* Hardware registers for a supporting UART to the ZPUFlex project. */
+/* Hardware registers for a timer, needed for the Dhrystone ZPU demo. */
 
 #define TIMERBASE 0xFFFFFFC8
 #define HW_TIMER(x) *(volatile unsigned int *)(TIMERBASE+x)

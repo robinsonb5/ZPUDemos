@@ -111,8 +111,8 @@ set_false_path -from {SW*} -to {*}
 
 set_multicycle_path -from [get_clocks {sd1clk_pin}] -to [get_clocks {mypll|altpll_component|pll|clk[1]}] -setup -end 2
 
-set_multicycle_path -from {VirtualToplevel:myVirtualToplevel|SDRAMTest_ROM:myrom|*} -to {VirtualToplevel:myVirtualToplevel|zpu_core:zpu|*} -setup -end 2
-set_multicycle_path -from {VirtualToplevel:myVirtualToplevel|SDRAMTest_ROM:myrom|*} -to {VirtualToplevel:myVirtualToplevel|zpu_core:zpu|*} -hold -end 2
+set_multicycle_path -from {VirtualToplevel:myVirtualToplevel|*:myrom|*} -to {VirtualToplevel:myVirtualToplevel|zpu_core:zpu|*} -setup -end 2
+set_multicycle_path -from {VirtualToplevel:myVirtualToplevel|*:myrom|*} -to {VirtualToplevel:myVirtualToplevel|zpu_core:zpu|*} -hold -end 2
 
 #**************************************************************
 # Set Maximum Delay

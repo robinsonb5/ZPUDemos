@@ -22,11 +22,11 @@ BUILD_DIR=zpu_obj
 MINSTARTUP_SRC = $(STARTUP_DIR)/crt0.s
 MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
-COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h $(COMMON_DIR)/timer.h
+COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h $(COMMON_DIR)/vga.h
 COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
 
-MAIN_PRJ = Dhrystone_fast
-MAIN_SRC = dhry_1.c dhry_2.c
+MAIN_PRJ = VGATest
+MAIN_SRC = vgatest.c
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld

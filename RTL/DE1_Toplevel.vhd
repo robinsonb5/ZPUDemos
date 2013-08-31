@@ -58,9 +58,9 @@ entity DE1_Toplevel is
 		PS2_CLK		:	 in STD_LOGIC;
 		VGA_HS		:	 out STD_LOGIC;
 		VGA_VS		:	 out STD_LOGIC;
-		VGA_R		:	 out std_logic_vector(3 downto 0);
-		VGA_G		:	 out std_logic_vector(3 downto 0);
-		VGA_B		:	 out std_logic_vector(3 downto 0);
+		VGA_R		:	 out unsigned(3 downto 0);
+		VGA_G		:	 out unsigned(3 downto 0);
+		VGA_B		:	 out unsigned(3 downto 0);
 		AUD_ADCLRCK		:	 out STD_LOGIC;
 		AUD_ADCDAT		:	 in STD_LOGIC;
 		AUD_DACLRCK		:	 out STD_LOGIC;
@@ -77,10 +77,6 @@ architecture rtl of DE1_Toplevel is
 signal reset : std_logic;
 signal sysclk : std_logic;
 signal pll_locked : std_logic;
-signal red : unsigned(7 downto 0);
-signal green : unsigned(7 downto 0);
-signal blue : unsigned(7 downto 0);
-signal vga_window : std_logic;
 
 begin
 
@@ -102,12 +98,14 @@ port map
 
 reset<=(not SW(0) xor KEY(0)) and pll_locked;
 
+
 myVirtualToplevel : entity work.VirtualToplevel
 generic map
 (
 	sdram_rows => 12,
 	sdram_cols => 8,
-	sysclk_frequency => 1250
+	sysclk_frequency => 1250,
+	vga_bits => 4
 )
 port map
 (	
@@ -117,10 +115,10 @@ port map
 	-- video
 	vga_hsync => VGA_HS,
 	vga_vsync => VGA_VS,
-	vga_red => red,
-	vga_green => green,
-	vga_blue => blue,
-	vga_window => vga_window,
+	vga_red => VGA_R,
+	vga_green => VGA_G,
+	vga_blue => VGA_B,
+--	vga_window => vga_window,
 	
 	-- sdram
 	sdr_data => DRAM_DQ,
