@@ -1,0 +1,14 @@
+The VGA demo demonstrates making use of a simple VGA framebuffer with the
+ZPU processor.
+
+Released under the terms of the GNU General Public License version 2 or
+later.  (See the individual components' headers for their own licenses.)
+
+The VGA timing generator is by Peter Wendrich of Syntiac, the SDRAM
+controller is adapted from Tobias Gubener's work.
+
+Currently only one hardware register is implemented, the framebuffer base
+address.  This framebuffer is a fixed 640x480 screen with 16-bit (5-6-5)
+depth.  The demo program simply writes an incrementing value into the
+framebuffer.
+
