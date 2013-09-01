@@ -10,18 +10,17 @@ entity MIST_Toplevel is
 		UART_TX		:	 out STD_LOGIC;
 		UART_RX		:	 in STD_LOGIC;
 
-		DRAM_DQ		:	 inout std_logic_vector(15 downto 0);
-		DRAM_ADDR		:	 out std_logic_vector(11 downto 0);
-		DRAM_LDQM		:	 out STD_LOGIC;
-		DRAM_UDQM		:	 out STD_LOGIC;
-		DRAM_WE_N		:	 out STD_LOGIC;
-		DRAM_CAS_N		:	 out STD_LOGIC;
-		DRAM_RAS_N		:	 out STD_LOGIC;
-		DRAM_CS_N		:	 out STD_LOGIC;
-		DRAM_BA_0		:	 out STD_LOGIC;
-		DRAM_BA_1		:	 out STD_LOGIC;
-		DRAM_CLK		:	 out STD_LOGIC;
-		DRAM_CKE		:	 out STD_LOGIC;
+		SDRAM_DQ		:	 inout std_logic_vector(15 downto 0);
+		SDRAM_A	:	 out std_logic_vector(12 downto 0);
+		SDRAM_DQMH	:	 out STD_LOGIC;
+		SDRAM_DQML	:	 out STD_LOGIC;
+		SDRAM_nWE	:	 out STD_LOGIC;
+		SDRAM_nCAS	:	 out STD_LOGIC;
+		SDRAM_nRAS	:	 out STD_LOGIC;
+		SDRAM_nCS	:	 out STD_LOGIC;
+		SDRAM_BA		:	 out std_logic_vector(1 downto 0);
+		SDRAM_CLK	:	 out STD_LOGIC;
+		SDRAM_CKE	:	 out STD_LOGIC;
 
 		SPI_DO	: inout std_logic;
 		SPI_DI	: in std_logic;
@@ -57,7 +56,7 @@ mypll : entity work.PLL
 port map
 (
 	inclk0 => CLOCK_27(0),
-	c0 => DRAM_CLK,
+	c0 => SDRAM_CLK,
 	c1 => sysclk,
 	locked => pll_locked
 );
@@ -67,8 +66,8 @@ reset<='1';
 myVirtualToplevel : entity work.VirtualToplevel
 generic map
 (
-	sdram_rows => 12,
-	sdram_cols => 8,
+	sdram_rows => 13,
+	sdram_cols => 9,
 	sysclk_frequency => 1250,
 	vga_bits => 6
 )
@@ -86,18 +85,17 @@ port map
 --	vga_window => vga_window,
 	
 	-- sdram
-	sdr_data => DRAM_DQ,
-	sdr_addr => DRAM_ADDR,
-	sdr_dqm(1) => DRAM_UDQM,
-	sdr_dqm(0) => DRAM_LDQM,
-	sdr_we => DRAM_WE_N,
-	sdr_cas => DRAM_CAS_N,
-	sdr_ras => DRAM_RAS_N,
-	sdr_cs => DRAM_CS_N,
-	sdr_ba(1) => DRAM_BA_1,
-	sdr_ba(0) => DRAM_BA_0,
+	sdr_data => SDRAM_DQ,
+	sdr_addr => SDRAM_A,
+	sdr_dqm(1) => SDRAM_DQMH,
+	sdr_dqm(0) => SDRAM_DQML,
+	sdr_we => SDRAM_nWE,
+	sdr_cas => SDRAM_nCAS,
+	sdr_ras => SDRAM_nRAS,
+	sdr_cs => SDRAM_nCS,
+	sdr_ba => SDRAM_BA,
 --	sdr_clk => DRAM_CLK,
-	sdr_cke => DRAM_CKE,
+	sdr_cke => SDRAM_CKE,
 
 	-- RS232
 	rxd => UART_RX,

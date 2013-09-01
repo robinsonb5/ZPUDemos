@@ -34,7 +34,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/boot_standalone_remapped.ld # We use a link sc
 
 # Commandline options for each tool.
 
-ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg # No-neg requires bugfixed toolchain
+ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-neg # No-neg requires bugfixed toolchain
 CFLAGS  = -I. -I$(COMMON_DIR)/ -c -O6 $(ZPUOPTS) -DDISABLE_UART_RX -DPRINTF_HEX_ONLY
 
 LFLAGS  = -nostartfiles -Wl,--relax -Os
