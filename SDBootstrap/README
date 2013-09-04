@@ -1,0 +1,14 @@
+The SDBootstrap demo builds upon the VGA demo, and adds a simple SPI
+controller, allowing files to be read from an SD Card.
+
+The Firmware directory contains a CardContents directory, which in turn
+contains a few image files, and a "manifest" file which describes what the
+boot firmware should do with them.
+The example manifest loads and displays each image in turn, but it's also
+possible to load and run a program.
+
+The firmware currently contains debugging printfs - but once these are
+removed the firmware should fit within 4 kilobytes.
+
+On the Altera DE1, the resulting mini system-on-chip takes up just over 
+2,000 logic elements.
