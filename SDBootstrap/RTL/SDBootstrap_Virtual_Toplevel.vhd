@@ -59,6 +59,21 @@ signal reset_counter : unsigned(15 downto 0) := X"FFFF";
 signal millisecond_counter : unsigned(31 downto 0) := X"00000000";
 signal millisecond_tick : unsigned(19 downto 0);
 
+
+-- SPI Clock counter
+signal spi_tick : unsigned(8 downto 0);
+signal spiclk_in : std_logic;
+signal spi_fast : std_logic;
+
+-- SPI signals
+signal host_to_spi : std_logic_vector(7 downto 0);
+signal spi_to_host : std_logic_vector(31 downto 0);
+signal spi_wide : std_logic;
+signal spi_trigger : std_logic;
+signal spi_busy : std_logic;
+signal spi_active : std_logic;
+
+
 -- UART signals
 
 signal ser_txdata : std_logic_vector(7 downto 0);
@@ -132,7 +147,7 @@ sdr_cke <='1';
 
 -- ROM
 
-	myrom : entity work.VGATest_ROM
+	myrom : entity work.SDBootstrap_ROM
 	generic map
 	(
 		maxAddrBit => 13
@@ -193,6 +208,42 @@ myuart : entity work.simple_uart
 		rxd => rxd,
 		txd => txd
 	);
+
+
+-- SPI Timer
+process(clk)
+begin
+	if rising_edge(clk) then
+		spiclk_in<='0';
+		spi_tick<=spi_tick+1;
+		if (spi_fast='1' and spi_tick(4)='1') or spi_tick(8)='1' then
+			spiclk_in<='1'; -- Momentary pulse for SPI host.
+			spi_tick<='0'&X"00";
+		end if;
+	end if;
+end process;
+
+
+-- SPI host
+spi : entity work.spi_interface
+	port map(
+		sysclk => clk,
+		reset => reset,
+
+		-- Host interface
+		spiclk_in => spiclk_in,
+		host_to_spi => host_to_spi,
+		spi_to_host => spi_to_host,
+		wide => spi_wide,
+		trigger => spi_trigger,
+		busy => spi_busy,
+
+		-- Hardware interface
+		miso => spi_miso,
+		mosi => spi_mosi,
+		spiclk_out => spi_clk
+	);
+
 
 	
 -- SDRAM
@@ -291,7 +342,7 @@ mysdram : entity work.sdram_simple
 		IMPL_SHIFT => true,
 		IMPL_XOR => true,
 		REMAP_STACK => true, -- We need to remap the Boot ROM / Stack RAM so we can access SDRAM
-		EXECUTE_RAM => false, -- We don't need to execute code from SDRAM, however.
+		EXECUTE_RAM => true, -- We might need to execute code from SDRAM, too.
 		maxAddrBitBRAM => 13
 	)
 	port map (
@@ -314,11 +365,13 @@ process(clk)
 begin
 	if reset='0' then
 		spi_cs<='1';
+		spi_active<='0';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';
 		vga_reg_req<='0';
-		
+		spi_trigger<='0';
+
 		-- Write from CPU?
 		if mem_writeEnable='1' then
 			case mem_addr(31 downto 28) is
@@ -332,7 +385,24 @@ begin
 							ser_txdata<=mem_write(7 downto 0);
 							ser_txgo<='1';
 							mem_busy<='0';
-							
+
+						when X"D0" => -- SPI CS
+							spi_cs<=not mem_write(0);
+							spi_fast<=mem_write(8);
+							mem_busy<='0';
+
+						when X"D4" => -- SPI Data
+							spi_wide<='0';
+							spi_trigger<='1';
+							host_to_spi<=mem_write(7 downto 0);
+							spi_active<='1';
+						
+						when X"D8" => -- SPI Pump (32-bit read)
+							spi_wide<='1';
+							spi_trigger<='1';
+							host_to_spi<=mem_write(7 downto 0);
+							spi_active<='1';
+
 						when others =>
 							mem_busy<='0';
 							null;
@@ -363,6 +433,20 @@ begin
 							mem_read<=std_logic_vector(millisecond_counter);
 							mem_busy<='0';
 
+						when X"D0" => -- SPI Status
+							mem_read<=(others=>'X');
+							mem_read(15)<=spi_busy;
+							mem_busy<='0';
+
+						when X"D4" => -- SPI read (blocking)
+							spi_active<='1';
+
+						when X"D8" => -- SPI wide read (blocking)
+							spi_wide<='1';
+							spi_trigger<='1';
+							spi_active<='1';
+							host_to_spi<=X"FF";
+
 						when others =>
 							mem_busy<='0';
 							null;
@@ -372,6 +456,14 @@ begin
 					sdram_state<=read1;
 			end case;
 		end if;
+		
+	-- SPI cycles
+
+	if spi_active='1' and spi_busy='0' then
+		mem_read<=spi_to_host;
+		spi_active<='0';
+		mem_busy<='0';
+	end if;
 
 	-- SDRAM state machine
 	

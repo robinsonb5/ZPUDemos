@@ -39,6 +39,7 @@ int main(int argc,char **argv)
 	puts("Initializing SD card\n");
 	if(spi_init())
 	{
+		puts("Hunting for partition\n");
 		FindDrive();
 		if(LoadFile("MANIFESTMST",Manifest))
 		{

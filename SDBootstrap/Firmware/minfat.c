@@ -99,8 +99,15 @@ unsigned char FindDrive(void)
     buffered_fat_index = -1;
 	fat32=0;
 
+	puts("Reading MBR\n");
+
     if (!sd_read_sector(0, sector_buffer)) // read MBR
+	{
+		puts("Read of MBR failed\n");
         return(0);
+	}
+
+	puts("MBR successfully read\n");
 
 	boot_sector=0;
 	partitioncount=1;
@@ -110,6 +117,8 @@ unsigned char FindDrive(void)
 		partitioncount=0;
     if (compare((const char*)&sector_buffer[0x52], "FAT32   ",8)==0) // check for FAT32
 		partitioncount=0;
+
+	printf("Partitioncount %d\n",partitioncount);
 
 	if(partitioncount)
 	{
@@ -121,13 +130,16 @@ unsigned char FindDrive(void)
 				boot_sector=SwapBBBB(mbr->Partition[0].startlba);
 		else if(mbr->Signature!=0xaa55)
 		{
-				BootPrint("No partition signature found\n");
-				return(0);
+			puts("No partition signature found\n");
+			return(0);
 		}
+		printf("Reading boot sector %d\n",boot_sector);
 		if (!sd_read_sector(boot_sector, sector_buffer)) // read discriptor
 		    return(0);
-		BootPrint("Read boot sector from first partition\n");
+		puts("Read boot sector from first partition\n");
 	}
+
+	printf("Hunting for filesystem\n");
 
     if (compare(sector_buffer+0x52, "FAT32   ",8)==0) // check for FAT16
 		fat32=1;
