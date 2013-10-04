@@ -25,6 +25,18 @@ int SDHCtype;
 
 unsigned char SPI_R1[6];
 
+#if 0
+int SPI_PUMP()
+{
+	int r=0;
+	r=SPI_READ();
+	r=(r<<8)|SPI_READ();
+	r=(r<<8)|SPI_READ();
+	r=(r<<8)|SPI_READ();
+	return(r);
+}
+#endif
+
 
 int cmd_write(unsigned long cmd, unsigned long lba)
 {
@@ -265,6 +277,7 @@ int sd_read_sector(unsigned long lba,unsigned char *buf)
 	int i;
 	int r;
 //	printf("sd_read_sector %d, %d\n",lba,buf);
+	SPI(0xff);
 	SPI_CS(1|(1<<HW_SPI_FAST));
 	SPI(0xff);
 
@@ -303,9 +316,7 @@ int sd_read_sector(unsigned long lba,unsigned char *buf)
 		}
 	}
 	SPI(0xff);
-//	SPI_WAIT();
 	SPI_CS(0);
-//	puts("Sector read\n");
 	return(result);
 }
 
