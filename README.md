@@ -15,6 +15,8 @@ the current codebase like so:
 
 > git clone https://github.com/robinsonb5/ZPUDemos.git
 
+> cd ZPUDemos
+
 > git submodule init
 
 > git submodule update
