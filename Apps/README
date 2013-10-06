@@ -1,0 +1,10 @@
+Projects residing in the Apps subdirectory are larger programs that won't fit
+into block RAM and thus have to be bootstrapped either over RS232 serial or
+from SD card.
+
+Unlike the toplevel projects which are optimised to be lightweight and
+freestanding, these apps make use of the C standard library, and demonstrate
+how to override certain aspects of that library to suit the hardware platform
+in use.
+
+These apps are intended to be run on the "SystemOnChip" hardware project.

@@ -80,6 +80,7 @@ int main(int argc,char **argv)
 					// c-1 is now the filename pointer
 
 //					printf("Loading file %s to %d\n",fn,(long)ptr);
+					buffer[11]=0;
 					LoadFile(buffer,(unsigned char *)ptr);
 					HW_VGA(FRAMEBUFFERPTR)=ptr;
 				}
