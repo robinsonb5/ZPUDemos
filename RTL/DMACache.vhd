@@ -15,30 +15,32 @@ entity DMACache is
 --		data_from_host : in std_logic_vector(31 downto 0); -- Address and length
 --		data_to_host : out std_logic_vector(15 downto 0);
 
+		vga_channel_from_host : in DMAChannel_FromHost;
+		vga_channel_to_host : out DMAChannel_ToHost;
 --		channels_from_host : in DMAChannels_FromHost;
 --		channels_to_host : out DMAChannels_FromHost;
 		
 		addr_in : in std_logic_vector(31 downto 0);
-		setaddr_vga : in std_logic;
+--		setaddr_vga : in std_logic;
 		setaddr_sprite0 : in std_logic;
 		setaddr_audio0 : in std_logic;
 		setaddr_audio1 : in std_logic;
 
 		req_length : unsigned(11 downto 0);
-		setreqlen_vga : in std_logic;
+--		setreqlen_vga : in std_logic;
 		setreqlen_sprite0 : in std_logic;
 		setreqlen_audio0 : in std_logic;
 		setreqlen_audio1 : in std_logic;
 
 		-- Read requests
-		req_vga : in std_logic;
+--		req_vga : in std_logic;
 		req_sprite0 : in std_logic;
 		req_audio0 : in std_logic;
 		req_audio1 : in std_logic;
 
 		-- DMA channel output and valid flags.
 		data_out : out std_logic_vector(15 downto 0);
-		valid_vga : out std_logic;
+--		valid_vga : out std_logic;
 		valid_sprite0 : out std_logic;
 		valid_audio0 : out std_logic;
 		valid_audio1 : out std_logic;
@@ -79,7 +81,7 @@ signal vga_wrptr : unsigned(5 downto 0);
 signal vga_wrptr_next : unsigned(5 downto 0);
 signal vga_rdptr : unsigned(5 downto 0);
 signal vga_addr : std_logic_vector(31 downto 0);
-signal vga_count : unsigned(11 downto 0);
+signal vga_count : unsigned(15 downto 0);
 
 signal spr0_wrptr : unsigned(5 downto 0);
 signal spr0_wrptr_next : unsigned(5 downto 0);
@@ -131,7 +133,7 @@ begin
 	if rising_edge(clk) then
 		if reset_n='0' then
 			inputstate<=rd1;
-			vga_count<=X"000";
+			vga_count<=(others => '0');
 			vga_wrptr<=(others => '0');
 			vga_wrptr_next<="000100";
 			spr0_count<=X"000";
@@ -209,8 +211,8 @@ begin
 				null;
 		end case;
 		
-		if setaddr_vga='1' then
-			vga_addr<=addr_in;
+		if vga_channel_from_host.setaddr='1' then
+			vga_addr<=vga_channel_from_host.addr;
 			vga_wrptr<="000000";
 			vga_wrptr_next<="000100";
 		end if;
@@ -220,8 +222,8 @@ begin
 			spr0_wrptr_next<="000100";
 		end if;
 
-		if setreqlen_vga='1' then
-			vga_count<=req_length;
+		if vga_channel_from_host.setreqlen='1' then
+			vga_count<=vga_channel_from_host.reqlen;
 		end if;
 		if setreqlen_sprite0='1' then
 			spr0_count<=req_length;
@@ -240,7 +242,7 @@ begin
 		end if;
 
 	-- Reset read pointers when a new address is set
-		if setaddr_vga='1' then
+		if vga_channel_from_host.setaddr='1' then
 			vga_rdptr<="000000";
 		end if;
 		if setaddr_sprite0='1' then
@@ -259,7 +261,7 @@ begin
 			aud0_pending<='1';
 		end if;
 
-		valid_vga<=valid_vga_d;
+		vga_channel_to_host.valid<=valid_vga_d;
 		valid_sprite0<=valid_sprite0_d;
 		valid_audio0<=valid_audio0_d;
 
@@ -267,7 +269,7 @@ begin
 		valid_sprite0_d<='0';
 		valid_audio0_d<='0';
 		
-		if req_vga='1' then -- and vga_rdptr/=vga_wrptr then -- This test should never fail.
+		if vga_channel_from_host.req='1' then -- and vga_rdptr/=vga_wrptr then -- This test should never fail.
 			cache_rdaddr<=vga_base&std_logic_vector(vga_rdptr);
 			vga_rdptr<=vga_rdptr+1;
 			valid_vga_d<='1';

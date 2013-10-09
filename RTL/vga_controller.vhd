@@ -2,6 +2,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.numeric_std.ALL;
 
+library work;
+use work.DMACache_pkg.ALL;
+use work.DMACache_config.ALL;
+
 -- VGA controller
 -- a module to handle VGA output
 
@@ -52,15 +56,15 @@ architecture rtl of vga_controller is
 	signal vga_pointer : std_logic_vector(31 downto 0);
 
 	signal dma_addr : std_logic_vector(31 downto 0);
-	signal setaddr_vga : std_logic;
+--	signal setaddr_vga : std_logic;
 	signal setaddr_spr0 : std_logic;
 	signal dma_len : unsigned(11 downto 0);
-	signal setlen_vga : std_logic;
+--	signal setlen_vga : std_logic;
 	signal setlen_spr0 : std_logic;
-	signal req_vga : std_logic;
+--	signal req_vga : std_logic;
 	signal req_spr0 : std_logic;
 	signal data_from_dma : std_logic_vector(15 downto 0);
-	signal valid_vga : std_logic;
+--	signal valid_vga : std_logic;
 	signal valid_spr0 : std_logic;
 	
 	signal framebuffer_pointer : std_logic_vector(31 downto 0) := X"00100000";
@@ -90,6 +94,9 @@ architecture rtl of vga_controller is
 	signal tred : unsigned(7 downto 0);
 	signal tgreen : unsigned(7 downto 0);
 	signal tblue : unsigned(7 downto 0);
+	
+	signal vgachannel_fromhost : DMAChannel_FromHost;
+	signal vgachannel_tohost : DMAChannel_ToHost;
 
 begin
 
@@ -148,29 +155,32 @@ begin
 			clk => clk,
 			reset_n => reset,
 
+			vga_channel_from_host => vgachannel_fromhost,
+			vga_channel_to_host => vgachannel_tohost,
+			
 			-- DMA addressing
 			addr_in => dma_addr,
-			setaddr_vga => setaddr_vga,
+--			setaddr_vga => setaddr_vga,
 			setaddr_sprite0 => setaddr_spr0,
 			setaddr_audio0 => '0',
 			setaddr_audio1 => '0',
 
 			-- DMA request lengths
 			req_length => dma_len,
-			setreqlen_vga => setlen_vga,
+--			setreqlen_vga => setlen_vga,
 			setreqlen_sprite0 => setlen_spr0,
 			setreqlen_audio0 => '0',
 			setreqlen_audio1 => '0',
 
 			-- Read requests
-			req_vga => req_vga,
+--			req_vga => req_vga,
 			req_sprite0 => req_spr0,
 			req_audio0 => '0',
 			req_audio1 => '0',
 
 			-- DMA channel output and valid flags.
 			data_out => data_from_dma,
-			valid_vga => valid_vga,
+--			valid_vga => valid_vga,
 			valid_sprite0 => valid_spr0,
 			valid_audio0 => open,
 			valid_audio1 => open,
@@ -276,14 +286,14 @@ begin
 		
 		if rising_edge(clk) then
 			vblank_int<='0';
-			req_vga<='0';
 			vga_newframe<='0';
-			setaddr_vga<='0';
+			vgachannel_fromhost.req<='0';
+			vgachannel_fromhost.setaddr<='0';
+			vgachannel_fromhost.setreqlen<='0';
 			setaddr_spr0<='0';
-			setlen_vga<='0';
 			setlen_spr0<='0';	
 
-			if(valid_vga='1') then
+			if(vgachannel_tohost.valid='1') then
 				vgadata<=data_from_dma;
 			end if;
 
@@ -292,7 +302,7 @@ begin
 				if currentX<640 and currentY<480 then
 					vga_window<='1';
 					-- Request next pixel from VGA cache
-					req_vga<='1';
+					vgachannel_fromhost.req<='1';
 
 					if sprite_col(3)='1' then
 						tred <= (others => sprite_col(2));
@@ -323,17 +333,17 @@ begin
 					-- Last line of VBLANK - update DMA pointers
 					if currentY=vtotal then
 							if currentX=0 then
-								dma_addr<=framebuffer_pointer;
-								setaddr_vga<='1';
+								vgachannel_fromhost.addr<=framebuffer_pointer;
+								vgachannel_fromhost.setaddr<='1';
 							elsif currentX=1 then
 								dma_addr<=sprite0_pointer;
 								setaddr_spr0<='1';
 							end if;
 					end if;
 					
-					if currentX=(htotal - 20) then	-- Signal to SDRAM controller that we're
-						dma_len<=TO_UNSIGNED(640,12);
-						setlen_vga<='1';
+					if currentX=(htotal - 20) then	-- Signal to SDRAM controller that we're about to start displaying
+						vgachannel_fromhost.reqlen<=TO_UNSIGNED(640,16);
+						vgachannel_fromhost.setreqlen<='1';
 					elsif enable_sprite and currentX=(htotal - 19) then
 						dma_len<=TO_UNSIGNED(4,12);
 						setlen_spr0<='1';
