@@ -2,11 +2,22 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
+library work;
+use work.DMACache_pkg.ALL;
+use work.DMACache_config.ALL;
+
+
 entity DMACache is
 	port(
 		clk : in std_logic;
 		reset_n : in std_logic;
 		-- DMA channel address strobes
+--		data_from_host : in std_logic_vector(31 downto 0); -- Address and length
+--		data_to_host : out std_logic_vector(15 downto 0);
+
+--		channels_from_host : in DMAChannels_FromHost;
+--		channels_to_host : out DMAChannels_FromHost;
+		
 		addr_in : in std_logic_vector(31 downto 0);
 		setaddr_vga : in std_logic;
 		setaddr_sprite0 : in std_logic;

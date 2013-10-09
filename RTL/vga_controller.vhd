@@ -142,7 +142,7 @@ begin
 			oBlue => blue
 		);
 
-		
+
 	mydmacache : entity work.DMACache
 		port map(
 			clk => clk,
