@@ -51,13 +51,13 @@ signal inputstate : inputstate_t := rd1;
 type updatestate_t is (upd_vga,upd_spr0,upd_aud0,apd_aud1);
 signal update : updatestate_t := upd_vga;
 
-constant vga_base : std_logic_vector(1 downto 0) := "00";
-constant spr0_base : std_logic_vector(1 downto 0) := "01";
-constant spr1_base : std_logic_vector(1 downto 0) := "10";
-constant aud0_base : std_logic_vector(1 downto 0) := "11";
-constant aud1_base : std_logic_vector(1 downto 0) := "11";
-constant aud2_base : std_logic_vector(1 downto 0) := "11";
-constant aud3_base : std_logic_vector(1 downto 0) := "11";
+constant vga_base : std_logic_vector(2 downto 0) := "000";
+constant spr0_base : std_logic_vector(2 downto 0) := "001";
+constant spr1_base : std_logic_vector(2 downto 0) := "010";
+constant aud0_base : std_logic_vector(2 downto 0) := "011";
+constant aud1_base : std_logic_vector(2 downto 0) := "100";
+constant aud2_base : std_logic_vector(2 downto 0) := "101";
+constant aud3_base : std_logic_vector(2 downto 0) := "110";
 -- constant aud1_base : std_logic_vector(2 downto 0) := "100";
 
 -- DMA channel state information
@@ -100,10 +100,10 @@ begin
 			inputstate<=rd1;
 			vga.count<=(others => '0');
 			vga.wrptr<=(others => '0');
-			vga.wrptr_next<="000100";
+			vga.wrptr_next<=(2=>'1', others =>'0');
 			spr0.count<=(others => '0');
 			spr0.wrptr<=(others => '0');
-			spr0.wrptr_next<="000100";
+			spr0.wrptr_next<=(2=>'1', others =>'0');
 		end if;
 
 		cache_wren<='0';
@@ -119,7 +119,7 @@ begin
 			-- VGA has absolutel priority, and the others won't do anything until the VGA buffer is
 			-- full.
 			when rd1 =>
-				if vga.rdptr(5 downto 2)/=vga.wrptr_next(5 downto 2) and vga.count/=X"000" then
+				if vga.rdptr( DMACache_MaxCacheBit downto 2)/=vga.wrptr_next( DMACache_MaxCacheBit downto 2) and vga.count/=X"000" then
 					cache_wraddr<=vga_base&std_logic_vector(vga.wrptr);
 					sdram_req<='1';
 					sdram_addr<=vga.addr;
@@ -127,7 +127,7 @@ begin
 					inputstate<=rcv1;
 					update<=upd_vga;
 					vga.count<=vga.count-4;
-				elsif spr0.rdptr(5 downto 2)/=spr0.wrptr_next(5 downto 2) and spr0.count/=X"000" then
+				elsif spr0.rdptr( DMACache_MaxCacheBit downto 2)/=spr0.wrptr_next( DMACache_MaxCacheBit downto 2) and spr0.count/=X"000" then
 					cache_wraddr<=spr0_base&std_logic_vector(spr0.wrptr);
 					sdram_req<='1';
 					sdram_addr<=spr0.addr;
@@ -176,13 +176,13 @@ begin
 		
 		if vga_channel_from_host.setaddr='1' then
 			vga.addr<=vga_channel_from_host.addr;
-			vga.wrptr<="000000";
-			vga.wrptr_next<="000100";
+			vga.wrptr<=(others =>'0');
+			vga.wrptr_next<=(2=>'1', others =>'0');
 		end if;
 		if spr0_channel_from_host.setaddr='1' then
 			spr0.addr<=spr0_channel_from_host.addr;
-			spr0.wrptr<="000000";
-			spr0.wrptr_next<="000100";
+			spr0.wrptr<=(others =>'0');
+			spr0.wrptr_next<=(2=>'1', others =>'0');
 		end if;
 
 		if vga_channel_from_host.setreqlen='1' then
@@ -206,10 +206,10 @@ begin
 
 	-- Reset read pointers when a new address is set
 		if vga_channel_from_host.setaddr='1' then
-			vga.rdptr<="000000";
+			vga.rdptr<=(others => '0');
 		end if;
 		if spr0_channel_from_host.setaddr='1' then
-			spr0.rdptr<="000000";
+			spr0.rdptr<=(others => '0');
 		end if;
 		
 	-- Handle timeslicing of output registers
