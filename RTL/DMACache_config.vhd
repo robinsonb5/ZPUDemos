@@ -4,4 +4,5 @@ use ieee.numeric_std.all;
 
 package DMACache_config is
 	constant DMACache_MaxChannel : integer :=0;
+	constant DMACache_MaxCacheBit : integer :=5;
 end package;

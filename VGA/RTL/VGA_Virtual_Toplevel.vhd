@@ -1,8 +1,12 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
+
+library work;
 use work.zpu_config.all;
 use work.zpupkg.ALL;
+use work.DMACache_pkg.ALL;
+use work.DMACache_config.ALL;
 
 entity VirtualToplevel is
 	generic (
@@ -83,7 +87,7 @@ signal zpu_to_rom : ZPU_ToROM;
 signal zpu_from_rom : ZPU_FromROM;
 
 
--- Plumbing between VGA controller and SDRAM
+-- Plumbing between DMA controller and SDRAM
 
 signal vga_addr : std_logic_vector(31 downto 0);
 signal vga_data : std_logic_vector(15 downto 0);
@@ -93,6 +97,15 @@ signal vga_refresh : std_logic;
 signal vga_newframe : std_logic;
 signal vga_reservebank : std_logic; -- Keep bank clear for instant access.
 signal vga_reserveaddr : std_logic_vector(31 downto 0); -- to SDRAM
+
+signal dma_data : std_logic_vector(15 downto 0);
+
+-- Plumbing between VGA controller and DMA controller
+
+signal vgachannel_fromhost : DMAChannel_FromHost;
+signal vgachannel_tohost : DMAChannel_ToHost;
+signal spr0channel_fromhost : DMAChannel_FromHost;
+signal spr0channel_tohost : DMAChannel_ToHost;
 
 
 -- VGA register block signals
@@ -194,6 +207,31 @@ myuart : entity work.simple_uart
 		txd => txd
 	);
 
+-- DMA controller
+
+	mydmacache : entity work.DMACache
+		port map(
+			clk => clk,
+			reset_n => reset,
+
+			vga_channel_from_host => vgachannel_fromhost,
+			vga_channel_to_host => vgachannel_tohost,
+			
+			spr0_channel_from_host => spr0channel_fromhost,
+			spr0_channel_to_host => spr0channel_tohost,
+
+			data_out => dma_data,
+
+			-- SDRAM interface
+			sdram_addr=> vga_addr,
+			sdram_reserveaddr(31 downto 0) => vga_reserveaddr,
+			sdram_reserve => vga_reservebank,
+			sdram_req => vga_req,
+			sdram_ack => vga_ack,
+			sdram_fill => vga_fill,
+			sdram_data => vga_data
+		);
+
 	
 -- SDRAM
 mysdram : entity work.sdram_simple
@@ -259,14 +297,13 @@ mysdram : entity work.sdram_simple
 		reg_rw => vga_reg_rw,
 		reg_req => vga_reg_req,
 
-		sdr_addrout => vga_addr,
-		sdr_datain => vga_data, 
-		sdr_fill => vga_fill,
-		sdr_req => vga_req,
-		sdr_ack => vga_ack,
-		sdr_reservebank => vga_reservebank,
-		sdr_reserveaddr => vga_reserveaddr,
 		sdr_refresh => vga_refresh,
+
+		dma_data => dma_data,
+		vgachannel_fromhost => vgachannel_fromhost,
+		vgachannel_tohost => vgachannel_tohost,
+		spr0channel_fromhost => spr0channel_fromhost,
+		spr0channel_tohost => spr0channel_tohost,
 
 		hsync => vga_hsync,
 		vsync => vga_vsync,

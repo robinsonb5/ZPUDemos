@@ -12,39 +12,16 @@ entity DMACache is
 		clk : in std_logic;
 		reset_n : in std_logic;
 		-- DMA channel address strobes
---		data_from_host : in std_logic_vector(31 downto 0); -- Address and length
---		data_to_host : out std_logic_vector(15 downto 0);
 
 		vga_channel_from_host : in DMAChannel_FromHost;
 		vga_channel_to_host : out DMAChannel_ToHost;
+		spr0_channel_from_host : in DMAChannel_FromHost;
+		spr0_channel_to_host : out DMAChannel_ToHost;
+
 --		channels_from_host : in DMAChannels_FromHost;
 --		channels_to_host : out DMAChannels_FromHost;
-		
-		addr_in : in std_logic_vector(31 downto 0);
---		setaddr_vga : in std_logic;
-		setaddr_sprite0 : in std_logic;
-		setaddr_audio0 : in std_logic;
-		setaddr_audio1 : in std_logic;
-
-		req_length : unsigned(11 downto 0);
---		setreqlen_vga : in std_logic;
-		setreqlen_sprite0 : in std_logic;
-		setreqlen_audio0 : in std_logic;
-		setreqlen_audio1 : in std_logic;
-
-		-- Read requests
---		req_vga : in std_logic;
-		req_sprite0 : in std_logic;
-		req_audio0 : in std_logic;
-		req_audio1 : in std_logic;
-
-		-- DMA channel output and valid flags.
 		data_out : out std_logic_vector(15 downto 0);
---		valid_vga : out std_logic;
-		valid_sprite0 : out std_logic;
-		valid_audio0 : out std_logic;
-		valid_audio1 : out std_logic;
-		
+
 		-- SDRAM interface
 		sdram_addr : out std_logic_vector(31 downto 0);
 		sdram_reserveaddr : out std_logic_vector(31 downto 0);
@@ -58,51 +35,39 @@ end entity;
 
 architecture rtl of dmacache is
 
+type DMAChannel_Internal is record
+	valid_d : std_logic; -- Used to delay the valid flag
+	wrptr : unsigned(DMACache_MaxCacheBit downto 0);
+	wrptr_next : unsigned(DMACache_MaxCacheBit downto 0);
+	rdptr : unsigned(DMACache_MaxCacheBit downto 0);
+	addr : std_logic_vector(31 downto 0); -- Current RAM address
+	count : unsigned(15 downto 0); -- Number of words to transfer.
+	pending : std_logic;
+end record;
 
 type inputstate_t is (rd1,rcv1,rcv2,rcv3,rcv4);
 signal inputstate : inputstate_t := rd1;
 
-type updatestate_t is (vga,spr0,aud0,aud1);
-signal update : updatestate_t := vga;
+type updatestate_t is (upd_vga,upd_spr0,upd_aud0,apd_aud1);
+signal update : updatestate_t := upd_vga;
 
 constant vga_base : std_logic_vector(1 downto 0) := "00";
 constant spr0_base : std_logic_vector(1 downto 0) := "01";
 constant spr1_base : std_logic_vector(1 downto 0) := "10";
 constant aud0_base : std_logic_vector(1 downto 0) := "11";
+constant aud1_base : std_logic_vector(1 downto 0) := "11";
+constant aud2_base : std_logic_vector(1 downto 0) := "11";
+constant aud3_base : std_logic_vector(1 downto 0) := "11";
 -- constant aud1_base : std_logic_vector(2 downto 0) := "100";
 
 -- DMA channel state information
 
-signal valid_vga_d : std_logic;
-signal valid_sprite0_d : std_logic;
-signal valid_audio0_d : std_logic;
-
-signal vga_wrptr : unsigned(5 downto 0);
-signal vga_wrptr_next : unsigned(5 downto 0);
-signal vga_rdptr : unsigned(5 downto 0);
-signal vga_addr : std_logic_vector(31 downto 0);
-signal vga_count : unsigned(15 downto 0);
-
-signal spr0_wrptr : unsigned(5 downto 0);
-signal spr0_wrptr_next : unsigned(5 downto 0);
-signal spr0_rdptr : unsigned(5 downto 0);
-signal spr0_addr : std_logic_vector(31 downto 0);
-signal spr0_count : unsigned(11 downto 0);
-signal spr0_pending : std_logic;
-
-signal aud0_wrptr : unsigned(5 downto 0);
-signal aud0_wrptr_next : unsigned(5 downto 0);
-signal aud0_rdptr : unsigned(5 downto 0);
-signal aud0_addr : std_logic_vector(31 downto 0);
-signal aud0_count : unsigned(11 downto 0);
-signal aud0_pending : std_logic;
-
-signal aud1_wrptr : unsigned(5 downto 0);
-signal aud1_wrptr_next : unsigned(5 downto 0);
-signal aud1_rdptr : unsigned(5 downto 0);
-signal aud1_addr : std_logic_vector(31 downto 0);
-signal aud1_count : unsigned(11 downto 0);
-signal aud1_pending : std_logic;
+signal vga : DMAChannel_Internal;
+signal spr0 : DMAChannel_Internal;
+signal aud0 : DMAChannel_Internal;
+signal aud1 : DMAChannel_Internal;
+signal aud2 : DMAChannel_Internal;
+signal aud3 : DMAChannel_Internal;
 
 -- interface to the blockram
 
@@ -126,26 +91,25 @@ myDMACacheRAM : entity work.DMACacheRAM
 
 -- Employ bank reserve for SDRAM.
 -- FIXME - use pointer comparison to turn off reserve when not needed.
-sdram_reserve<='1' when vga_count/=X"000" else '0';
+sdram_reserve<='1' when vga.count/=X"000" else '0';
 
 process(clk)
 begin
 	if rising_edge(clk) then
 		if reset_n='0' then
 			inputstate<=rd1;
-			vga_count<=(others => '0');
-			vga_wrptr<=(others => '0');
-			vga_wrptr_next<="000100";
-			spr0_count<=X"000";
-			spr0_wrptr<=(others => '0');
-			spr0_wrptr_next<="000100";
+			vga.count<=(others => '0');
+			vga.wrptr<=(others => '0');
+			vga.wrptr_next<="000100";
+			spr0.count<=(others => '0');
+			spr0.wrptr<=(others => '0');
+			spr0.wrptr_next<="000100";
 		end if;
 
 		cache_wren<='0';
 		
 		if sdram_ack='1' then
-			sdram_reserveaddr<=vga_addr;
---			sdram_reserveaddr<=std_logic_vector(unsigned(vga_addr)+8);
+			sdram_reserveaddr<=vga.addr;
 			sdram_req<='0';
 		end if;
 
@@ -155,22 +119,22 @@ begin
 			-- VGA has absolutel priority, and the others won't do anything until the VGA buffer is
 			-- full.
 			when rd1 =>
-				if vga_rdptr(5 downto 2)/=vga_wrptr_next(5 downto 2) and vga_count/=X"000" then
-					cache_wraddr<=vga_base&std_logic_vector(vga_wrptr);
+				if vga.rdptr(5 downto 2)/=vga.wrptr_next(5 downto 2) and vga.count/=X"000" then
+					cache_wraddr<=vga_base&std_logic_vector(vga.wrptr);
 					sdram_req<='1';
-					sdram_addr<=vga_addr;
-					vga_addr<=std_logic_vector(unsigned(vga_addr)+8);
+					sdram_addr<=vga.addr;
+					vga.addr<=std_logic_vector(unsigned(vga.addr)+8);
 					inputstate<=rcv1;
-					update<=vga;
-					vga_count<=vga_count-4;
-				elsif spr0_rdptr(5 downto 2)/=spr0_wrptr_next(5 downto 2) and spr0_count/=X"000" then
-					cache_wraddr<=spr0_base&std_logic_vector(spr0_wrptr);
+					update<=upd_vga;
+					vga.count<=vga.count-4;
+				elsif spr0.rdptr(5 downto 2)/=spr0.wrptr_next(5 downto 2) and spr0.count/=X"000" then
+					cache_wraddr<=spr0_base&std_logic_vector(spr0.wrptr);
 					sdram_req<='1';
-					sdram_addr<=spr0_addr;
-					spr0_addr<=std_logic_vector(unsigned(spr0_addr)+8);
+					sdram_addr<=spr0.addr;
+					spr0.addr<=std_logic_vector(unsigned(spr0.addr)+8);
 					inputstate<=rcv1;
-					update<=spr0;
-					spr0_count<=spr0_count-4;
+					update<=upd_spr0;
+					spr0.count<=spr0.count-4;
 				end if;
 				-- FIXME - other channels here
 			-- Wait for SDRAM, fill first word.
@@ -179,7 +143,6 @@ begin
 					data_from_ram<=sdram_data;
 					cache_wren<='1';
 					inputstate<=rcv2;
---					cache_wraddr<=std_logic_vector(unsigned(cache_wraddr)+1);
 				end if;
 			when rcv2 =>
 				data_from_ram<=sdram_data;
@@ -197,12 +160,12 @@ begin
 				cache_wraddr<=std_logic_vector(unsigned(cache_wraddr)+1);
 				inputstate<=rd1;
 				case update is
-					when vga =>
-						vga_wrptr<=vga_wrptr_next;
-						vga_wrptr_next<=vga_wrptr_next+4;
-					when spr0 =>
-						spr0_wrptr<=spr0_wrptr_next;
-						spr0_wrptr_next<=spr0_wrptr_next+4;
+					when upd_vga =>
+						vga.wrptr<=vga.wrptr_next;
+						vga.wrptr_next<=vga.wrptr_next+4;
+					when upd_spr0 =>
+						spr0.wrptr<=spr0.wrptr_next;
+						spr0.wrptr_next<=spr0.wrptr_next+4;
 				-- FIXME - other channels here
 					when others =>
 						null;
@@ -212,21 +175,21 @@ begin
 		end case;
 		
 		if vga_channel_from_host.setaddr='1' then
-			vga_addr<=vga_channel_from_host.addr;
-			vga_wrptr<="000000";
-			vga_wrptr_next<="000100";
+			vga.addr<=vga_channel_from_host.addr;
+			vga.wrptr<="000000";
+			vga.wrptr_next<="000100";
 		end if;
-		if setaddr_sprite0='1' then
-			spr0_addr<=addr_in;
-			spr0_wrptr<="000000";
-			spr0_wrptr_next<="000100";
+		if spr0_channel_from_host.setaddr='1' then
+			spr0.addr<=spr0_channel_from_host.addr;
+			spr0.wrptr<="000000";
+			spr0.wrptr_next<="000100";
 		end if;
 
 		if vga_channel_from_host.setreqlen='1' then
-			vga_count<=vga_channel_from_host.reqlen;
+			vga.count<=vga_channel_from_host.reqlen;
 		end if;
-		if setreqlen_sprite0='1' then
-			spr0_count<=req_length;
+		if spr0_channel_from_host.setreqlen='1' then
+			spr0.count<=spr0_channel_from_host.reqlen;
 		end if;
 
 	end if;
@@ -237,16 +200,16 @@ process(clk)
 begin
 	if rising_edge(clk) then
 		if reset_n='0' then
-			vga_rdptr<=(others => '0');
-			spr0_rdptr<=(others => '0');
+			vga.rdptr<=(others => '0');
+			spr0.rdptr<=(others => '0');
 		end if;
 
 	-- Reset read pointers when a new address is set
 		if vga_channel_from_host.setaddr='1' then
-			vga_rdptr<="000000";
+			vga.rdptr<="000000";
 		end if;
-		if setaddr_sprite0='1' then
-			spr0_rdptr<="000000";
+		if spr0_channel_from_host.setaddr='1' then
+			spr0.rdptr<="000000";
 		end if;
 		
 	-- Handle timeslicing of output registers
@@ -254,35 +217,33 @@ begin
 	-- req signals should always be a single pulse; need to latch all but VGA, since it may be several
 	-- cycles since they're serviced.
 
-		if req_sprite0='1' then
-			spr0_pending<='1';
+		if spr0_channel_from_host.req='1' then
+			spr0.pending<='1';
 		end if;
-		if req_audio0='1' then
-			aud0_pending<='1';
-		end if;
+--		if req_audio0='1' then
+--			aud0_pending<='1';
+--		end if;
 
-		vga_channel_to_host.valid<=valid_vga_d;
-		valid_sprite0<=valid_sprite0_d;
-		valid_audio0<=valid_audio0_d;
+		vga_channel_to_host.valid<=vga.valid_d;
+		spr0_channel_to_host.valid<=spr0.valid_d;
 
-		valid_vga_d<='0';
-		valid_sprite0_d<='0';
-		valid_audio0_d<='0';
+		vga.valid_d<='0';
+		spr0.valid_d<='0';
 		
 		if vga_channel_from_host.req='1' then -- and vga_rdptr/=vga_wrptr then -- This test should never fail.
-			cache_rdaddr<=vga_base&std_logic_vector(vga_rdptr);
-			vga_rdptr<=vga_rdptr+1;
-			valid_vga_d<='1';
-		elsif spr0_pending='1' and spr0_rdptr/=spr0_wrptr then
-			cache_rdaddr<=spr0_base&std_logic_vector(spr0_rdptr);
-			spr0_rdptr<=spr0_rdptr+1;
-			valid_sprite0_d<='1';
-			spr0_pending<='0';
-		elsif aud0_pending='1' and aud0_rdptr/=aud0_wrptr then
-			cache_rdaddr<=aud0_base&std_logic_vector(aud0_rdptr);
-			aud0_rdptr<=aud0_rdptr+1;
-			valid_audio0_d<='1';
-			aud0_pending<='0';
+			cache_rdaddr<=vga_base&std_logic_vector(vga.rdptr);
+			vga.rdptr<=vga.rdptr+1;
+			vga.valid_d<='1';
+		elsif spr0.pending='1' and spr0.rdptr/=spr0.wrptr then
+			cache_rdaddr<=spr0_base&std_logic_vector(spr0.rdptr);
+			spr0.rdptr<=spr0.rdptr+1;
+			spr0.valid_d<='1';
+			spr0.pending<='0';
+--		elsif aud0_pending='1' and aud0_rdptr/=aud0_wrptr then
+--			cache_rdaddr<=aud0_base&std_logic_vector(aud0_rdptr);
+--			aud0_rdptr<=aud0_rdptr+1;
+--			valid_audio0_d<='1';
+--			aud0_pending<='0';
 		end if;
 	end if;
 end process;
