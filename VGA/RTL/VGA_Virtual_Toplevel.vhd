@@ -214,11 +214,11 @@ myuart : entity work.simple_uart
 			clk => clk,
 			reset_n => reset,
 
-			vga_channel_from_host => vgachannel_fromhost,
-			vga_channel_to_host => vgachannel_tohost,
+			channels_from_host(0) => vgachannel_fromhost,
+			channels_to_host(0) => vgachannel_tohost,
 			
-			spr0_channel_from_host => spr0channel_fromhost,
-			spr0_channel_to_host => spr0channel_tohost,
+			channels_from_host(1) => spr0channel_fromhost,
+			channels_to_host(1) => spr0channel_tohost,
 
 			data_out => dma_data,
 

@@ -4,11 +4,12 @@
 
 typedef struct
 {
-    char *DAT;
-    unsigned int LEN;
-    char *REPDAT;
-    unsigned int REPLEN;
-    int	VOL;
+	char *DAT;
+	unsigned int LEN;
+	char *REPDAT;
+	unsigned int REPLEN;
+	int PERIOD;
+	int	VOL;
 } SoundChannel;
 
 volatile struct *SoundChannels=0xffffffd0;

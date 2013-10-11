@@ -13,13 +13,17 @@ entity DMACache is
 		reset_n : in std_logic;
 		-- DMA channel address strobes
 
-		vga_channel_from_host : in DMAChannel_FromHost;
-		vga_channel_to_host : out DMAChannel_ToHost;
-		spr0_channel_from_host : in DMAChannel_FromHost;
-		spr0_channel_to_host : out DMAChannel_ToHost;
+		channels_from_host : in DMAChannels_FromHost
+			:= (others =>
+					(
+						addr => (others =>'X'),
+						setaddr => '0',
+						reqlen => (others =>'X'),
+						setreqlen => '0',
+						req => '0'
+					)); -- Yes, I know - ick.
+		channels_to_host : out DMAChannels_ToHost;
 
---		channels_from_host : in DMAChannels_FromHost;
---		channels_to_host : out DMAChannels_FromHost;
 		data_out : out std_logic_vector(15 downto 0);
 
 		-- SDRAM interface
@@ -35,16 +39,6 @@ end entity;
 
 architecture rtl of dmacache is
 
-type DMAChannel_Internal is record
-	valid_d : std_logic; -- Used to delay the valid flag
-	wrptr : unsigned(DMACache_MaxCacheBit downto 0);
-	wrptr_next : unsigned(DMACache_MaxCacheBit downto 0);
-	rdptr : unsigned(DMACache_MaxCacheBit downto 0);
-	addr : std_logic_vector(31 downto 0); -- Current RAM address
-	count : unsigned(15 downto 0); -- Number of words to transfer.
-	pending : std_logic;
-end record;
-
 type inputstate_t is (rd1,rcv1,rcv2,rcv3,rcv4);
 signal inputstate : inputstate_t := rd1;
 
@@ -58,16 +52,21 @@ constant aud0_base : std_logic_vector(2 downto 0) := "011";
 constant aud1_base : std_logic_vector(2 downto 0) := "100";
 constant aud2_base : std_logic_vector(2 downto 0) := "101";
 constant aud3_base : std_logic_vector(2 downto 0) := "110";
--- constant aud1_base : std_logic_vector(2 downto 0) := "100";
 
 -- DMA channel state information
+type DMAChannel_Internal is record
+	valid_d : std_logic; -- Used to delay the valid flag
+	wrptr : unsigned(DMACache_MaxCacheBit downto 0);
+	wrptr_next : unsigned(DMACache_MaxCacheBit downto 0);
+	rdptr : unsigned(DMACache_MaxCacheBit downto 0);
+	addr : std_logic_vector(31 downto 0); -- Current RAM address
+	count : unsigned(15 downto 0); -- Number of words to transfer.
+	pending : std_logic;
+end record;
 
-signal vga : DMAChannel_Internal;
-signal spr0 : DMAChannel_Internal;
-signal aud0 : DMAChannel_Internal;
-signal aud1 : DMAChannel_Internal;
-signal aud2 : DMAChannel_Internal;
-signal aud3 : DMAChannel_Internal;
+type DMAChannels_Internal is array (DMACache_MaxChannel downto 0) of DMAChannel_Internal;
+
+signal internals : DMAChannels_Internal;
 
 -- interface to the blockram
 
@@ -91,25 +90,24 @@ myDMACacheRAM : entity work.DMACacheRAM
 
 -- Employ bank reserve for SDRAM.
 -- FIXME - use pointer comparison to turn off reserve when not needed.
-sdram_reserve<='1' when vga.count/=X"000" else '0';
+sdram_reserve<='1' when internals(0).count/=X"000" else '0';
 
 process(clk)
 begin
 	if rising_edge(clk) then
 		if reset_n='0' then
 			inputstate<=rd1;
-			vga.count<=(others => '0');
-			vga.wrptr<=(others => '0');
-			vga.wrptr_next<=(2=>'1', others =>'0');
-			spr0.count<=(others => '0');
-			spr0.wrptr<=(others => '0');
-			spr0.wrptr_next<=(2=>'1', others =>'0');
+			for I in 0 to DMACache_MaxChannel loop
+				internals(I).count<=(others => '0');
+				internals(I).wrptr<=(others => '0');
+				internals(I).wrptr_next<=(2=>'1', others =>'0');
+			end loop;
 		end if;
 
 		cache_wren<='0';
 		
 		if sdram_ack='1' then
-			sdram_reserveaddr<=vga.addr;
+			sdram_reserveaddr<=internals(0).addr;
 			sdram_req<='0';
 		end if;
 
@@ -119,22 +117,22 @@ begin
 			-- VGA has absolutel priority, and the others won't do anything until the VGA buffer is
 			-- full.
 			when rd1 =>
-				if vga.rdptr( DMACache_MaxCacheBit downto 2)/=vga.wrptr_next( DMACache_MaxCacheBit downto 2) and vga.count/=X"000" then
-					cache_wraddr<=vga_base&std_logic_vector(vga.wrptr);
+				if internals(0).rdptr( DMACache_MaxCacheBit downto 2)/=internals(0).wrptr_next( DMACache_MaxCacheBit downto 2) and internals(0).count/=X"000" then
+					cache_wraddr<=vga_base&std_logic_vector(internals(0).wrptr);
 					sdram_req<='1';
-					sdram_addr<=vga.addr;
-					vga.addr<=std_logic_vector(unsigned(vga.addr)+8);
+					sdram_addr<=internals(0).addr;
+					internals(0).addr<=std_logic_vector(unsigned(internals(0).addr)+8);
 					inputstate<=rcv1;
 					update<=upd_vga;
-					vga.count<=vga.count-4;
-				elsif spr0.rdptr( DMACache_MaxCacheBit downto 2)/=spr0.wrptr_next( DMACache_MaxCacheBit downto 2) and spr0.count/=X"000" then
-					cache_wraddr<=spr0_base&std_logic_vector(spr0.wrptr);
+					internals(0).count<=internals(0).count-4;
+				elsif internals(1).rdptr( DMACache_MaxCacheBit downto 2)/=internals(1).wrptr_next( DMACache_MaxCacheBit downto 2) and internals(1).count/=X"000" then
+					cache_wraddr<=spr0_base&std_logic_vector(internals(1).wrptr);
 					sdram_req<='1';
-					sdram_addr<=spr0.addr;
-					spr0.addr<=std_logic_vector(unsigned(spr0.addr)+8);
+					sdram_addr<=internals(1).addr;
+					internals(1).addr<=std_logic_vector(unsigned(internals(1).addr)+8);
 					inputstate<=rcv1;
 					update<=upd_spr0;
-					spr0.count<=spr0.count-4;
+					internals(1).count<=internals(1).count-4;
 				end if;
 				-- FIXME - other channels here
 			-- Wait for SDRAM, fill first word.
@@ -161,11 +159,11 @@ begin
 				inputstate<=rd1;
 				case update is
 					when upd_vga =>
-						vga.wrptr<=vga.wrptr_next;
-						vga.wrptr_next<=vga.wrptr_next+4;
+						internals(0).wrptr<=internals(0).wrptr_next;
+						internals(0).wrptr_next<=internals(0).wrptr_next+4;
 					when upd_spr0 =>
-						spr0.wrptr<=spr0.wrptr_next;
-						spr0.wrptr_next<=spr0.wrptr_next+4;
+						internals(1).wrptr<=internals(1).wrptr_next;
+						internals(1).wrptr_next<=internals(1).wrptr_next+4;
 				-- FIXME - other channels here
 					when others =>
 						null;
@@ -173,24 +171,17 @@ begin
 			when others =>
 				null;
 		end case;
-		
-		if vga_channel_from_host.setaddr='1' then
-			vga.addr<=vga_channel_from_host.addr;
-			vga.wrptr<=(others =>'0');
-			vga.wrptr_next<=(2=>'1', others =>'0');
-		end if;
-		if spr0_channel_from_host.setaddr='1' then
-			spr0.addr<=spr0_channel_from_host.addr;
-			spr0.wrptr<=(others =>'0');
-			spr0.wrptr_next<=(2=>'1', others =>'0');
-		end if;
-
-		if vga_channel_from_host.setreqlen='1' then
-			vga.count<=vga_channel_from_host.reqlen;
-		end if;
-		if spr0_channel_from_host.setreqlen='1' then
-			spr0.count<=spr0_channel_from_host.reqlen;
-		end if;
+	
+		for I in 0 to DMACache_MaxChannel loop
+			if channels_from_host(I).setaddr='1' then
+				internals(I).addr<=channels_from_host(I).addr;
+				internals(I).wrptr<=(others =>'0');
+				internals(I).wrptr_next<=(2=>'1', others =>'0');
+			end if;
+			if channels_from_host(I).setreqlen='1' then
+				internals(I).count<=channels_from_host(I).reqlen;
+			end if;
+		end loop;
 
 	end if;
 end process;
@@ -200,45 +191,42 @@ process(clk)
 begin
 	if rising_edge(clk) then
 		if reset_n='0' then
-			vga.rdptr<=(others => '0');
-			spr0.rdptr<=(others => '0');
+			for I in 0 to DMACache_MaxChannel loop
+				internals(I).rdptr<=(others => '0');
+			end loop;
 		end if;
 
 	-- Reset read pointers when a new address is set
-		if vga_channel_from_host.setaddr='1' then
-			vga.rdptr<=(others => '0');
-		end if;
-		if spr0_channel_from_host.setaddr='1' then
-			spr0.rdptr<=(others => '0');
-		end if;
+		for I in 0 to DMACache_MaxChannel loop
+			if channels_from_host(I).setaddr='1' then
+				internals(I).rdptr<=(others => '0');
+			end if;
+		end loop;
 		
 	-- Handle timeslicing of output registers
 	-- We prioritise simply by testing in order of priority.
 	-- req signals should always be a single pulse; need to latch all but VGA, since it may be several
 	-- cycles since they're serviced.
 
-		if spr0_channel_from_host.req='1' then
-			spr0.pending<='1';
-		end if;
---		if req_audio0='1' then
---			aud0_pending<='1';
---		end if;
+		for I in 0 to DMACache_MaxChannel loop -- Channel 0 has priority, so is never held pending.
+			if channels_from_host(I).req='1' then
+				internals(I).pending<='1';
+			end if;
 
-		vga_channel_to_host.valid<=vga.valid_d;
-		spr0_channel_to_host.valid<=spr0.valid_d;
-
-		vga.valid_d<='0';
-		spr0.valid_d<='0';
+			channels_to_host(I).valid<=internals(I).valid_d;
+			internals(I).valid_d<='0';
+		end loop;
 		
-		if vga_channel_from_host.req='1' then -- and vga_rdptr/=vga_wrptr then -- This test should never fail.
-			cache_rdaddr<=vga_base&std_logic_vector(vga.rdptr);
-			vga.rdptr<=vga.rdptr+1;
-			vga.valid_d<='1';
-		elsif spr0.pending='1' and spr0.rdptr/=spr0.wrptr then
-			cache_rdaddr<=spr0_base&std_logic_vector(spr0.rdptr);
-			spr0.rdptr<=spr0.rdptr+1;
-			spr0.valid_d<='1';
-			spr0.pending<='0';
+-- FIXME - put this within a loop
+		if channels_from_host(0).req='1' then -- and vga_rdptr/=vga_wrptr then -- This test should never fail.
+			cache_rdaddr<=vga_base&std_logic_vector(internals(0).rdptr);
+			internals(0).rdptr<=internals(0).rdptr+1;
+			internals(0).valid_d<='1';
+		elsif internals(1).pending='1' and internals(1).rdptr/=internals(1).wrptr then
+			cache_rdaddr<=spr0_base&std_logic_vector(internals(1).rdptr);
+			internals(1).rdptr<=internals(1).rdptr+1;
+			internals(1).valid_d<='1';
+			internals(1).pending<='0';
 --		elsif aud0_pending='1' and aud0_rdptr/=aud0_wrptr then
 --			cache_rdaddr<=aud0_base&std_logic_vector(aud0_rdptr);
 --			aud0_rdptr<=aud0_rdptr+1;
