@@ -222,7 +222,7 @@ begin
 		
 		-- Write from CPU?
 		if mem_writeEnable='1' then
-			case mem_addr(31 downto 28) is
+			case mem_addr(31)&mem_addr(10 downto 8) is
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
 

@@ -5,7 +5,7 @@
    Based on the similar TG68MiniSOC project, but with
    changes to suit the ZPU's archicture */
 
-#define VGABASE 0xE0000000
+#define VGABASE 0xFFFFFE00
 
 #define FRAMEBUFFERPTR 0
 
