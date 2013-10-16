@@ -3,15 +3,13 @@ use ieee.std_logic_1164.all;
 use IEEE.numeric_std.ALL;
 
 library work;
-use work.DMACache_pkg.ALL;
-use work.DMACache_config.ALL;
 
 -- Timer controller module
 
 entity timer_controller is
   generic(
-		prescale : unsigned(7 downto 0) := X"01"; -- Prescale incoming clock
-		timers : integer := 0 -- This is a power of 2, so zero mean 1 counter, 4 means 16 counters...
+		prescale : integer := 1; -- Prescale incoming clock
+		timers : integer := 0 -- This is a power of 2, so zero means 1 counter, 4 means 16 counters...
 	);
   port (
 		clk : in std_logic;
@@ -27,7 +25,8 @@ entity timer_controller is
 end entity;
 	
 architecture rtl of timer_controller is
-	signal prescale_counter : unsigned(7 downto 0);
+	constant prescale_adj : integer := prescale-1;
+	signal prescale_counter : unsigned(15 downto 0);
 	signal prescaled_tick : std_logic;
 	type timer_counters is array (2**timers-1 downto 0) of unsigned(23 downto 0);
 	signal timer_counter : timer_counters;
@@ -39,14 +38,14 @@ begin
 	-- Prescaled tick
 	process(clk)
 	begin
-		prescaled_tick<='0';
 		if reset='0' then
 			prescale_counter<=(others=>'0');
 		elsif rising_edge(clk) then
+			prescaled_tick<='0';
 			prescale_counter<=prescale_counter-1;
 			if prescale_counter=X"00" then
 				prescaled_tick<='1';
-				prescale_counter<=(prescale-1);
+				prescale_counter<=to_unsigned(prescale_adj,16);
 			end if;
 		end if;
 	end process;
@@ -54,15 +53,23 @@ begin
 	-- The timers proper;
 	process(clk,reset)
 	begin
-		ticks<=(others => '0');
-		if prescaled_tick='1' then
-			for I in 0 to timers-1 loop
-				timer_counter(I)<=timer_counter(I)-1;
-				if timer_counter(I)=X"000000" then
-					timer_counter(I)<=timer_limit(I);
-					ticks(I)<=timer_enabled(I);
-				end if;
+		if reset='0' then
+			for I in 0 to (2**timers-1) loop
+				timer_counter(I)<=(others => '0');
 			end loop;
+		elsif rising_edge(clk) then
+			ticks<=(others => '0');
+			if prescaled_tick='1' then
+				for I in 0 to (2**timers-1) loop
+					if timer_enabled(I)='1' then
+						timer_counter(I)<=timer_counter(I)-1;
+						if timer_counter(I)=X"000000" then
+							timer_counter(I)<=timer_limit(I);
+							ticks(I)<='1';
+						end if;
+					end if;
+				end loop;
+			end if;
 		end if;
 	end process;
 
@@ -81,7 +88,7 @@ begin
 						timer_index<=unsigned(reg_data_in(7 downto 0));
 					when X"08" =>
 						timer_limit(to_integer(timer_index(timers downto 0)))<=
-							unsigned(reg_data_in(23 downto 0));
+							unsigned(reg_data_in(23 downto 0));					
 					when others =>
 						null;
 				end case;

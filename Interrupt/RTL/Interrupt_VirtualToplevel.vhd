@@ -72,9 +72,10 @@ signal int_ack : std_logic;
 signal int_req : std_logic;
 signal int_enabled : std_logic :='0'; -- Disabled by default
 
--- Timer signals
-signal second_counter : unsigned(31 downto 0) := X"00000000";
-signal second_tick : std_logic;
+
+-- Timer register block signals
+signal timer_reg_req : std_logic;
+signal timer_tick : std_logic;
 
 -- ZPU signals
 
@@ -147,6 +148,24 @@ myuart : entity work.simple_uart
 		to_zpu => zpu_from_rom
 	);
 
+	
+mytimer : entity work.timer_controller
+  generic map(
+		prescale => sysclk_frequency, -- Prescale incoming clock
+		timers => 1
+  )
+  port map (
+		clk => clk,
+		reset => reset,
+
+		reg_addr_in => mem_addr(7 downto 0),
+		reg_data_in => mem_write,
+		reg_rw => '0', -- we never read from the timers
+		reg_req => timer_reg_req,
+
+		ticks(0) => timer_tick -- Tick signal is used to trigger an interrupt
+	);
+
 
 -- Interrupt controller
 
@@ -157,7 +176,7 @@ generic map (
 port map (
 	clk => clk,
 	reset_n => reset,
-	trigger(0) => second_tick,
+	trigger(0) => timer_tick,
 	ack => int_ack,
 	int => int_req,
 	status => int_status
@@ -196,19 +215,6 @@ port map (
 		to_rom => zpu_to_rom
 	);
 
--- Timer
-process(clk)
-begin
-	if rising_edge(clk) then
-		second_counter<=second_counter+1;
-		second_tick<='0';
-		if second_counter=sysclk_frequency*100000 then
-			second_tick<='1';
-			second_counter<=(others=>'0');
-		end if;
-	end if;
-end process;
-
 
 process(clk)
 begin
@@ -223,6 +229,9 @@ begin
 		-- Write from CPU?
 		if mem_writeEnable='1' then
 			case mem_addr(31)&mem_addr(10 downto 8) is
+				when X"C" =>	-- Timer controller at 0xFFFFFC00
+					timer_reg_req<='1';
+					mem_busy<='0';	-- Audio controller never blocks the CPU
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
 
