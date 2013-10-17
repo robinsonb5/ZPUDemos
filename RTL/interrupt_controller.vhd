@@ -3,15 +3,13 @@
 -- Released under the terms of the GNU General Public License
 -- version 3 or later.
 
---
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
 entity interrupt_controller is
 generic (
-	max_int : integer :=15
+	max_int : integer :=15  -- Specify here how many interrupts should be handled.
 );
 port (
 	clk : in std_logic;
@@ -33,13 +31,13 @@ begin
 	if rising_edge(clk) then
 
 		-- Clear the int bit if the interrupt is acknowledged.
-		-- While int is one, the status is frozen, and new interrupts
+		-- While int is 1, the status is frozen, and new interrupts
 		-- are held pending, which prevents them being lost.
 		if ack='1' then
 			int<='0';
 		end if;
 
-		-- If no interrupts are currently signalle,d
+		-- If no interrupts are currently signalled
 		-- copy any pending interrupts to status.
 		-- We clear the pending signal at the same time.
 		if int='0' then
