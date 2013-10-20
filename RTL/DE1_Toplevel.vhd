@@ -2,6 +2,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
+library work;
+use work.Toplevel_Config.all;
+
 entity DE1_Toplevel is
 	port
 	(
@@ -78,6 +81,9 @@ signal reset : std_logic;
 signal sysclk : std_logic;
 signal pll_locked : std_logic;
 
+signal audio_l : signed(15 downto 0);
+signal audio_r : signed(15 downto 0);
+
 begin
 
 --	All bidir ports tri-stated
@@ -148,5 +154,13 @@ port map
 	audio_r => audio_r
 );
 
+
+sound1: if Toplevel_UseAudio=true generate
+-- FIXME - make use of the DE1 board's codec
+end generate;
+
+sound2: if Toplevel_UseAudio=false generate
+-- FIXME - set safe defaults for the audio codec
+end generate;
 
 end architecture;

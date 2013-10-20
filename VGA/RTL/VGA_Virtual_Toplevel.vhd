@@ -47,7 +47,11 @@ entity VirtualToplevel is
 		
 		-- UART
 		rxd	: in std_logic;
-		txd	: out std_logic
+		txd	: out std_logic;
+		
+		-- Sound
+		audio_l : out signed(15 downto 0);
+		audio_r : out signed(15 downto 0)
 );
 end entity;
 
@@ -140,6 +144,8 @@ signal sdram_state : sdram_states;
 
 begin
 
+audio_l <= X"0000";
+audio_r <= X"0000";
 sdr_cke <='1';
 
 

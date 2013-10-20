@@ -2,6 +2,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
 
+library work;
+use work.Toplevel_Config.ALL;
+
 entity MIST_Toplevel is
 	port
 	(
@@ -46,6 +49,20 @@ architecture rtl of MIST_Toplevel is
 signal reset : std_logic;
 signal sysclk : std_logic;
 signal pll_locked : std_logic;
+
+signal audiol : signed(15 downto 0);
+signal audior : signed(15 downto 0);
+
+-- Sigma Delta audio
+COMPONENT hybrid_pwm_sd
+	PORT
+	(
+		clk		:	 IN STD_LOGIC;
+		n_reset		:	 IN STD_LOGIC;
+		din		:	 IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		dout		:	 OUT STD_LOGIC
+	);
+END COMPONENT;
 
 begin
 
@@ -99,14 +116,46 @@ port map
 
 	-- RS232
 	rxd => UART_RX,
-	txd => UART_TX
+	txd => UART_TX,
 
 	-- SD Card
 --	spi_cs => SD_DAT3,
 --	spi_miso => SD_DAT,
 --	spi_mosi => SD_CMD,
 --	spi_clk => SD_CLK
+
+	-- Audio
+	audio_l => audiol,
+	audio_r => audior
 );
+
+-- Do we have audio?  If so, instantiate a two DAC channels.
+audio2: if Toplevel_UseAudio = true generate
+leftsd: component hybrid_pwm_sd
+	port map
+	(
+		clk => sysclk,
+		n_reset => reset,
+		din => std_logic_vector(audiol),
+		dout => AUDIO_L
+	);
+	
+rightsd: component hybrid_pwm_sd
+	port map
+	(
+		clk => sysclk,
+		n_reset => reset,
+		din => std_logic_vector(audior),
+		dout => AUDIO_R
+	);
+end generate;
+
+-- No audio?  Make the audio pins high Z.
+
+audio3: if Toplevel_UseAudio = false generate
+	AUDIO_L<='Z';
+	AUDIO_R<='Z';
+end generate;
 
 
 end architecture;
