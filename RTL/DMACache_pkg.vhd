@@ -3,7 +3,8 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library work;
-use work.DMACache_config.all;
+use work.DMACache_Config.all;
+
 
 package DMACache_pkg is
 	constant DMACache_MaxCacheBit : integer :=4;
