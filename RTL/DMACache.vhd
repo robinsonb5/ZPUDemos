@@ -42,9 +42,6 @@ architecture rtl of dmacache is
 type inputstate_t is (rd1,rcv1,rcv2,rcv3,rcv4);
 signal inputstate : inputstate_t := rd1;
 
-type updatestate_t is (upd_vga,upd_spr0,upd_aud0,apd_aud1);
-signal update : updatestate_t := upd_vga;
-
 constant vga_base : std_logic_vector(2 downto 0) := "000";
 constant spr0_base : std_logic_vector(2 downto 0) := "001";
 constant spr1_base : std_logic_vector(2 downto 0) := "010";
@@ -61,7 +58,8 @@ type DMAChannel_Internal is record
 	rdptr : unsigned(DMACache_MaxCacheBit downto 0);
 	addr : std_logic_vector(31 downto 0); -- Current RAM address
 	count : unsigned(15 downto 0); -- Number of words to transfer.
-	pending : std_logic;
+	pending : std_logic; -- Host has a request pending on this channel.
+	sdram_pending : std_logic; -- A request to the SDRAM is in progress.
 end record;
 
 type DMAChannels_Internal is array (DMACache_MaxChannel downto 0) of DMAChannel_Internal;
@@ -93,6 +91,8 @@ myDMACacheRAM : entity work.DMACacheRAM
 sdram_reserve<='1' when internals(0).count/=X"000" else '0';
 
 process(clk)
+	variable activechannel : integer range 0 to DMACache_MaxChannel;
+	variable activereq : std_logic;
 begin
 	if rising_edge(clk) then
 		if reset_n='0' then
@@ -117,24 +117,39 @@ begin
 			-- VGA has absolutel priority, and the others won't do anything until the VGA buffer is
 			-- full.
 			when rd1 =>
+				activereq:='0';
+				for I in 1 to DMACache_MaxChannel loop
+					if internals(I).rdptr( DMACache_MaxCacheBit downto 2)/=internals(I).wrptr_next( DMACache_MaxCacheBit downto 2) and internals(I).count/=X"000" then
+						activechannel := I;
+						activereq:='1';
+					end if;
+				end loop;
+				-- Give channel zero priority:
 				if internals(0).rdptr( DMACache_MaxCacheBit downto 2)/=internals(0).wrptr_next( DMACache_MaxCacheBit downto 2) and internals(0).count/=X"000" then
-					cache_wraddr<=vga_base&std_logic_vector(internals(0).wrptr);
-					sdram_req<='1';
-					sdram_addr<=internals(0).addr;
-					internals(0).addr<=std_logic_vector(unsigned(internals(0).addr)+8);
-					inputstate<=rcv1;
-					update<=upd_vga;
-					internals(0).count<=internals(0).count-4;
-				elsif internals(1).rdptr( DMACache_MaxCacheBit downto 2)/=internals(1).wrptr_next( DMACache_MaxCacheBit downto 2) and internals(1).count/=X"000" then
-					cache_wraddr<=spr0_base&std_logic_vector(internals(1).wrptr);
-					sdram_req<='1';
-					sdram_addr<=internals(1).addr;
-					internals(1).addr<=std_logic_vector(unsigned(internals(1).addr)+8);
-					inputstate<=rcv1;
-					update<=upd_spr0;
-					internals(1).count<=internals(1).count-4;
+					activechannel := 0;
+					activereq:='1';
 				end if;
-				-- FIXME - other channels here
+
+				if activereq='1' then
+					cache_wraddr<=std_logic_vector(to_unsigned(activechannel,3))&std_logic_vector(internals(activechannel).wrptr);
+					sdram_req<='1';
+					sdram_addr<=internals(activechannel).addr;
+					internals(activechannel).addr<=std_logic_vector(unsigned(internals(activechannel).addr)+8);
+					inputstate<=rcv1;
+					internals(activechannel).sdram_pending<='1';
+					internals(activechannel).count<=internals(activechannel).count-4;
+				end if;
+
+--				elsif internals(1).rdptr( DMACache_MaxCacheBit downto 2)/=internals(1).wrptr_next( DMACache_MaxCacheBit downto 2) and internals(1).count/=X"000" then
+--					cache_wraddr<=spr0_base&std_logic_vector(internals(1).wrptr);
+--					sdram_req<='1';
+--					sdram_addr<=internals(1).addr;
+--					internals(1).addr<=std_logic_vector(unsigned(internals(1).addr)+8);
+--					inputstate<=rcv1;
+--					update<=upd_spr0;
+--					internals(1).count<=internals(1).count-4;
+--				end if;
+
 			-- Wait for SDRAM, fill first word.
 			when rcv1 =>
 				if sdram_fill='1' then
@@ -157,17 +172,9 @@ begin
 				cache_wren<='1';
 				cache_wraddr<=std_logic_vector(unsigned(cache_wraddr)+1);
 				inputstate<=rd1;
-				case update is
-					when upd_vga =>
-						internals(0).wrptr<=internals(0).wrptr_next;
-						internals(0).wrptr_next<=internals(0).wrptr_next+4;
-					when upd_spr0 =>
-						internals(1).wrptr<=internals(1).wrptr_next;
-						internals(1).wrptr_next<=internals(1).wrptr_next+4;
-				-- FIXME - other channels here
-					when others =>
-						null;
-				end case;
+				
+				internals(activechannel).wrptr<=internals(activechannel).wrptr_next;
+				internals(activechannel).wrptr_next<=internals(activechannel).wrptr_next+4;
 			when others =>
 				null;
 		end case;
@@ -188,6 +195,8 @@ end process;
 
 
 process(clk)
+	variable servicechannel : integer range 0 to DMACache_MaxChannel;
+	variable serviceactive : std_logic;
 begin
 	if rising_edge(clk) then
 		if reset_n='0' then
@@ -200,6 +209,7 @@ begin
 		for I in 0 to DMACache_MaxChannel loop
 			if channels_from_host(I).setaddr='1' then
 				internals(I).rdptr<=(others => '0');
+				internals(I).pending<='0';
 			end if;
 		end loop;
 		
@@ -217,22 +227,25 @@ begin
 			internals(I).valid_d<='0';
 		end loop;
 		
--- FIXME - put this within a loop
-		if channels_from_host(0).req='1' then -- and vga_rdptr/=vga_wrptr then -- This test should never fail.
-			cache_rdaddr<=vga_base&std_logic_vector(internals(0).rdptr);
-			internals(0).rdptr<=internals(0).rdptr+1;
-			internals(0).valid_d<='1';
-		elsif internals(1).pending='1' and internals(1).rdptr/=internals(1).wrptr then
-			cache_rdaddr<=spr0_base&std_logic_vector(internals(1).rdptr);
-			internals(1).rdptr<=internals(1).rdptr+1;
-			internals(1).valid_d<='1';
-			internals(1).pending<='0';
---		elsif aud0_pending='1' and aud0_rdptr/=aud0_wrptr then
---			cache_rdaddr<=aud0_base&std_logic_vector(aud0_rdptr);
---			aud0_rdptr<=aud0_rdptr+1;
---			valid_audio0_d<='1';
---			aud0_pending<='0';
+		serviceactive := '0';
+		for I in 1 to DMACache_MaxChannel loop
+			if internals(1).pending='1' and internals(1).rdptr/=internals(1).wrptr then
+				serviceactive := '1';
+				servicechannel := I;
+			end if;
+		end loop;
+		if channels_from_host(0).req='1' then
+				serviceactive := '1';
+				servicechannel := 0;
 		end if;
+
+		if serviceactive='1' then
+			cache_rdaddr<=std_logic_vector(to_unsigned(servicechannel,3))&std_logic_vector(internals(servicechannel).rdptr);
+			internals(servicechannel).rdptr<=internals(servicechannel).rdptr+1;
+			internals(servicechannel).valid_d<='1';
+			internals(servicechannel).pending<='0';
+		end if;
+
 	end if;
 end process;
 		

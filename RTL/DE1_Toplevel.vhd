@@ -142,7 +142,10 @@ port map
 	spi_cs => SD_DAT3,
 	spi_miso => SD_DAT,
 	spi_mosi => SD_CMD,
-	spi_clk => SD_CLK
+	spi_clk => SD_CLK,
+	
+	audio_l => audio_l,
+	audio_r => audio_r
 );
 
 

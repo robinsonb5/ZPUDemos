@@ -16,9 +16,10 @@ use work.DMACache_config.ALL;
 
 
 entity sound_controller is
-  port (
+	port (
 		clk : in std_logic;
 		reset : in std_logic;
+		audiotick : in std_logic;
 
 		reg_addr_in : in std_logic_vector(7 downto 0); -- from host CPU
 		reg_data_in: in std_logic_vector(31 downto 0);
@@ -36,26 +37,31 @@ entity sound_controller is
 end entity;
 	
 architecture rtl of sound_controller is
-
 	-- Sound channel state
 	signal datapointer : std_logic_vector(31 downto 0);
-	signal datalen : std_logic_vector(15 downto 0);
+	signal datalen : unsigned(15 downto 0);
 	signal repeatpointer : std_logic_vector(31 downto 0);
-	signal repeatlen : std_logic_vector(15 downto 0);
+	signal repeatlen : unsigned(15 downto 0);
 	signal period : std_logic_vector(15 downto 0);
+	signal periodcounter : unsigned(15 downto 0);
 	signal volume : signed(6 downto 0);
 
 	-- Sound data
+	signal hibyte : std_logic;
 	signal sampleword : std_logic_vector(15 downto 0);
 	signal sample : signed(7 downto 0);
 	signal sampleout : signed(14 downto 0);
+	signal sampletick : std_logic; 	-- single pulse on underflow of period counter
+
 begin
 
-	channel_fromhost.reqlen <= reg_data_in;
-	volume(6)<='0';
+	volume(6)<='0'; -- Make volume effectively unsigned.
 
+
+	-- Multiplexer, selects between high and low byte of the sampleword.
+	sample <= signed(sampleword(15 downto 8)) when hibyte='1' else signed(sampleword(7 downto 0));
 	sampleout <= sample * volume;
-	audio_out<=sampleout(14 downto 0);
+	audio_out<=sampleout(13 downto 0);
 
 	-- Handle CPU access to hardware registers
 	
@@ -65,6 +71,26 @@ begin
 
 		elsif rising_edge(clk) then
 
+			if sampletick='1' then
+				if hibyte='0' then
+					channel_fromhost.req<='1';
+					datalen<=datalen-1;
+				elsif datalen<=X"0000" then
+					channel_fromhost.addr <= repeatpointer;
+					channel_fromhost.setaddr <='1';			
+					channel_fromhost.reqlen <= repeatlen;
+					channel_fromhost.setreqlen <='1';
+				end if;
+				-- request one sample
+			-- Channel fetch
+			end if;
+
+			if channel_tohost.valid='1' then
+				channel_fromhost.req<='0';
+				sampleword<=dma_data;
+				hibyte <= not hibyte; -- First or second sample from the word?
+			end if;
+
 			channel_fromhost.setaddr <='0';
 			channel_fromhost.setreqlen <='0';
 			reg_data_out<=(others => '0');
@@ -72,40 +98,43 @@ begin
 			if reg_req='1' and reg_rw='0' then
 				case reg_addr_in is
 					when X"00" =>
-						datapointer <= reg_data_in;
+						datapointer <= reg_data_in;	-- Set repeat pointer at the same time as datapointer
+						repeatpointer <= reg_data_in;
 						channel_fromhost.addr <= reg_data_in;
 						channel_fromhost.setaddr <='1';
 					when X"04" =>
-						datalen <= reg_data_in;
---						channel_fromhost.reqlen <= reg_data_in;
+						datalen <= unsigned(reg_data_in(15 downto 0));
+						repeatlen <= unsigned(reg_data_in(15 downto 0));
+						channel_fromhost.reqlen <= unsigned(reg_data_in(15 downto 0));
 						channel_fromhost.setreqlen <='1';
 					when X"08" =>
 						repeatpointer <= reg_data_in;
 					when X"0c" =>
-						repeatlen <= reg_data_in;
+						repeatlen <= unsigned(reg_data_in(15 downto 0));
 					when X"10" =>
-						period <= reg_data_in;
+						period <= reg_data_in(15 downto 0);
 					when X"14" =>
-						volume <= reg_data_in;
+						volume(5 downto 0) <= signed(reg_data_in(5 downto 0));
 					when others =>
 				end case;
 			end if;
-
-		-- Channel fetch
-			channel_fromhost.req<='0';
-
-			spr0channel_fromhost.req<='1';
-
-			if channel_tohost.valid='1' then
-				sound_data<=dma_data;
-			end if;
-
 		end if;
 	end process;
 
-	elsif enable_sprite and currentX=(htotal - 19) then
-		spr0channel_fromhost.reqlen<=TO_UNSIGNED(4,16);
-		spr0channel_fromhost.setreqlen<='1';
+
+-- Generate sampletick signal from audiotick and period counter
+process(clk)
+begin
+	if rising_edge(clk) then
+		sampletick<='0';
+		if audiotick='1' then
+			periodcounter<=periodcounter-1;
+			if periodcounter=X"0000" then
+				periodcounter<=unsigned(period);
+				sampletick<='1';
+			end if;
+		end if;
 	end if;
-		
+end process;
+
 end architecture;

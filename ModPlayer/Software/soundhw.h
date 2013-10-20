@@ -2,17 +2,18 @@
 #define SOUNDHW_H
 
 
-typedef struct
+struct SoundChannel
 {
-	char *DAT;
-	unsigned int LEN;
-	char *REPDAT;
-	unsigned int REPLEN;
-	int PERIOD;
-	int	VOL;
-} SoundChannel;
+	char *DAT;	// 0-3
+	unsigned int LEN;	// 4-7
+	char *REPDAT; 	// 8-11
+	unsigned int REPLEN;	// 12-15
+	int PERIOD;	// 16-19
+	int	VOL;	// 20-23
+	int pad1,pad2 // 24-31
+};	// 32 bytes long
 
-volatile struct *SoundChannels=0xffffffd0;
+#define REG_SOUNDCHANNEL ((struct SoundChannel *)0xfffffd00)
 
 #endif
 
