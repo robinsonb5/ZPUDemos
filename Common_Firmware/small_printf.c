@@ -39,9 +39,8 @@ _cvt(unsigned int val, char *buf, int radix)
     } else {
         while (val) {
 			unsigned int c;
-
-            *cp++ = digits[val % radix];
 			c=val%radix;
+            *cp++ = digits[c];
             val /= radix;
         }
     }

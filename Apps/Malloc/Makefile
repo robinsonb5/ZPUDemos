@@ -39,7 +39,7 @@ LFLAGS  = -mboard=phi -Wl,--relax -Os
 
 
 # Our target.
-all: $(BUILD_DIR) $(MAIN_PRJ).bin 
+all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ).srec 
 
 clean:
 	rm -f $(BUILD_DIR)/*.o *.hex *.elf *.map *.lst *.srec $(MAIN_PRJ).rom *~ */*.o *.bin
@@ -48,6 +48,9 @@ clean:
 # Convert ELF binary to bin file.
 %.bin: %.elf
 	$(CP) -O binary $< $@
+
+%.srec: %.elf
+	$(CP) -O srec $< $@
 
 # Link - this produces an ELF binary.
 

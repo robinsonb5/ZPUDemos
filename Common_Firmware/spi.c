@@ -23,6 +23,12 @@ int SDHCtype;
 #define cmd_CMD55(x) cmd_write(0xff0077,0)
 #define cmd_CMD58(x) cmd_write(0xff007A,0)
 
+#ifdef DEBUG
+#define DBG(x) puts(x)
+#else
+#define DBG(X)
+#endif
+
 unsigned char SPI_R1[6];
 
 #if 0
@@ -43,23 +49,27 @@ int cmd_write(unsigned long cmd, unsigned long lba)
 	int ctr;
 	int result=0xff;
 
-//	puts("In cmd_write\n");
+	DBG("In cmd_write\n");
 
 	SPI(cmd & 255);
 
-//	puts("Command sent\n");
+	DBG("Command sent\n");
 
 	if(!SDHCtype)	// If normal SD then we have to use byte offset rather than LBA offset.
 		lba<<=9;
 
-//	puts("Sending LBA\n");
+	DBG("Sending LBA\n");
 
 	SPI((lba>>24)&255);
+	DBG("Sent 1st byte\n");
 	SPI((lba>>16)&255);
+	DBG("Sent 2nd byte\n");
 	SPI((lba>>8)&255);
+	DBG("Sent 3rd byte\n");
 	SPI(lba&255);
+	DBG("Sent 4th byte\n");
 
-//	puts("Sending CRC - if any\n");
+	DBG("Sending CRC - if any\n");
 
 	SPI((cmd>>16)&255); // CRC, if any
 
@@ -232,31 +242,31 @@ int spi_init()
 	SDHCtype=1;
 	SPI_CS(0);	// Disable CS
 	spi_spin();
-	puts("Activating CS\n");
+	DBG("Activating CS\n");
 	SPI_CS(1);
 	i=8;
 	while(--i)
 	{
 		if(cmd_reset()==1) // Enable SPI mode
 			i=1;
-		puts("Sent reset command\n");
+		DBG("Sent reset command\n");
 		if(i==2)
 		{
-			puts("SD card initialization error!\n");
+			DBG("SD card initialization error!\n");
 			return(0);
 		}
 	}
-	puts("Card responded to reset\n");
+	DBG("Card responded to reset\n");
 	SDHCtype=is_sdhc();
 	if(SDHCtype)
-		puts("SDHC card detected\n");
+		DBG("SDHC card detected\n");
 
-	puts("Sending cmd16\n");
+	DBG("Sending cmd16\n");
 	cmd_CMD16(1);
 	SPI(0xFF);
 	SPI_CS(0);
 	SPI(0xFF);
-	puts("Init done\n");
+	DBG("Init done\n");
 
 	return(1);
 }

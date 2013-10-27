@@ -33,7 +33,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 
 # Commandline options for each tool.
-ZPUFLAGS =
+ZPUFLAGS = -DDEBUG
 CFLAGS  = -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -DDISABLE_UART_RX
 
 LFLAGS  = -nostartfiles -Wl,--relax -Os
