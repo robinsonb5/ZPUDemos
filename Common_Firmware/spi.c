@@ -23,11 +23,11 @@ int SDHCtype;
 #define cmd_CMD55(x) cmd_write(0xff0077,0)
 #define cmd_CMD58(x) cmd_write(0xff007A,0)
 
-#ifdef DEBUG
-#define DBG(x) puts(x)
-#else
+// #ifdef DEBUG
+//#define DBG(x) puts(x)
+//#else
 #define DBG(X)
-#endif
+//#endif
 
 unsigned char SPI_R1[6];
 
@@ -58,7 +58,7 @@ int cmd_write(unsigned long cmd, unsigned long lba)
 	if(!SDHCtype)	// If normal SD then we have to use byte offset rather than LBA offset.
 		lba<<=9;
 
-	DBG("Sending LBA\n");
+	DBG("Sending LBA!\n");
 
 	SPI((lba>>24)&255);
 	DBG("Sent 1st byte\n");
@@ -230,7 +230,6 @@ int is_sdhc()
 			return(0);
 		}
 	}
-	puts("Determined SDHC status\n");
 	return(0);
 }
 
