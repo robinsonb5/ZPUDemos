@@ -10,7 +10,7 @@ struct SoundChannel
 	unsigned int REPLEN;	// 12-15
 	int PERIOD;	// 16-19
 	int	VOL;	// 20-23
-	int pad1,pad2 // 24-31
+	int pad1,pad2; // 24-31
 };	// 32 bytes long
 
 #define REG_SOUNDCHANNEL ((struct SoundChannel *)0xfffffd00)
