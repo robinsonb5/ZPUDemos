@@ -66,9 +66,9 @@ port (
 	-- video
 	n_hsync : out std_logic;				-- horizontal sync
 	n_vsync : out std_logic;				-- vertical sync
-	red : out std_logic_vector(3 downto 0);			-- red
-	green : out std_logic_vector(3 downto 0);		-- green
-	blue : out std_logic_vector(3 downto 0);			-- blue
+	red : out unsigned(3 downto 0);			-- red
+	green : out unsigned(3 downto 0);		-- green
+	blue : out unsigned(3 downto 0);			-- blue
 	-- audio
 	left : out std_logic;				-- audio bitstream left
 	right : out std_logic;				-- audio bitstream right
@@ -97,7 +97,7 @@ n_ram_bhe<='1';
 n_ram_ble<='1';
 n_ram_we<='1';
 n_ram_oe<='1';
-txd<='1';
+--txd<='1';
 rts<='1';
 pwrled<='1';
 msdat<='Z';
@@ -105,23 +105,67 @@ msclk<='Z';
 kbddat<='Z';
 kbdclk<='Z';
 sdo<='Z';
-n_hsync<='1';
-n_vsync<='1';
-red<=(others => '0');
-green<=(others => '0');
-blue<=(others => '0');
+--n_hsync<='1';
+--n_vsync<='1';
+--red<=(others => '0');
+--green<=(others => '0');
+--blue<=(others => '0');
 left<='0';
 right<='0';
 drv_snd<='0';
 init_b<='0';
 
 
-myclock : entity work.sysclock
+myclock : entity work.minimig_sysclock
 port map(
 	CLKIN_IN => mclk,
 	RST_IN => '0',
 	CLKFX_OUT => sysclk,
 	LOCKED_OUT => clklocked
+);
+
+project: entity work.VirtualToplevel
+	generic map (
+		sysclk_frequency => 1250, -- Sysclk frequency * 10
+		vga_bits => 4
+	)
+	port map (
+		clk => sysclk,
+		reset_in => '1',
+
+		-- VGA
+		vga_red => red,
+		vga_green => green,
+		vga_blue => blue,
+		vga_hsync 	=> n_hsync,
+		vga_vsync 	=> n_vsync,
+--		vga_window	: out std_logic;
+
+		-- SDRAM
+--		sdr_data		: inout std_logic_vector(15 downto 0);
+--		sdr_addr		: out std_logic_vector((sdram_rows-1) downto 0);
+--		sdr_dqm 		: out std_logic_vector(1 downto 0);
+--		sdr_we 		: out std_logic;
+--		sdr_cas 		: out std_logic;
+--		sdr_ras 		: out std_logic;
+--		sdr_cs		: out std_logic;
+--		sdr_ba		: out std_logic_vector(1 downto 0);
+--		sdr_clk		: out std_logic;
+--		sdr_cke		: out std_logic;
+
+		-- SPI signals
+--		spi_miso		: in std_logic := '1'; -- Allow the SPI interface not to be plumbed in.
+--		spi_mosi		: out std_logic;
+--		spi_clk		: out std_logic;
+--		spi_cs 		: out std_logic;
+		
+		-- UART
+		rxd => rxd,
+		txd => txd
+		
+		-- Audio
+--		audio_l => left,
+--		audio_r => right
 );
 
 end architecture;

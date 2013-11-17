@@ -167,7 +167,7 @@ audio_r <= X"0000";
 	myrom : entity work.RS232Bootstrap_ROM
 	generic map
 	(
-		maxAddrBit => 13
+		maxAddrBitBRAM => 13
 	)
 	port map (
 		clk => clk,

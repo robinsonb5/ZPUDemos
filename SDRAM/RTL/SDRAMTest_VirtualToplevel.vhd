@@ -160,7 +160,7 @@ myuart : entity work.simple_uart
 	myrom : entity work.SDRAMTest_ROM
 	generic map
 	(
-		maxAddrBit => 13
+		maxAddrBitBRAM => 13
 	)
 	port map (
 		clk => clk,

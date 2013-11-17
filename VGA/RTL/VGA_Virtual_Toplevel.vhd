@@ -154,7 +154,7 @@ sdr_cke <='1';
 	myrom : entity work.VGATest_ROM
 	generic map
 	(
-		maxAddrBit => 13
+		maxAddrBitBRAM => 13
 	)
 	port map (
 		clk => clk,

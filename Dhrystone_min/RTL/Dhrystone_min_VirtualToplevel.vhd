@@ -150,7 +150,7 @@ myuart : entity work.simple_uart
 	myrom : entity work.Dhrystone_min_ROM
 	generic map
 	(
-		maxAddrBit => 13
+		maxAddrBitBRAM => 13
 	)
 	port map (
 		clk => clk,

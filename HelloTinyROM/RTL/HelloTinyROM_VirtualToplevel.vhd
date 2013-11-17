@@ -133,7 +133,7 @@ myuart : entity work.simple_uart
 	myrom : entity work.HelloTinyROM_ROM
 	generic map
 	(
-		maxAddrBit => 8
+		maxAddrBitBRAM => 8
 	)
 	port map (
 		clk => clk,
