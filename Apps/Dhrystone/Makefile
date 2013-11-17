@@ -34,9 +34,9 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 ZPUFLAGS =
-CFLAGS  = -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -DDISABLE_UART_RX
+CFLAGS  = -I. -I$(COMMON_DIR) $(ZPUFLAGS) -ffunction-sections -fdata-sections -c -Os -DDISABLE_UART_RX
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
+LFLAGS  = -nostartfiles -Wl,--gc-sections -Wl,--relax -Os
 
 
 # Our target.
