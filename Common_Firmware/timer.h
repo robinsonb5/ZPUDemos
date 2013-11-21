@@ -13,7 +13,7 @@
 /*  Legacy millisecond counter, needed for the Dhrystone ZPU demo.
 	FIXME - replace this with a TIMER_COUNTER read at some point */
 
-#define REG_MILLISECONDS *(volatile unsigned int *)(0xFFFFFFC8)
+#define REG_MILLISECONDS (0xFFFFFFC8-TIMERBASE)
 
 #endif
 

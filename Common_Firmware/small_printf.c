@@ -8,12 +8,17 @@ int putchar(int c);
 static char temp[80];
 
 static int
-_cvt(unsigned int val, char *buf, int radix)
+_cvt(int val, char *buf, int radix)
 {
 #ifdef PRINTF_HEX_ONLY
 	int c;
 	int i;
 	int nz=0;
+	if(val<0)
+	{
+		putchar('-');
+		val=-val;
+	}
 	for(i=0;i<8;++i)
 	{
 		c=(val>>28)&0xf;
@@ -33,6 +38,11 @@ _cvt(unsigned int val, char *buf, int radix)
 	const char *digits="0123456789ABCDEF";
     int length = 0;
 
+	if(val<0)
+	{
+		putchar('-');
+		val=-val;
+	}
     if (val == 0) {
         /* Special case */
         *cp++ = '0';
