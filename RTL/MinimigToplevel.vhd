@@ -84,6 +84,8 @@ architecture RTL of MinimigToplevel is
 signal sysclk : std_logic;
 signal clklocked : std_logic;
 
+signal counter : unsigned(31 downto 0);
+
 begin
 
 n_ram_oe<='1';
