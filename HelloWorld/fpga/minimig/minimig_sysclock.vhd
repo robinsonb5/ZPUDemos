@@ -7,7 +7,7 @@
 -- \   \   \/     Version : 14.3
 --  \   \         Application : xaw2vhdl
 --  /   /         Filename : minimig_sysclock.vhd
--- /___/   /\     Timestamp : 11/20/2013 20:50:22
+-- /___/   /\     Timestamp : 11/22/2013 00:16:09
 -- \   \  /  \ 
 --  \___\/\___\ 
 --
