@@ -71,10 +71,12 @@ signal ser_rxint : std_logic;
 -- Interrupt signals
 
 constant int_max : integer := 1;
+signal int_triggers : std_logic_vector(int_max downto 0);
 signal int_status : std_logic_vector(int_max downto 0);
 signal int_ack : std_logic;
 signal int_req : std_logic;
 signal int_enabled : std_logic :='0'; -- Disabled by default
+signal int_trigger : std_logic;
 
 
 -- Timer register block signals
@@ -182,12 +184,13 @@ generic map (
 port map (
 	clk => clk,
 	reset_n => reset,
-	trigger(0) => timer_tick,
+	trigger => int_triggers, -- Again, thanks ISE.
 	ack => int_ack,
 	int => int_req,
 	status => int_status
 );
-	
+
+int_triggers<=(0=>timer_tick, others => '0');
 
 -- Main CPU
 
@@ -208,7 +211,7 @@ port map (
 	port map (
 		clk                 => clk,
 		reset               => not reset,
-		interrupt			  => int_req and int_enabled,
+		interrupt			  => int_trigger, -- Thanks, ISE.  int_req and int_enabled,
 		in_mem_busy         => mem_busy,
 		mem_read            => mem_read,
 		mem_write           => mem_write,
@@ -221,6 +224,7 @@ port map (
 		to_rom => zpu_to_rom
 	);
 
+int_trigger<=int_req and int_enabled;
 
 process(clk)
 begin
