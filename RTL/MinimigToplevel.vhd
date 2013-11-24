@@ -128,7 +128,7 @@ port map(
 
 project: entity work.VirtualToplevel
 	generic map (
-		sysclk_frequency => 1250, -- Sysclk frequency * 10
+		sysclk_frequency => 1108, -- Sysclk frequency * 10
 		vga_bits => 4
 	)
 	port map (
