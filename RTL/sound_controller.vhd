@@ -71,49 +71,47 @@ begin
 
 		elsif rising_edge(clk) then
 
+			channel_fromhost.setaddr <='0';
+			channel_fromhost.setreqlen <='0';
+			reg_data_out<=(others => '0');
+
 			if sampletick='1' then
 				if hibyte='0' then
+					-- request one sample
 					channel_fromhost.req<='1';
 					datalen<=datalen-1;
-				elsif datalen<=X"0000" then
-					channel_fromhost.addr <= repeatpointer;
-					channel_fromhost.setaddr <='1';			
-					channel_fromhost.reqlen <= repeatlen;
-					channel_fromhost.setreqlen <='1';
+				else
+					hibyte<='0';
+					if datalen<=X"0000" then
+						channel_fromhost.addr <= datapointer;
+						channel_fromhost.setaddr <='1';			
+						channel_fromhost.reqlen <= datalen;
+						channel_fromhost.setreqlen <='1';
+					end if;
 				end if;
-				-- request one sample
 			-- Channel fetch
 			end if;
 
 			if channel_tohost.valid='1' then
 				channel_fromhost.req<='0';
 				sampleword<=dma_data;
-				hibyte <= not hibyte; -- First or second sample from the word?
+				hibyte <= '1'; -- First or second sample from the word?
 			end if;
-
-			channel_fromhost.setaddr <='0';
-			channel_fromhost.setreqlen <='0';
-			reg_data_out<=(others => '0');
 
 			if reg_req='1' and reg_rw='0' then
 				case reg_addr_in is
-					when X"00" =>
-						datapointer <= reg_data_in;	-- Set repeat pointer at the same time as datapointer
-						repeatpointer <= reg_data_in;
-						channel_fromhost.addr <= reg_data_in;
-						channel_fromhost.setaddr <='1';
-					when X"04" =>
+					when X"00" =>	-- Data pointer
+						datapointer <= reg_data_in;
+					when X"04" => -- Data length
 						datalen <= unsigned(reg_data_in(15 downto 0));
-						repeatlen <= unsigned(reg_data_in(15 downto 0));
-						channel_fromhost.reqlen <= unsigned(reg_data_in(15 downto 0));
+					when X"08" => -- Trigger
+						channel_fromhost.addr <= datapointer;
+						channel_fromhost.setaddr <='1';			
+						channel_fromhost.reqlen <= datalen;
 						channel_fromhost.setreqlen <='1';
-					when X"08" =>
-						repeatpointer <= reg_data_in;
-					when X"0c" =>
-						repeatlen <= unsigned(reg_data_in(15 downto 0));
-					when X"10" =>
+					when X"0c" => -- Period
 						period <= reg_data_in(15 downto 0);
-					when X"14" =>
+					when X"10" => -- Volume
 						volume(5 downto 0) <= signed(reg_data_in(5 downto 0));
 					when others =>
 				end case;

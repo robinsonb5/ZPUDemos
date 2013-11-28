@@ -6,11 +6,10 @@ struct SoundChannel
 {
 	char *DAT;	// 0-3
 	unsigned int LEN;	// 4-7
-	char *REPDAT; 	// 8-11
-	unsigned int REPLEN;	// 12-15
-	int PERIOD;	// 16-19
-	int	VOL;	// 20-23
-	int pad1,pad2; // 24-31
+	int TRIGGER; // 8-11
+	int PERIOD;	// 12-15
+	int	VOL;	// 16-19
+	int pad1,pad2,pad3; // 20-31
 };	// 32 bytes long
 
 #define REG_SOUNDCHANNEL ((struct SoundChannel *)0xfffffd00)

@@ -45,7 +45,7 @@ char *LoadFile(const char *filename)
 int main(int argc, char **argv)
 {
 	char *modptr;
-	modptr=LoadFile("drumloopraw");
+	modptr=LoadFile("DRUMLOOPRAW");
 //	mt_init(0x10000);
 //	mt_music();
 	REG_SOUNDCHANNEL[0].DAT=modptr;
