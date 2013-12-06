@@ -103,4 +103,5 @@
       <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
       <CurrentItem>View HDL Functional Model</CurrentItem>
    </ItemView>
+   <CopyAdditionalFiles/>
 </Project>
