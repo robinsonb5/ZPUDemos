@@ -98,15 +98,15 @@ CTS1_FROM_FPGA<='1';
 
 myclock : entity work.ESM_BB10_sysclock
 port map(
-	CLKIN_IN => clk,
-	RST_IN => '0',
-	CLKFX_OUT => sysclk,
-	LOCKED_OUT => clklocked
+	CLK_IN1 => clk,
+	RESET => '0',
+	CLK_OUT1 => sysclk,
+	LOCKED => clklocked
 );
 
 project: entity work.VirtualToplevel
 	generic map (
-		sysclk_frequency => 1108, -- Sysclk frequency * 10
+		sysclk_frequency => 1250, -- Sysclk frequency * 10
 		vga_bits => 4
 	)
 	port map (

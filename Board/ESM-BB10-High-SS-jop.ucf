@@ -15,6 +15,7 @@ CONFIG VCCAUX=3.3;
 
 # NET "50MHZ" LOC = "B12";
 NET "clk" LOC = "B12";
+NET "clk" IOSTANDARD = LVTTL;
 
 # NET "80MHZ" LOC = "A12";
 

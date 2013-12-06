@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2013-12-02T00:34:08</DateModified>
+  <DateModified>2013-12-06T00:49:53</DateModified>
   <ModuleName>ESM_BB10Toplevel</ModuleName>
-  <SummaryTimeStamp>Unknown</SummaryTimeStamp>
+  <SummaryTimeStamp>2013-12-06T00:32:43</SummaryTimeStamp>
   <SavedFilePath>/home/amr/FPGA/Projects/ZPUDemos/HelloWorld/fpga/esm-bb10/iseconfig/ESM_BB10Toplevel.xreport</SavedFilePath>
-  <ImplementationReportsDirectory>/home/amr/FPGA/Projects/ZPUDemos/HelloWorld/fpga/esm-bb10</ImplementationReportsDirectory>
+  <ImplementationReportsDirectory>/home/amr/FPGA/Projects/ZPUDemos/HelloWorld/fpga/esm-bb10/</ImplementationReportsDirectory>
   <DateInitialized>2013-12-02T00:34:00</DateInitialized>
   <EnableMessageFiltering>false</EnableMessageFiltering>
  </header>
