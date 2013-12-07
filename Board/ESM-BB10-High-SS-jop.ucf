@@ -23,52 +23,52 @@ NET "clk" TNM_NET = "clk" | CLOCK_DEDICATED_ROUTE = FALSE;
 TIMESPEC "TS_clk" = PERIOD "clk" 20 ns HIGH 50 %;
 
 
-# NET "#DR-CAS" LOC = "A13";
-# NET "#DR-CS" LOC = "A16";
-# NET "#DR-RAS" LOC = "A14";
-# NET "#DR-WE" LOC = "A11";
+NET "DR_CAS" LOC = "A13";
+NET "DR_CS" LOC = "A16";
+NET "DR_RAS" LOC = "A14";
+NET "DR_WE" LOC = "A11";
 # NET "#FPGA-SD-CDET" LOC = "D26";
 # NET "#MR" LOC = "N23";
 # NET "#RESET" LOC = "M24";
 
 
 # NET "CS1" LOC = "AF4";
-# NET "DR-A0" LOC = "A19";
-# NET "DR-A1" LOC = "B20";
-# NET "DR-A2" LOC = "A20";
-# NET "DR-A3" LOC = "C21";
-# NET "DR-A4" LOC = "A22";
-# NET "DR-A5" LOC = "A21";
-# NET "DR-A6" LOC = "C20";
-# NET "DR-A7" LOC = "C19";
-# NET "DR-A8" LOC = "B18";
-# NET "DR-A9" LOC = "D18";
-# NET "DR-A10" LOC = "C18";
-# NET "DR-A11" LOC = "C17";
-# NET "DR-A12" LOC = "B16";
-# NET "DR-BA0" LOC = "A17";
-# NET "DR-BA1" LOC = "A18";
-# NET "DR-CKE" LOC = "C14";
-# NET "DR-CLK" LOC = "C15";
-# NET "DR-CLK" LOC = "A15";
-# NET "DR-D0" LOC = "A3";
-# NET "DR-D1" LOC = "B4";
-# NET "DR-D2" LOC = "A4";
-# NET "DR-D3" LOC = "A5";
-# NET "DR-D4" LOC = "A6";
-# NET "DR-D5" LOC = "A7";
-# NET "DR-D6" LOC = "A8";
-# NET "DR-D7" LOC = "A9";
-# NET "DR-D8" LOC = "C13";
-# NET "DR-D9" LOC = "C11";
-# NET "DR-D10" LOC = "B8";
-# NET "DR-D11" LOC = "C7";
-# NET "DR-D12" LOC = "D6";
-# NET "DR-D13" LOC = "B6";
-# NET "DR-D14" LOC = "C6";
-# NET "DR-D15" LOC = "C5";
-# NET "DR-DQMH" LOC = "B14";
-# NET "DR-DQML" LOC = "C9";
+NET "DR_A<0>" LOC = "A19";
+NET "DR_A<1>" LOC = "B20";
+NET "DR_A<2>" LOC = "A20";
+NET "DR_A<3>" LOC = "C21";
+NET "DR_A<4>" LOC = "A22";
+NET "DR_A<5>" LOC = "A21";
+NET "DR_A<6>" LOC = "C20";
+NET "DR_A<7>" LOC = "C19";
+NET "DR_A<8>" LOC = "B18";
+NET "DR_A<9>" LOC = "D18";
+NET "DR_A<10>" LOC = "C18";
+NET "DR_A<11>" LOC = "C17";
+NET "DR_A<12>" LOC = "B16";
+NET "DR_BA<0>" LOC = "A17";
+NET "DR_BA<1>" LOC = "A18";
+NET "DR_CKE" LOC = "C14";
+NET "DR_CLK_I" LOC = "C15";
+NET "DR_CLK_O" LOC = "A15";
+NET "DR_D<0>" LOC = "A3";
+NET "DR_D<1>" LOC = "B4";
+NET "DR_D<2>" LOC = "A4";
+NET "DR_D<3>" LOC = "A5";
+NET "DR_D<4>" LOC = "A6";
+NET "DR_D<5>" LOC = "A7";
+NET "DR_D<6>" LOC = "A8";
+NET "DR_D<7>" LOC = "A9";
+NET "DR_D<8>" LOC = "C13";
+NET "DR_D<9>" LOC = "C11";
+NET "DR_D<10>" LOC = "B8";
+NET "DR_D<11>" LOC = "C7";
+NET "DR_D<12>" LOC = "D6";
+NET "DR_D<13>" LOC = "B6";
+NET "DR_D<14>" LOC = "C6";
+NET "DR_D<15>" LOC = "C5";
+NET "DR_DQMH" LOC = "B14";
+NET "DR_DQML" LOC = "C9";
 # NET "FPGA-CCLK" LOC = "T23";
 # NET "FPGA-DIN" LOC = "T24";
 # NET "FPGA-DONE" LOC = "R24";
@@ -307,6 +307,10 @@ NET "CTS1_FROM_FPGA" LOC = "F24";
 #
 #	Power, and other options
 #
+
+NET DR_* IOSTANDARD = LVTTL | DRIVE = 16 | SLEW = FAST;
+NET DR_CLK_O BUFG = CLK;
+
 NET sram_clk	IOSTANDARD = LVTTL | DRIVE = 16 | SLEW = FAST;
 # NET sram_mode	IOSTANDARD = LVTTL | SLEW = FAST | DRIVE = 8;
 

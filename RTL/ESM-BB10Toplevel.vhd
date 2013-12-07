@@ -1,13 +1,11 @@
--- Minimig toplevel file
+-- ESM_BB10 toplevel file
+-- by Alastair M. Robinson
 -- 
--- This file is part of Minimig
+-- You may redistribute and/or modify it under the terms of the
+-- GNU General Public License as published by the Free Software Foundation;
+-- either version 3 of the License, or (at your option) any later version.
 -- 
--- Minimig is free software; you can redistribute it and/or modify
--- it under the terms of the GNU General Public License as published by
--- the Free Software Foundation; either version 3 of the License, or
--- (at your option) any later version.
--- 
--- Minimig is distributed in the hope that it will be useful,
+-- This project is distributed in the hope that it will be useful,
 -- but WITHOUT ANY WARRANTY; without even the implied warranty of
 -- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 -- GNU General Public License for more details.
@@ -15,11 +13,13 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http:-- www.gnu.org/licenses/>.
 --
--- Toplevel converted to VHDL by Alastair M. Robinson
 
 library ieee;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
+
+library UNISIM;
+use UNISIM.vcomponents.all;
 
 entity ESM_BB10Toplevel is
 port (
@@ -44,7 +44,7 @@ port (
 	TXD1_TO_FPGA : in std_logic;
 	RXD1_FROM_FPGA : out std_logic;
 	RTS1_TO_FPGA : in std_logic;
-	CTS1_FROM_FPGA : out std_logic
+	CTS1_FROM_FPGA : out std_logic;
 
 	-- I/O
 --	msdat : inout std_logic;				-- PS2 mouse data
@@ -68,11 +68,27 @@ port (
 	-- audio
 --	left : out std_logic;				-- audio bitstream left
 --	right : out std_logic				-- audio bitstream right
+
+	-- SDRAM
+	DR_CAS : out std_logic;
+	DR_CS : out std_logic;
+	DR_RAS : out std_logic;
+	DR_WE	: out std_logic;
+	DR_CLK_I : in std_logic;
+	DR_CLK_O : out std_logic;
+	DR_CKE : out std_logic;
+	DR_A : out std_logic_vector(12 downto 0);
+	DR_D : inout std_logic_vector(15 downto 0);
+	DR_DQMH : out std_logic;
+	DR_DQML : out std_logic;
+	DR_BA : out std_logic_vector(1 downto 0)
 );
 end entity;
 
 architecture RTL of ESM_BB10Toplevel is
 
+signal sdram_clk : std_logic;
+signal sdram_clk_inv : std_logic;
 signal sysclk : std_logic;
 signal clklocked : std_logic;
 
@@ -96,16 +112,41 @@ sram_data<=(others => 'Z');
 --txd<='1';
 CTS1_FROM_FPGA<='1';
 
+-- Clock generation.  We need a system clock and an SDRAM clock.
+-- Limitations of the Spartan 6 mean we need to "forward" the SDRAM clock
+-- to the io pin.
+
 myclock : entity work.ESM_BB10_sysclock
 port map(
 	CLK_IN1 => clk,
 	RESET => '0',
 	CLK_OUT1 => sysclk,
+	CLK_OUT2 => sdram_clk,
 	LOCKED => clklocked
+);
+
+sdram_clk_inv <= not sdram_clk;
+
+ODDR2_inst : ODDR2
+generic map(
+	DDR_ALIGNMENT => "NONE",
+	INIT => '0',
+	SRTYPE => "SYNC")
+port map (
+	Q => DR_CLK_O,
+	C0 => sdram_clk,
+	C1 => sdram_clk_inv,
+	CE => '1',
+	D0 => '0',
+	D1 => '1',
+	R => '0',    -- 1-bit reset input
+	S => '0'     -- 1-bit set input
 );
 
 project: entity work.VirtualToplevel
 	generic map (
+		sdram_rows => 13,
+		sdram_cols => 9,
 		sysclk_frequency => 1250, -- Sysclk frequency * 10
 		vga_bits => 4
 	)
@@ -122,16 +163,16 @@ project: entity work.VirtualToplevel
 --		vga_window	: out std_logic;
 
 		-- SDRAM
---		sdr_data		: inout std_logic_vector(15 downto 0);
---		sdr_addr		: out std_logic_vector((sdram_rows-1) downto 0);
---		sdr_dqm 		: out std_logic_vector(1 downto 0);
---		sdr_we 		: out std_logic;
---		sdr_cas 		: out std_logic;
---		sdr_ras 		: out std_logic;
---		sdr_cs		: out std_logic;
---		sdr_ba		: out std_logic_vector(1 downto 0);
---		sdr_clk		: out std_logic;
---		sdr_cke		: out std_logic;
+		sdr_data => DR_D,
+		sdr_addr => DR_A,
+		sdr_dqm(1) => DR_DQMH,
+		sdr_dqm(0) => DR_DQML,
+		sdr_we => DR_WE,
+		sdr_cas => DR_CAS,
+		sdr_ras => DR_RAS,
+		sdr_cs => DR_CS,
+		sdr_ba => DR_BA,
+		sdr_cke => DR_CKE,
 
 		-- SPI signals
 --		spi_miso		: in std_logic := '1'; -- Allow the SPI interface not to be plumbed in.
