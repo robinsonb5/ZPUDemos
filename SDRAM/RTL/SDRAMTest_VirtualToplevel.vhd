@@ -108,7 +108,7 @@ sdr_cke <='1';
 
 process(clk)
 begin
-	if reset_in='0' then
+	if reset_in='0' or sdr_ready='0' then
 		reset_counter<=X"FFFF";
 		reset<='0';
 	elsif rising_edge(clk) then

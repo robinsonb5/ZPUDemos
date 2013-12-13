@@ -146,7 +146,7 @@ port map (
 project: entity work.VirtualToplevel
 	generic map (
 		sdram_rows => 13,
-		sdram_cols => 9,
+		sdram_cols => 10,
 		sysclk_frequency => 1250, -- Sysclk frequency * 10
 		vga_bits => 4
 	)
