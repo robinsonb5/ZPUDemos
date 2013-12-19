@@ -270,9 +270,9 @@ spi : entity work.spi_interface
 			reset_n => reset,
 
 			channels_from_host(0) => vgachannel_fromhost,
-			channels_to_host(0) => vgachannel_tohost,
-			
 			channels_from_host(1) => spr0channel_fromhost,
+			
+			channels_to_host(0) => vgachannel_tohost,
 			channels_to_host(1) => spr0channel_tohost,
 
 			data_out => dma_data,

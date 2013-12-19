@@ -214,6 +214,8 @@ int main(int argc, char **argv)
 {
 	volatile int *base=0;
 
+	puts("Testing\n");
+
 	while(1)
 	{
 		int size;

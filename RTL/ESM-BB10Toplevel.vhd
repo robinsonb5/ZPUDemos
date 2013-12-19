@@ -59,11 +59,11 @@ port (
 --	sck : in std_logic;				-- SPI clock
 
 	-- video
---	n_hsync : out std_logic;				-- horizontal sync
---	n_vsync : out std_logic;				-- vertical sync
---	red : out unsigned(1 downto 0);			-- red
---	green : out unsigned(1 downto 0);		-- green
---	blue : out unsigned(1 downto 0);			-- blue
+	n_hsync : out std_logic;				-- horizontal sync
+	n_vsync : out std_logic;				-- vertical sync
+	red : out unsigned(1 downto 0);			-- red
+	green : out unsigned(1 downto 0);		-- green
+	blue : out unsigned(1 downto 0);			-- blue
 	
 	-- audio
 --	left : out std_logic;				-- audio bitstream left
@@ -81,7 +81,13 @@ port (
 	DR_D : inout std_logic_vector(15 downto 0);
 	DR_DQMH : out std_logic;
 	DR_DQML : out std_logic;
-	DR_BA : out std_logic_vector(1 downto 0)
+	DR_BA : out std_logic_vector(1 downto 0);
+
+	-- SD Card
+	FPGA_SD_CMD : out std_logic;
+	FPGA_SD_D0 : in std_logic;
+	FPGA_SD_D3 : out std_logic;
+	FPGA_SD_SCLK : out std_logic
 );
 end entity;
 
@@ -148,18 +154,18 @@ project: entity work.VirtualToplevel
 		sdram_rows => 13,
 		sdram_cols => 10,
 		sysclk_frequency => 1250, -- Sysclk frequency * 10
-		vga_bits => 4
+		vga_bits => 2
 	)
 	port map (
 		clk => sysclk,
 		reset_in => '1',
 
 		-- VGA
---		vga_red => red,
---		vga_green => green,
---		vga_blue => blue,
---		vga_hsync 	=> n_hsync,
---		vga_vsync 	=> n_vsync,
+		vga_red => red,
+		vga_green => green,
+		vga_blue => blue,
+		vga_hsync 	=> n_hsync,
+		vga_vsync 	=> n_vsync,
 --		vga_window	: out std_logic;
 
 		-- SDRAM
@@ -175,10 +181,10 @@ project: entity work.VirtualToplevel
 		sdr_cke => DR_CKE,
 
 		-- SPI signals
---		spi_miso		: in std_logic := '1'; -- Allow the SPI interface not to be plumbed in.
---		spi_mosi		: out std_logic;
---		spi_clk		: out std_logic;
---		spi_cs 		: out std_logic;
+		spi_miso => FPGA_SD_D0,
+		spi_mosi => FPGA_SD_CMD,
+		spi_clk => FPGA_SD_SCLK,
+		spi_cs => FPGA_SD_D3,
 		
 		-- UART
 		rxd => TXD1_TO_FPGA,

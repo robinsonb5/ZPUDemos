@@ -9,13 +9,15 @@ __inline int putchar(int c)
 	return(c);
 }
 
+
 int puts(const char *msg)
 {
+	int c;
 	int result=0;
 	// Because we haven't implemented loadb from ROM yet, we can't use *<char*>++.
 	// Therefore we read the source data in 32-bit chunks and shift-and-split accordingly.
 	int *s2=(int*)msg;
-	unsigned char c;
+
 	do
 	{
 		int i;

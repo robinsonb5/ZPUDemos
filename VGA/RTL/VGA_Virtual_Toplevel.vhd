@@ -24,7 +24,7 @@ entity VirtualToplevel is
 		vga_green 	: out unsigned(vga_bits-1 downto 0);
 		vga_blue 	: out unsigned(vga_bits-1 downto 0);
 		vga_hsync 	: out std_logic;
-		vga_vsync 	: buffer std_logic;
+		vga_vsync 	: out std_logic;
 		vga_window	: out std_logic;
 
 		-- SDRAM
@@ -148,6 +148,9 @@ audio_l <= X"0000";
 audio_r <= X"0000";
 sdr_cke <='1';
 
+spi_mosi <='1';
+spi_clk <='1';
+spi_cs <='1';
 
 -- ROM
 
@@ -167,7 +170,7 @@ sdr_cke <='1';
 
 process(clk)
 begin
-	if reset_in='0' then
+	if reset_in='0' or sdr_ready='0' then
 		reset_counter<=X"FFFF";
 		reset<='0';
 	elsif rising_edge(clk) then
@@ -221,9 +224,8 @@ myuart : entity work.simple_uart
 			reset_n => reset,
 
 			channels_from_host(0) => vgachannel_fromhost,
-			channels_to_host(0) => vgachannel_tohost,
-			
 			channels_from_host(1) => spr0channel_fromhost,
+			channels_to_host(0) => vgachannel_tohost,	
 			channels_to_host(1) => spr0channel_tohost,
 
 			data_out => dma_data,
@@ -356,7 +358,7 @@ mysdram : entity work.sdram_simple
 process(clk)
 begin
 	if reset='0' then
-		spi_cs<='1';
+--		spi_cs<='1';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';

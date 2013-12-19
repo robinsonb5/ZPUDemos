@@ -42,12 +42,12 @@ entity vga_controller is
 		sdr_refresh : out std_logic;
 
 		vblank_int : out std_logic;
-		hsync : buffer std_logic; -- to monitor
-		vsync : buffer std_logic; -- to monitor
+		hsync : out std_logic; -- to monitor
+		vsync : out std_logic; -- to monitor
 		red : out unsigned(vga_bits-1 downto 0);		-- Allow for 8bpp even if we
 		green : out unsigned(vga_bits-1 downto 0);	-- only currently support 16-bit
 		blue : out unsigned(vga_bits-1 downto 0);		-- 5-6-5 output
-		vga_window : buffer std_logic	-- '1' during the display window
+		vga_window : out std_logic	-- '1' during the display window
 	);
 end entity;
 	
@@ -85,7 +85,15 @@ architecture rtl of vga_controller is
 	signal tgreen : unsigned(7 downto 0);
 	signal tblue : unsigned(7 downto 0);
 
+	signal vsync_r : std_logic;
+	signal hsync_r : std_logic;
+	signal vga_window_r : std_logic;
+
 begin
+
+	vsync<=vsync_r;
+	hsync<=hsync_r;
+	vga_window<=vga_window_r;
 
 	vgachannel_fromhost.setaddr<=vgasetaddr;
 	spr0channel_fromhost.setaddr<=spr0setaddr;
@@ -99,8 +107,8 @@ begin
 --			clkDiv => X"3",	-- 100 Mhz / (3+1) = 25 Mhz
 			clkDiv => X"4",	-- 125 Mhz / (4+1) = 25 Mhz
 
-			hSync => hsync,
-			vSync => vsync,
+			hSync => hsync_r,
+			vSync => vsync_r,
 
 			endOfPixel => end_of_pixel,
 			endOfLine => open,
@@ -128,9 +136,9 @@ begin
 		port map
 		(
 			clk => clk,
-			hsync => hsync,
-			vsync => vsync,
-			vid_ena => vga_window,
+			hsync => hsync_r,
+			vsync => vsync_r,
+			vid_ena => vga_window_r,
 			iRed => tred,
 			iGreen => tgreen,
 			iBlue => tblue,
@@ -244,7 +252,7 @@ begin
 			if end_of_pixel='1' then
 
 				if currentX<640 and currentY<480 then
-					vga_window<='1';
+					vga_window_r<='1';
 					-- Request next pixel from VGA cache
 					vgachannel_fromhost.req<='1';
 
@@ -267,7 +275,7 @@ begin
 					end if;
 
 				else
-					vga_window<='0';
+					vga_window_r<='0';
 					
 					-- New frame...
 					if currentY=vsize and currentX=0 then
