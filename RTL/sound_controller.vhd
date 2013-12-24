@@ -73,10 +73,11 @@ begin
 
 			channel_fromhost.setaddr <='0';
 			channel_fromhost.setreqlen <='0';
+			channel_fromhost.req <='0';
 			reg_data_out<=(others => '0');
 
 			if sampletick='1' then
-				if hibyte='0' then
+				if hibyte='0' and datalen/=X"0000" then
 					-- request one sample
 					channel_fromhost.req<='1';
 					datalen<=datalen-1;
@@ -93,7 +94,6 @@ begin
 			end if;
 
 			if channel_tohost.valid='1' then
-				channel_fromhost.req<='0';
 				sampleword<=dma_data;
 				hibyte <= '1'; -- First or second sample from the word?
 			end if;

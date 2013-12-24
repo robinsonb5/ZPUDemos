@@ -76,8 +76,8 @@ port map (
 	sel3<='1' when reg_addr_in(6 downto 5)="11" else '0';
 	audio_l(0)<='0';
 	audio_r(0)<='0';
-	audio_l(15 downto 1)<=('0'&aud0)+('0'&aud3);
-	audio_r(15 downto 1)<=('0'&aud1)+('0'&aud2);
+	audio_l(15 downto 1)<=(aud0(13)&aud0)+(aud3(13)&aud3);
+	audio_r(15 downto 1)<=(aud1(13)&aud1)+(aud2(13)&aud2);
 
 channel0 : entity work.sound_controller
 	port map (

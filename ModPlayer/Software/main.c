@@ -48,9 +48,12 @@ int main(int argc, char **argv)
 	modptr=LoadFile("DRUMLOOPRAW");
 //	mt_init(0x10000);
 //	mt_music();
+	printf("Module loaded to %d\n",modptr);
+	printf("Triggering sound\n");
 	REG_SOUNDCHANNEL[0].DAT=modptr;
 	REG_SOUNDCHANNEL[0].LEN=statbuf.st_size/2;
 	REG_SOUNDCHANNEL[0].VOL=63;
 	REG_SOUNDCHANNEL[0].PERIOD=200;
+	REG_SOUNDCHANNEL[0].TRIGGER=0;
 	return(0);
 }

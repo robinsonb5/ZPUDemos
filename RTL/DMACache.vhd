@@ -212,7 +212,7 @@ begin
 				internals(I).pending<='0';
 			end if;
 		end loop;
-		
+
 	-- Handle timeslicing of output registers
 	-- We prioritise simply by testing in order of priority.
 	-- req signals should always be a single pulse; need to latch all but VGA, since it may be several
@@ -229,7 +229,7 @@ begin
 		
 		serviceactive := '0';
 		for I in 1 to DMACache_MaxChannel loop
-			if internals(1).pending='1' and internals(1).rdptr/=internals(1).wrptr then
+			if internals(I).pending='1' and internals(I).rdptr/=internals(I).wrptr then
 				serviceactive := '1';
 				servicechannel := I;
 			end if;
