@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "soundhw.h"
+
 // Structs
 typedef struct
 {

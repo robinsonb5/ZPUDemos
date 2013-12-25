@@ -45,15 +45,30 @@ char *LoadFile(const char *filename)
 int main(int argc, char **argv)
 {
 	char *modptr;
-	modptr=LoadFile("DRUMLOOPRAW");
-//	mt_init(0x10000);
-//	mt_music();
+	modptr=LoadFile("STARDSTMMOD");
 	printf("Module loaded to %d\n",modptr);
 	printf("Triggering sound\n");
-	REG_SOUNDCHANNEL[0].DAT=modptr;
-	REG_SOUNDCHANNEL[0].LEN=statbuf.st_size/2;
-	REG_SOUNDCHANNEL[0].VOL=63;
-	REG_SOUNDCHANNEL[0].PERIOD=200;
-	REG_SOUNDCHANNEL[0].TRIGGER=0;
+	mt_init(modptr);
+	mt_music();
+//	REG_SOUNDCHANNEL[0].DAT=modptr;
+//	REG_SOUNDCHANNEL[0].LEN=statbuf.st_size/2;
+//	REG_SOUNDCHANNEL[0].VOL=63;
+//	REG_SOUNDCHANNEL[0].PERIOD=200;
+//	REG_SOUNDCHANNEL[0].TRIGGER=0;
+//	REG_SOUNDCHANNEL[1].DAT=modptr;
+//	REG_SOUNDCHANNEL[1].LEN=statbuf.st_size/2;
+//	REG_SOUNDCHANNEL[1].VOL=63;
+//	REG_SOUNDCHANNEL[1].PERIOD=150;
+//	REG_SOUNDCHANNEL[1].TRIGGER=0;
+//	REG_SOUNDCHANNEL[2].DAT=modptr;
+//	REG_SOUNDCHANNEL[2].LEN=statbuf.st_size/2;
+//	REG_SOUNDCHANNEL[2].VOL=63;
+//	REG_SOUNDCHANNEL[2].PERIOD=125;
+//	REG_SOUNDCHANNEL[2].TRIGGER=0;
+//	REG_SOUNDCHANNEL[3].DAT=modptr;
+//	REG_SOUNDCHANNEL[3].LEN=statbuf.st_size/2;
+//	REG_SOUNDCHANNEL[3].VOL=63;
+//	REG_SOUNDCHANNEL[3].PERIOD=175;
+//	REG_SOUNDCHANNEL[3].TRIGGER=0;
 	return(0);
 }

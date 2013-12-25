@@ -83,10 +83,11 @@ begin
 					datalen<=datalen-1;
 				else
 					hibyte<='0';
-					if datalen<=X"0000" then
+					if datalen=X"0000" then
 						channel_fromhost.addr <= datapointer;
 						channel_fromhost.setaddr <='1';			
-						channel_fromhost.reqlen <= datalen;
+						channel_fromhost.reqlen <= repeatlen;
+						datalen <= repeatlen;
 						channel_fromhost.setreqlen <='1';
 					end if;
 				end if;
@@ -103,11 +104,12 @@ begin
 					when X"00" =>	-- Data pointer
 						datapointer <= reg_data_in;
 					when X"04" => -- Data length
-						datalen <= unsigned(reg_data_in(15 downto 0));
+						repeatlen <= unsigned(reg_data_in(15 downto 0));
 					when X"08" => -- Trigger
 						channel_fromhost.addr <= datapointer;
 						channel_fromhost.setaddr <='1';			
-						channel_fromhost.reqlen <= datalen;
+						channel_fromhost.reqlen <= repeatlen;
+						datalen <= repeatlen;
 						channel_fromhost.setreqlen <='1';
 					when X"0c" => -- Period
 						period <= reg_data_in(15 downto 0);
