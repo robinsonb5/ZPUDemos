@@ -3,7 +3,7 @@
 
 void mt_init(unsigned char *mt_data);
 void mt_music(void);
-int ptBuddyPlay(unsigned char *modData, char timerType, int soundFrequency);
+int ptBuddyPlay(unsigned char *modData, char timerType);
 void ptBuddyClose(void);
 
 #endif

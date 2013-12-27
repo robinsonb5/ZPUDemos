@@ -13,10 +13,16 @@
 
 #define FRAC_BITS 15
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+#include "small_printf.h"
+#define NULL 0
+// ZPU Demo specific hardware registers
 
 #include "soundhw.h"
+#include "interrupts.h"
+#include "timer.h"
+
 
 // Structs
 typedef struct
@@ -69,7 +75,7 @@ static PT_CHN mt_chan1temp = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 static PT_CHN mt_chan2temp = { 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 static PT_CHN mt_chan3temp = { 0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 static PT_CHN mt_chan4temp = { 0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-static P_CHN AUD[4] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+//static P_CHN AUD[4] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 static char *mt_SampleStarts[31] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 // Constant Tables
@@ -166,16 +172,38 @@ static int TimerVal;
 static int extSamplingFreq;
 
 // Macros
-#define mt_paulaSetLoop(i, x, y) if (x != NULL) AUD[i].REPDAT = x; AUD[i].REPLEN = y;
-#define mt_paulaSetPer(i, x) if (x > 0) AUD[i].INC = (((3546895 / (x)) << FRAC_BITS) / extSamplingFreq);
-#define mt_paulaStart(i) AUD[i].POS = 0; AUD[i].TRIGGER = 1;
-#define mt_paulaSetVol(i, x) AUD[i].VOL = x;
-#define mt_paulaSetLen(i, x) AUD[i].LEN = x;
-#define mt_paulaSetDat(i, x) AUD[i].DAT = x;
-#define word2AmigaWord(x) (unsigned short)(((x) << 8) | ((x) >> 8))
-#define amigaWord2Word(x) (unsigned short)(((x) >> 8) | ((x) << 8))
+
+#define mt_paulaSetLoop(i,x,y) if (x != NULL) REG_SOUNDCHANNEL[i].DAT=x; REG_SOUNDCHANNEL[i].LEN=y;
+#define mt_paulaSetPer(i,x) REG_SOUNDCHANNEL[i].PERIOD=x;
+#define mt_paulaStart(i) REG_SOUNDCHANNEL[i].TRIGGER=0;
+#define mt_paulaSetVol(i,x) REG_SOUNDCHANNEL[i].VOL=x;
+#define mt_paulaSetLen(i, x) REG_SOUNDCHANNEL[i].LEN = x;
+#define mt_paulaSetDat(i, x) REG_SOUNDCHANNEL[i].DAT = x;
+
+//#define mt_paulaSetLoop(i, x, y) if (x != NULL) AUD[i].REPDAT = x; AUD[i].REPLEN = y;
+//#define mt_paulaSetPer(i, x) if (x > 0) AUD[i].INC = (((3546895 / (x)) << FRAC_BITS) / extSamplingFreq);
+//#define mt_paulaStart(i) AUD[i].POS = 0; AUD[i].TRIGGER = 1;
+//#define mt_paulaSetVol(i, x) AUD[i].VOL = x;
+//#define mt_paulaSetLen(i, x) AUD[i].LEN = x;
+//#define mt_paulaSetDat(i, x) AUD[i].DAT = x;
+
+#define word2AmigaWord(x) (x) // ZPU is also big-endian
+// (unsigned short)(((x) << 8) | ((x) >> 8))
+#define amigaWord2Word(x) (x) // ZPU is also big-endian
+// (unsigned short)(((x) >> 8) | ((x) << 8))
 
 /* CODE START */
+
+
+// AMR - set hardware timer
+static void SetTempo(int tempo)
+{
+	int t=(10000*125)/(tempo*5);
+	printf("Setting timer 0 counter to %d\n",t);
+	HW_TIMER(REG_TIMER_INDEX)=0; // Set first timer
+	HW_TIMER(REG_TIMER_COUNTER)=t; // Timer is prescaled to 100KHz
+}
+
 
 
 static void mt_UpdateFunk(PT_CHN *ch)
@@ -391,7 +419,8 @@ static void mt_SetSpeed(PT_CHN *ch)
         else
         {
             if (ch->n_cmdlo >= 32)
-                SamplesPerFrame = TimerVal / ch->n_cmdlo;
+				SetTempo(ch->n_cmdlo);
+//                SamplesPerFrame = TimerVal / ch->n_cmdlo;
             else
                 mt_speed = ch->n_cmdlo;
         }
@@ -949,6 +978,7 @@ void mt_music(void)
     }
 }
 
+
 void mt_init(unsigned char *mt_data)
 {
     char *sampleStarts;
@@ -986,22 +1016,36 @@ void mt_init(unsigned char *mt_data)
 }
 
 
-int ptBuddyPlay(unsigned char *modData, char timerType, int soundFrequency)
+static void timer_interrupt()
+{
+	DisableInterrupts();
+	int ints=GetInterrupts();
+	mt_music();
+	EnableInterrupts();
+}
+
+
+int ptBuddyPlay(unsigned char *modData, char timerType)
 {
     char i;
 
     mt_Enable = 0;
 
+	puts("Initialising playroutine...\n");
     mt_init(modData);
 
-    extSamplingFreq = soundFrequency;
-
     tempoMode = (timerType > 0) ? 1 : 0; // 0 = cia, 1 = vblank
-    TimerVal = (soundFrequency * 125) / 50;
-    SamplesPerFrame = TimerVal / 125;
-    SampleCounter = 0;
 
+	puts("Setting up timer...\n");
+	SetTempo(125);	// Default tempo
+	puts("Setting interrupt handler...\n");
+	DisableInterrupts();
+	SetIntHandler(timer_interrupt);
+	puts("Enabling interrupts...\n");
+	EnableInterrupts();
+	puts("Enabling timer...\n");
     mt_Enable = 1;
+	HW_TIMER(REG_TIMER_ENABLE)=1; // Enable timer 0
 
     return (1);
 }

@@ -3,7 +3,9 @@
 
 int main(int argc, char **argv)
 {
-	printf("Hello, world! %d\n",1234);
+	volatile int *t=0;
+	
+	printf("Hello, world! %d\n",(*t+1234)/1234); // Test that division is working.
 	return(0);
 }
 

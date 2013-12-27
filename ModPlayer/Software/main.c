@@ -44,30 +44,19 @@ char *LoadFile(const char *filename)
 }
 
 
-void timer_interrupt()
-{
-	DisableInterrupts();
-	int ints=GetInterrupts();
-	mt_music();
-	EnableInterrupts();
-}
-
 
 int main(int argc, char **argv)
 {
 	char *modptr;
+	volatile int *t=0;
+
+	printf("Hello, world! %d\n",(*t+1234)/1234);
 
 	modptr=LoadFile("STARDSTMMOD");
 	printf("Module loaded to %d\n",modptr);
-	printf("Triggering sound\n");
-	mt_init(modptr);
+	printf("Starting replay\n");
 
-	HW_TIMER(REG_TIMER_INDEX)=0; // Set first timer
-	HW_TIMER(REG_TIMER_COUNTER)=2000; // Timer is prescaled to 100KHz
-	SetIntHandler(timer_interrupt);
-	EnableInterrupts();
-	puts("Enabling timer...\n");
-	HW_TIMER(REG_TIMER_ENABLE)=1; // Enable timer 0
+	ptBuddyPlay(modptr,1);
 
 	while(1)
 		;
