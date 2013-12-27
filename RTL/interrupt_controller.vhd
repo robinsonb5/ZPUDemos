@@ -23,7 +23,7 @@ end entity;
 
 architecture rtl of interrupt_controller is
 
-signal pending : std_logic_vector(max_int+1 downto 0); -- highest bit is set if any other bit is set.
+signal pending : std_logic_vector(max_int+1 downto 0) := (others => '0'); -- highest bit is set if any other bit is set.
 begin
 
 process(clk)
