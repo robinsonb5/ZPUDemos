@@ -71,6 +71,7 @@ signal int_status : std_logic_vector(int_max downto 0);
 signal int_ack : std_logic;
 signal int_req : std_logic;
 signal int_enabled : std_logic :='0'; -- Disabled by default
+signal int_trigger : std_logic;
 
 
 -- SPI Clock counter
@@ -472,6 +473,7 @@ port map (
 	port map (
 		clk                 => clk,
 		reset               => not reset,
+		interrupt			  => int_trigger, -- Thanks, ISE.  int_req and int_enabled,
 		in_mem_busy         => mem_busy,
 		mem_read            => mem_read,
 		mem_write           => mem_write,
@@ -484,6 +486,8 @@ port map (
 		to_rom => zpu_to_rom
 	);
 
+int_trigger<=int_req and int_enabled;
+
 
 process(clk)
 begin
@@ -495,7 +499,9 @@ begin
 		ser_txgo<='0';
 		vga_reg_req<='0';
 		audio_reg_req<='0';
+		timer_reg_req<='0';
 		spi_trigger<='0';
+		int_ack<='0';
 
 		-- Write from CPU?
 		if mem_writeEnable='1' then -- Write to top half of memory map?  Decode peripherals.
@@ -558,6 +564,12 @@ begin
 
 				when X"F" =>	-- Misc Peripherals at 0xFFFFFFF00
 					case mem_addr(7 downto 0) is
+						when X"B0" => -- Interrupt
+							mem_read<=(others=>'X');
+							mem_read(int_max downto 0)<=int_status;
+							int_ack<='1';
+							mem_busy<='0';
+
 						when X"C0" => -- UART
 							mem_read<=(others=>'X');
 							mem_read(9 downto 0)<=ser_rxrecv&ser_txready&ser_rxdata;
