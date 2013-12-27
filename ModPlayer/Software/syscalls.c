@@ -73,7 +73,8 @@ extern char _end; // Defined by the linker script
 extern char *heap_ptr;
 int _stack;
 
-void __attribute__ ((weak)) _premain()  
+//void __attribute__ ((weak)) _premain()  
+void _premain()  
 {
 	int t;
 	_initIO();

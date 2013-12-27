@@ -18,7 +18,10 @@ COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
-COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h \
+STARTUP_SRC = $(STARTUP_DIR)/crt0.s
+STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
+
+COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/interrupts.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h \
 	$(COMMON_DIR)/spi.c $(COMMON_DIR)/spi.h $(COMMON_DIR)/swap.c $(COMMON_DIR)/swap.h
 COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
@@ -33,7 +36,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 CFLAGS  = -I. -I$(COMMON_DIR) -fdata-sections -ffunction-sections -c -Os -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
 
-LFLAGS  = -mboard=phi -Wl,--gc-sections -Wl,--relax -Os
+LFLAGS  = -nostartfiles -mboard=phi -Wl,--gc-sections -Wl,--relax -Os
 
 
 # Our target.
@@ -52,7 +55,7 @@ clean:
 
 # Link - this produces an ELF binary.
 
-$(MAIN_PRJ).elf: $(MAIN_OBJ) $(LINKMAP)
+$(MAIN_PRJ).elf: $(STARTUP_OBJ) $(MAIN_OBJ) $(LINKMAP)
 	$(LD) $(LFLAGS) -T $(LINKMAP) -o $@ $+ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile

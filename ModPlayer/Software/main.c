@@ -3,6 +3,8 @@
 #include "small_printf.h"
 
 #include "soundhw.h"
+#include "interrupts.h"
+#include "timer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,14 +44,34 @@ char *LoadFile(const char *filename)
 }
 
 
+void timer_interrupt()
+{
+	DisableInterrupts();
+	int ints=GetInterrupts();
+	mt_music();
+	EnableInterrupts();
+}
+
+
 int main(int argc, char **argv)
 {
 	char *modptr;
+
 	modptr=LoadFile("STARDSTMMOD");
 	printf("Module loaded to %d\n",modptr);
 	printf("Triggering sound\n");
 	mt_init(modptr);
-	mt_music();
+
+	HW_TIMER(REG_TIMER_INDEX)=0; // Set first timer
+	HW_TIMER(REG_TIMER_COUNTER)=2000; // Timer is prescaled to 100KHz
+	SetIntHandler(timer_interrupt);
+	EnableInterrupts();
+	puts("Enabling timer...\n");
+	HW_TIMER(REG_TIMER_ENABLE)=1; // Enable timer 0
+
+	while(1)
+		;
+
 //	REG_SOUNDCHANNEL[0].DAT=modptr;
 //	REG_SOUNDCHANNEL[0].LEN=statbuf.st_size/2;
 //	REG_SOUNDCHANNEL[0].VOL=63;
