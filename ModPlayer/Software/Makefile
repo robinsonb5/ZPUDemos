@@ -33,10 +33,10 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 
 # Commandline options for each tool.
+ZPU_OPTS = -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-neg -mno-shortop -mno-byteop
+CFLAGS  = -I. -I$(COMMON_DIR) $(ZPU_OPTS) -fdata-sections -ffunction-sections -c -O6 -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_UART_RX -g
 
-CFLAGS  = -I. -I$(COMMON_DIR) -fdata-sections -ffunction-sections -c -Os -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
-
-LFLAGS  = -nostartfiles -mboard=phi -Wl,--gc-sections -Wl,--relax -Os
+LFLAGS  = -nostartfiles -mboard=phi -Wl,--gc-sections -Wl,--relax -O6
 
 
 # Our target.

@@ -7,4 +7,6 @@ freestanding, these apps make use of the C standard library, and demonstrate
 how to override certain aspects of that library to suit the hardware platform
 in use.
 
-These apps are intended to be run on the "SystemOnChip" hardware project.
+These apps are intended to be run on the "SystemOnChip" hardware project
+(which has yet to be written!  In the meantime they'll run on either the
+SDBootsrap or RS232Bootstrap projects.)

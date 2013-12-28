@@ -19,19 +19,24 @@ _cvt(int val, char *buf, int radix)
 		putchar('-');
 		val=-val;
 	}
-	for(i=0;i<8;++i)
+	if(val)
 	{
-		c=(val>>28)&0xf;
-		val<<=4;
-		if(c)
-			nz=1;	// Non-zero?  Start printing then.
-		if(c>9)
-			c+='A'-10;
-		else
-			c+='0';
-		if(nz)	// If we've encountered only zeroes so far we don't print.
-			putchar(c);
+		for(i=0;i<8;++i)
+		{
+			c=(val>>28)&0xf;
+			val<<=4;
+			if(c)
+				nz=1;	// Non-zero?  Start printing then.
+			if(c>9)
+				c+='A'-10;
+			else
+				c+='0';
+			if(nz)	// If we've encountered only zeroes so far we don't print.
+				putchar(c);
+		}
 	}
+	else
+		putchar('0');
 	return(0);
 #else
     char *cp = temp;
