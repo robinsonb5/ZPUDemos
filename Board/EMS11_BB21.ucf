@@ -8,7 +8,6 @@
 # Exported on: 09.11.2013 14:50:25
 # Edited on: 2013_12_09, by emu, removed "P" from export, as we have a BGA ...
 # Edited on: 2013_12_09, reorganized by function groups
-
 CONFIG VCCAUX=3.3;
 #
 #	Clocks & Config first ;-)
@@ -18,10 +17,9 @@ CONFIG VCCAUX=3.3;
 #	NET "clk" LOC = "xxx";
 #	NET "clk" TNM_NET = "clk" | CLOCK_DEDICATED_ROUTE = FALSE;
 #	TIMESPEC "TS_clk" = PERIOD "clk" 10 ns HIGH 50 %;
-
 NET "CLK50" LOC = "D14";
 NET "CLK50" IOSTANDARD = LVTTL;
-NET "CLK50" TNM_NET = "CLK50" | CLOCK_DEDICATED_ROUTE = FALSE;
+NET "CLK50" TNM_NET = "CLK50" |CLOCK_DEDICATED_ROUTE = FALSE;
 TIMESPEC "TS_CLK50" = PERIOD "CLK50" 20 ns HIGH 50 %;
 
 # NET "80MHZ" LOC = "A13";
@@ -30,18 +28,14 @@ TIMESPEC "TS_CLK50" = PERIOD "CLK50" 20 ns HIGH 50 %;
 #
 # NET "LED1" LOC = "M9";
 # NET "LED2" LOC = "M8";
-
 #
 #	Resets, Diagnostics, etc. _______________________________________
 #
-
 # NET "#DIAG" LOC = "P22";
 # NET "#RESET" LOC = "U22";
-
 # 
 # serial lines ______________________________________________________
 #
-
 NET "RXD1_FROM_FPGA" LOC = "L18";
 NET "N_CTS1_FROM_FPGA" LOC = "K19";
 NET "N_RTS1_TO_FPGA" LOC = "H24";
@@ -56,7 +50,6 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "#CTS2(FROM_FPGA)" LOC = "A25";
 # NET "#RTS2(TO_FPGA)" LOC = "K24";
 # NET "TXD2(TO_FPGA)" LOC = "N20";
-
 #
 #	SD_Flash ________________________________________________________
 #
@@ -68,55 +61,57 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "FPGA_SD_D2" LOC = "A23";
 # NET "FPGA_SD_D3" LOC = "L17";
 # NET "FPGA_SD_SCLK" LOC = "N17";
-
 #
 #	SDRAM mt48lc32m16A2_75 __________________________________________
 #
+NET "DR_CAS" LOC = "B12";
+NET "DR_CS" LOC = "A16";
+NET "DR_RAS" LOC = "A14";
+NET "DR_WE" LOC = "A11";
+NET "DR_CKE" LOC = "C14";
+NET "DR_CLK_O" LOC = "C15";
+NET "DR_CLK_I" LOC = "A15";
 
-# NET "#DR_CAS" LOC = "B12";
-# NET "#DR_CS" LOC = "A16";
-# NET "#DR_RAS" LOC = "A14";
-# NET "#DR_WE" LOC = "A11";
-# NET "DR_CKE" LOC = "C14";
-# NET "DR_CLK" LOC = "C15";
-# NET "DR_CLK" LOC = "A15";
+NET "DR_A<0>" LOC = "A19";
+NET "DR_A<1>" LOC = "B20";
+NET "DR_A<2>" LOC = "A20";
+NET "DR_A<3>" LOC = "C21";
+NET "DR_A<4>" LOC = "A22";
+NET "DR_A<5>" LOC = "A21";
+NET "DR_A<6>" LOC = "C20";
+NET "DR_A<7>" LOC = "C19";
+NET "DR_A<8>" LOC = "B18";
+NET "DR_A<9>" LOC = "D18";
+NET "DR_A<10>" LOC = "C18";
+NET "DR_A<11>" LOC = "C17";
+NET "DR_A<12>" LOC = "B16";
 
-# NET "DR_A0" LOC = "A19";
-# NET "DR_A1" LOC = "B20";
-# NET "DR_A2" LOC = "A20";
-# NET "DR_A3" LOC = "C21";
-# NET "DR_A4" LOC = "A22";
-# NET "DR_A5" LOC = "A21";
-# NET "DR_A6" LOC = "C20";
-# NET "DR_A7" LOC = "C19";
-# NET "DR_A8" LOC = "B18";
-# NET "DR_A9" LOC = "D18";
-# NET "DR_A10" LOC = "C18";
-# NET "DR_A11" LOC = "C17";
-# NET "DR_A12" LOC = "B16";
+NET "DR_BA<0>" LOC = "A17";
+NET "DR_BA<1>" LOC = "A18";
 
-# NET "DR_BA0" LOC = "A17";
-# NET "DR_BA1" LOC = "A18";
+NET "DR_D<0>" LOC = "A3";
+NET "DR_D<1>" LOC = "B4";
+NET "DR_D<2>" LOC = "A4";
+NET "DR_D<3>" LOC = "A5";
+NET "DR_D<4>" LOC = "A6";
+NET "DR_D<5>" LOC = "A7";
+NET "DR_D<6>" LOC = "A8";
+NET "DR_D<7>" LOC = "A9";
+NET "DR_D<8>" LOC = "C13";
+NET "DR_D<9>" LOC = "C11";
+NET "DR_D<10>" LOC = "B8";
+NET "DR_D<11>" LOC = "C7";
+NET "DR_D<12>" LOC = "D6";
+NET "DR_D<13>" LOC = "B6";
+NET "DR_D<14>" LOC = "C6";
+NET "DR_D<15>" LOC = "C5";
 
-# NET "DR_D0" LOC = "A3";
-# NET "DR_D1" LOC = "B4";
-# NET "DR_D2" LOC = "A4";
-# NET "DR_D3" LOC = "A5";
-# NET "DR_D4" LOC = "A6";
-# NET "DR_D5" LOC = "A7";
-# NET "DR_D6" LOC = "A8";
-# NET "DR_D7" LOC = "A9";
-# NET "DR_D8" LOC = "C13";
-# NET "DR_D9" LOC = "C11";
-# NET "DR_D10" LOC = "B8";
-# NET "DR_D11" LOC = "C7";
-# NET "DR_D12" LOC = "D6";
-# NET "DR_D13" LOC = "B6";
-# NET "DR_D14" LOC = "C6";
-# NET "DR_D15" LOC = "C5";
+NET "DR_DQMH" LOC = "B14";
+NET "DR_DQML" LOC = "C9";
 
-# NET "DR_DQMH" LOC = "B14";
-# NET "DR_DQML" LOC = "C9";
+NET DR_* IOSTANDARD = LVTTL |DRIVE = 16 |SLEW = FAST;
+NET DR_CLK_O BUFG = CLK;
+
 
 #
 #	SSRAM Cypress CY7c1460av33_167 __________________________________
@@ -131,7 +126,6 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "#SR_WE" LOC = "AB18";
 # NET "SR_ADV/#LD" LOC = "AC15";
 # NET "SR_CE" LOC = "AF21";
-
 # NET "SR_A0" LOC = "V11";
 # NET "SR_A1" LOC = "U12";
 # NET "SR_A2" LOC = "AF5";
@@ -155,7 +149,6 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "SR_A20" LOC = "AD21";
 # NET "SR_A21" LOC = "Y10";
 # NET "SR_A22" LOC = "W11";
-
 # NET "SR_D0" LOC = "AA13";
 # NET "SR_D1" LOC = "AB13";
 # NET "SR_D2" LOC = "AC13";
@@ -192,7 +185,6 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "SR_D33" LOC = "AE9";
 # NET "SR_D34" LOC = "AF8";
 # NET "SR_D35" LOC = "AF7";
-
 #
 #	"VGA" Connector _________________________________________________
 #
@@ -236,7 +228,6 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "M1_S37" LOC = "M24";
 # NET "M1_S38" LOC = "N24";
 # NET "M1_S39" LOC = "M21";
-
 #
 #	FPGA Programming pins, when used by MCU
 #
@@ -244,7 +235,6 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "FPGA_DONE" LOC = "AF23";
 # NET "FPGA_INIT" LOC = "AE4";
 # NET "FPGA_PROG" LOC = "AF3";
-
 #
 #	"MCU" Connector _________________________________________________
 #
@@ -287,11 +277,9 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "MCU_36" LOC = "AF24";
 # NET "MCU_37" LOC = "AE24";
 # NET "MCU_38" LOC = "W19";
-
 # 
 # Vg96 connector ____________________________________________________
 #
-
 # NET "VA2" LOC = "AF2";
 # NET "VA3" LOC = "AE2";
 # NET "VA4" LOC = "AC2";
@@ -320,7 +308,6 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "VA29" LOC = "E2";
 # NET "VA30" LOC = "C1";
 # NET "VA31" LOC = "B2";
-
 # NET "VB2" LOC = "AE1";
 # NET "VB3" LOC = "AD1";
 # NET "VB4" LOC = "AC1";
@@ -349,7 +336,6 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "VB29" LOC = "E1";
 # NET "VB30" LOC = "D1";
 # NET "VB31" LOC = "B1";
-
 # NET "VC2" LOC = "AD4";
 # NET "VC3" LOC = "AD3";
 # NET "VC4" LOC = "AC4";
@@ -376,22 +362,36 @@ NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 # NET "VC29" LOC = "D3";
 # NET "VC30" LOC = "C4";
 # NET "VC31" LOC = "C3";
-
 #
 #	Weird auxilary pins, JTAG, etc. _________________________________
 #
-
 # NET "MODE_M1" LOC = "AD16";		DO NOT USE AS USER PIN !!!
 # NET "MODE_M0" LOC = "AF22";		DO NOT USE AS USER PIN !!!
 # NET "FPGA_MOSI" LOC = "AF20";		DO NOT USE AS USER PIN !!!
 # NET "FPGA_MISO" LOC = "AD20";		DO NOT USE AS USER PIN !!!
 # NET "FPGA_CS1" LOC = "AF4";		DO NOT USE AS USER PIN !!!
-
 # NET "FPGA_TCK" LOC = "E21";
 # NET "FPGA_TDI" LOC = "F20";
 # NET "FPGA_TDO" LOC = "A24";
 # NET "FPGA_TMS" LOC = "C23";
-
 #
 #	end _____________________________________________________________
 #
+NET DR_D<*> NODELAY;
+#Created by Constraints Editor (xc6slx45-fgg676-3) - 2013/12/29
+INST "project/mysdram/sdata_reg_0" IOB = TRUE;
+INST "project/mysdram/sdata_reg_1" IOB = TRUE;
+INST "project/mysdram/sdata_reg_2" IOB = TRUE;
+INST "project/mysdram/sdata_reg_3" IOB = TRUE;
+INST "project/mysdram/sdata_reg_4" IOB = TRUE;
+INST "project/mysdram/sdata_reg_5" IOB = TRUE;
+INST "project/mysdram/sdata_reg_6" IOB = TRUE;
+INST "project/mysdram/sdata_reg_7" IOB = TRUE;
+INST "project/mysdram/sdata_reg_8" IOB = TRUE;
+INST "project/mysdram/sdata_reg_9" IOB = TRUE;
+INST "project/mysdram/sdata_reg_10" IOB = TRUE;
+INST "project/mysdram/sdata_reg_11" IOB = TRUE;
+INST "project/mysdram/sdata_reg_12" IOB = TRUE;
+INST "project/mysdram/sdata_reg_13" IOB = TRUE;
+INST "project/mysdram/sdata_reg_14" IOB = TRUE;
+INST "project/mysdram/sdata_reg_15" IOB = TRUE;

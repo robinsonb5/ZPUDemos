@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2013-12-28T23:59:03</DateModified>
+  <DateModified>2013-12-29T11:06:24</DateModified>
   <ModuleName>EMS11_BB21Toplevel</ModuleName>
-  <SummaryTimeStamp>Unknown</SummaryTimeStamp>
-  <SavedFilePath>/home/amr/FPGA/Projects/ZPUDemos/HelloWorld/fpga/ems11-bb21/iseconfig/EMS11_BB21Toplevel.xreport</SavedFilePath>
-  <ImplementationReportsDirectory>/home/amr/FPGA/Projects/ZPUDemos/HelloWorld/fpga/ems11-bb21/</ImplementationReportsDirectory>
-  <DateInitialized>2013-12-28T15:12:58</DateInitialized>
+  <SummaryTimeStamp>2013-12-29T10:49:08</SummaryTimeStamp>
+  <SavedFilePath>/home/amr/FPGA/Projects/ZPUDemos/SDRAM/fpga/ems11-bb21/iseconfig/EMS11_BB21Toplevel.xreport</SavedFilePath>
+  <ImplementationReportsDirectory>/home/amr/FPGA/Projects/ZPUDemos/SDRAM/fpga/ems11-bb21/</ImplementationReportsDirectory>
+  <DateInitialized>2013-12-29T00:02:02</DateInitialized>
   <EnableMessageFiltering>false</EnableMessageFiltering>
  </header>
  <body>
