@@ -33,8 +33,8 @@ entity MIST_Toplevel is
 		SPI_SS4		:	 in STD_LOGIC; -- "sniff" mode
 		CONF_DATA0  : in std_logic; -- SPI_SS for user_io
 
-		VGA_HS		:	 out STD_LOGIC;
-		VGA_VS		:	 out STD_LOGIC;
+		VGA_HS		:	buffer STD_LOGIC;
+		VGA_VS		:	buffer STD_LOGIC;
 		VGA_R		:	 out unsigned(5 downto 0);
 		VGA_G		:	 out unsigned(5 downto 0);
 		VGA_B		:	 out unsigned(5 downto 0);
@@ -53,6 +53,11 @@ signal pll_locked : std_logic;
 signal audiol : signed(15 downto 0);
 signal audior : signed(15 downto 0);
 
+signal vga_tred : unsigned(7 downto 0);
+signal vga_tgreen : unsigned(7 downto 0);
+signal vga_tblue : unsigned(7 downto 0);
+signal vga_window : std_logic;
+
 -- Sigma Delta audio
 COMPONENT hybrid_pwm_sd
 	PORT
@@ -61,6 +66,23 @@ COMPONENT hybrid_pwm_sd
 		n_reset		:	 IN STD_LOGIC;
 		din		:	 IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 		dout		:	 OUT STD_LOGIC
+	);
+END COMPONENT;
+
+COMPONENT video_vga_dither
+	GENERIC ( outbits : INTEGER := 4 );
+	PORT
+	(
+		clk		:	 IN STD_LOGIC;
+		hsync		:	 IN STD_LOGIC;
+		vsync		:	 IN STD_LOGIC;
+		vid_ena		:	 IN STD_LOGIC;
+		iRed		:	 IN UNSIGNED(7 DOWNTO 0);
+		iGreen		:	 IN UNSIGNED(7 DOWNTO 0);
+		iBlue		:	 IN UNSIGNED(7 DOWNTO 0);
+		oRed		:	 OUT UNSIGNED(outbits-1 DOWNTO 0);
+		oGreen		:	 OUT UNSIGNED(outbits-1 DOWNTO 0);
+		oBlue		:	 OUT UNSIGNED(outbits-1 DOWNTO 0)
 	);
 END COMPONENT;
 
@@ -85,8 +107,7 @@ generic map
 (
 	sdram_rows => 13,
 	sdram_cols => 9,
-	sysclk_frequency => 1250,
-	vga_bits => 6
+	sysclk_frequency => 1250
 )
 port map
 (	
@@ -96,10 +117,10 @@ port map
 	-- video
 	vga_hsync => VGA_HS,
 	vga_vsync => VGA_VS,
-	vga_red => VGA_R,
-	vga_green => VGA_G,
-	vga_blue => VGA_B,
---	vga_window => vga_window,
+	vga_red => vga_tred,
+	vga_green => vga_tgreen,
+	vga_blue => vga_tblue,
+	vga_window => vga_window,
 	
 	-- sdram
 	sdr_data => SDRAM_DQ,
@@ -129,6 +150,29 @@ port map
 	audio_r => audior
 );
 
+dither1: if Toplevel_UseVGA=true generate
+-- Dither the video down to 4 bits per gun.
+mydither : component video_vga_dither
+	generic map (
+		outbits => 6
+	)
+	port map (
+		clk => sysclk,
+		hsync => VGA_HS,
+		vsync => VGA_VS,
+		vid_ena => vga_window,
+		iRed => vga_tred,
+		iGreen => vga_tgreen,
+		iBlue => vga_tblue,
+		oRed => VGA_R,
+		oGreen => VGA_G,
+		oBlue => VGA_B
+	);
+
+end generate;
+
+
+
 -- Do we have audio?  If so, instantiate a two DAC channels.
 audio2: if Toplevel_UseAudio = true generate
 leftsd: component hybrid_pwm_sd
@@ -156,6 +200,5 @@ audio3: if Toplevel_UseAudio = false generate
 	AUDIO_L<='Z';
 	AUDIO_R<='Z';
 end generate;
-
 
 end architecture;

@@ -59,8 +59,8 @@ entity DE1_Toplevel is
 		I2C_SCLK		:	 out STD_LOGIC;
 		PS2_DAT		:	 in STD_LOGIC;
 		PS2_CLK		:	 in STD_LOGIC;
-		VGA_HS		:	 out STD_LOGIC;
-		VGA_VS		:	 out STD_LOGIC;
+		VGA_HS		:	 buffer STD_LOGIC;
+		VGA_VS		:	 buffer STD_LOGIC;
 		VGA_R		:	 out unsigned(3 downto 0);
 		VGA_G		:	 out unsigned(3 downto 0);
 		VGA_B		:	 out unsigned(3 downto 0);
@@ -83,6 +83,28 @@ signal pll_locked : std_logic;
 
 signal audio_l : signed(15 downto 0);
 signal audio_r : signed(15 downto 0);
+
+signal vga_tred : unsigned(7 downto 0);
+signal vga_tgreen : unsigned(7 downto 0);
+signal vga_tblue : unsigned(7 downto 0);
+signal vga_window : std_logic;
+
+COMPONENT video_vga_dither
+	GENERIC ( outbits : INTEGER := 4 );
+	PORT
+	(
+		clk		:	 IN STD_LOGIC;
+		hsync		:	 IN STD_LOGIC;
+		vsync		:	 IN STD_LOGIC;
+		vid_ena		:	 IN STD_LOGIC;
+		iRed		:	 IN UNSIGNED(7 DOWNTO 0);
+		iGreen		:	 IN UNSIGNED(7 DOWNTO 0);
+		iBlue		:	 IN UNSIGNED(7 DOWNTO 0);
+		oRed		:	 OUT UNSIGNED(outbits-1 DOWNTO 0);
+		oGreen		:	 OUT UNSIGNED(outbits-1 DOWNTO 0);
+		oBlue		:	 OUT UNSIGNED(outbits-1 DOWNTO 0)
+	);
+END COMPONENT;
 
 begin
 
@@ -110,8 +132,7 @@ generic map
 (
 	sdram_rows => 12,
 	sdram_cols => 8,
-	sysclk_frequency => 1250,
-	vga_bits => 4
+	sysclk_frequency => 1250
 )
 port map
 (	
@@ -121,10 +142,10 @@ port map
 	-- video
 	vga_hsync => VGA_HS,
 	vga_vsync => VGA_VS,
-	vga_red => VGA_R,
-	vga_green => VGA_G,
-	vga_blue => VGA_B,
---	vga_window => vga_window,
+	vga_red => vga_tred,
+	vga_green => vga_tgreen,
+	vga_blue => vga_tblue,
+	vga_window => vga_window,
 	
 	-- sdram
 	sdr_data => DRAM_DQ,
@@ -154,6 +175,26 @@ port map
 	audio_r => audio_r
 );
 
+dither1: if Toplevel_UseVGA=true generate
+-- Dither the video down to 4 bits per gun.
+mydither : component video_vga_dither
+	generic map (
+		outbits => 4
+	)
+	port map (
+		clk => sysclk,
+		hsync => VGA_HS,
+		vsync => VGA_VS,
+		vid_ena => vga_window,
+		iRed => vga_tred,
+		iGreen => vga_tgreen,
+		iBlue => vga_tblue,
+		oRed => VGA_R,
+		oGreen => VGA_G,
+		oBlue => VGA_B
+	);
+
+end generate;
 
 sound1: if Toplevel_UseAudio=true generate
 -- FIXME - make use of the DE1 board's codec

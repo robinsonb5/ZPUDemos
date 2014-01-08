@@ -20,8 +20,7 @@ use work.DMACache_config.ALL;
 
 entity vga_controller is
   generic(
-		enable_sprite : boolean := true;
-		vga_bits : integer := 4
+		enable_sprite : boolean := true
 	);
   port (
 		clk : in std_logic;
@@ -44,9 +43,9 @@ entity vga_controller is
 		vblank_int : out std_logic;
 		hsync : out std_logic; -- to monitor
 		vsync : out std_logic; -- to monitor
-		red : out unsigned(vga_bits-1 downto 0);		-- Allow for 8bpp even if we
-		green : out unsigned(vga_bits-1 downto 0);	-- only currently support 16-bit
-		blue : out unsigned(vga_bits-1 downto 0);		-- 5-6-5 output
+		red : out unsigned(7 downto 0);		-- Allow for 8bpp even if we
+		green : out unsigned(7 downto 0);	-- only currently support 16-bit
+		blue : out unsigned(7 downto 0);		-- 5-6-5 output
 		vga_window : out std_logic	-- '1' during the display window
 	);
 end entity;
@@ -81,10 +80,6 @@ architecture rtl of vga_controller is
 	signal vga_newframe : std_logic;
 	signal vgadata : std_logic_vector(15 downto 0);
 
-	signal tred : unsigned(7 downto 0);
-	signal tgreen : unsigned(7 downto 0);
-	signal tblue : unsigned(7 downto 0);
-
 	signal vsync_r : std_logic;
 	signal hsync_r : std_logic;
 	signal vga_window_r : std_logic;
@@ -104,8 +99,8 @@ begin
 		)
 		port map (
 			clk => clk,
---			clkDiv => X"3",	-- 100 Mhz / (3+1) = 25 Mhz
-			clkDiv => X"4",	-- 125 Mhz / (4+1) = 25 Mhz
+			clkDiv => X"3",	-- 100 Mhz / (3+1) = 25 Mhz
+--			clkDiv => X"4",	-- 125 Mhz / (4+1) = 25 Mhz
 
 			hSync => hsync_r,
 			vSync => vsync_r,
@@ -126,26 +121,6 @@ begin
 			ySyncFr => vbstart, -- Sync pulse 2
 			ySyncTo => vbstop
 		);		
-
-
-	mydither: entity work.video_vga_dither
-		generic map
-		(
-			outbits => vga_bits
-		)
-		port map
-		(
-			clk => clk,
-			hsync => hsync_r,
-			vsync => vsync_r,
-			vid_ena => vga_window_r,
-			iRed => tred,
-			iGreen => tgreen,
-			iBlue => tblue,
-			oRed => red,
-			oGreen => green,
-			oBlue => blue
-		);
 
 	-- Handle CPU access to hardware registers
 	
@@ -257,21 +232,21 @@ begin
 					vgachannel_fromhost.req<='1';
 
 					if sprite_col(3)='1' then
-						tred <= (others => sprite_col(2));
+						red <= (others => sprite_col(2));
 					else
-						tred <= unsigned(vgadata(15 downto 11)&"000");
+						red <= unsigned(vgadata(15 downto 11)&"000");
 					end if;
 
 					if sprite_col(3)='1' then
-						tgreen <= (others=>sprite_col(1));
+						green <= (others=>sprite_col(1));
 					else
-						tgreen <= unsigned(vgadata(10 downto 5)&"00");
+						green <= unsigned(vgadata(10 downto 5)&"00");
 					end if;
 
 					if sprite_col(3)='1' then
-						tblue <= (others=>sprite_col(0));
+						blue <= (others=>sprite_col(0));
 					else
-						tblue <= unsigned(vgadata(4 downto 0)&"000");
+						blue <= unsigned(vgadata(4 downto 0)&"000");
 					end if;
 
 				else
