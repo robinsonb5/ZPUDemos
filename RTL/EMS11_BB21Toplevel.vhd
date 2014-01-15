@@ -101,19 +101,37 @@ PS2_DAT <= '0' when ps2k_dat_out='0' else 'Z';
 ps2k_clk_in<=PS2_CLK;
 PS2_CLK <= '0' when ps2k_clk_out='0' else 'Z';
 
--- Clock generation.  We need a system clock and an SDRAM clock.
--- Limitations of the Spartan 6 mean we need to "forward" the SDRAM clock
--- to the io pin.
+---- Clock generation.  We need a system clock and an SDRAM clock.
+---- Limitations of the Spartan 6 mean we need to "forward" the SDRAM clock
+---- to the io pin.
 
-myclock : entity work.EMS11_BB21_sysclock
+mysysclk : entity work.EMS11_BB21_sysclk_fb
 port map(
 	CLK_IN1 => CLK50,
 	RESET => '0',
 	CLK_OUT1 => sysclk,
-	CLK_OUT2 => sdram_clk,
 	LOCKED => clklocked
 );
 
+mysdramclk : entity work.EMS11_BB21_sdramclk_fb
+port map(
+	CLK_IN1 => sysclk,
+	RESET => '0',
+	CLK_OUT1 => sdram_clk,
+	CLKFB_IN => DR_CLK_I,
+	LOCKED => clklocked
+);
+
+--
+--myclock : entity work.EMS11_BB21_sysclock
+--port map(
+--	CLK_IN1 => CLK50,
+--	RESET => '0',
+--	CLK_OUT1 => sysclk,
+--	CLK_OUT2 => sdram_clk,
+--	LOCKED => clklocked
+--);
+--
 sysclk_inv <= not sysclk;
 sdram_clk_inv <= not sdram_clk;
 
@@ -205,7 +223,7 @@ project: entity work.VirtualToplevel
 	generic map (
 		sdram_rows => 12,
 		sdram_cols => 8,
-		sysclk_frequency => 1000 -- Sysclk frequency * 10
+		sysclk_frequency => 1250 -- Sysclk frequency * 10
 	)
 	port map (
 		clk => sysclk,

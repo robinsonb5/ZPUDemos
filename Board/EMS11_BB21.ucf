@@ -22,6 +22,9 @@ NET "CLK50" IOSTANDARD = LVTTL;
 NET "CLK50" TNM_NET = "CLK50" |CLOCK_DEDICATED_ROUTE = FALSE;
 TIMESPEC "TS_CLK50" = PERIOD "CLK50" 20 ns HIGH 50 %;
 
+# HACK - will need to address this later.
+PIN "mysysclk/clkout1_buf.O" CLOCK_DEDICATED_ROUTE = FALSE;
+
 # NET "80MHZ" LOC = "A13";
 #
 #	LEDS

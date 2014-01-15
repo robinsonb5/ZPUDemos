@@ -11,7 +11,7 @@ entity VirtualToplevel is
 		sdram_rows : integer := 12;
 		sdram_cols : integer := 8;
 		sysclk_frequency : integer := 1000; -- Sysclk frequency * 10
-		vga_bits : integer := 4
+		vga_bits : integer := 8
 	);
 	port (
 		clk 			: in std_logic;
@@ -108,6 +108,9 @@ signal sdram_state : sdram_states;
 
 begin
 
+spi_mosi <='1';
+spi_clk <='1';
+spi_cs <='1';
 sdr_cke <='1';
 
 -- Reset counter.
@@ -246,7 +249,7 @@ mysdram : entity work.sdram_simple
 process(clk)
 begin
 	if reset='0' then
-		spi_cs<='1';
+
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';

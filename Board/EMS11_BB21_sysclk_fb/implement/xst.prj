@@ -1,0 +1,2 @@
+vhdl work ../../EMS11_BB21_sysclk_fb.vhd
+vhdl work ../example_design/EMS11_BB21_sysclk_fb_exdes.vhd
