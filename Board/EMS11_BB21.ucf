@@ -23,19 +23,25 @@ NET "CLK50" TNM_NET = "CLK50" |CLOCK_DEDICATED_ROUTE = FALSE;
 TIMESPEC "TS_CLK50" = PERIOD "CLK50" 20 ns HIGH 50 %;
 
 # HACK - will need to address this later.
-PIN "mysysclk/clkout1_buf.O" CLOCK_DEDICATED_ROUTE = FALSE;
+# PIN "mysysclk/clkout1_buf.O" CLOCK_DEDICATED_ROUTE = FALSE;
 
 # NET "80MHZ" LOC = "A13";
 #
 #	LEDS
 #
-# NET "LED1" LOC = "M9";
-# NET "LED2" LOC = "M8";
+NET "LED1" LOC = "M9";
+NET "LED2" LOC = "M8";
+NET "LED1" IOSTANDARD = LVTTL;
+NET "LED2" IOSTANDARD = LVTTL;
+
 #
 #	Resets, Diagnostics, etc. _______________________________________
 #
-# NET "#DIAG" LOC = "P22";
-# NET "#RESET" LOC = "U22";
+NET "DIAG_N" LOC = "P22";
+NET "RESET_N" LOC = "U22";
+NET "DIAG_N" IOSTANDARD = LVTTL;
+NET "RESET_N" IOSTANDARD = LVTTL;
+
 # 
 # serial lines ______________________________________________________
 #
@@ -120,7 +126,7 @@ NET "DR_D<15>" LOC = "C5";
 NET "DR_DQMH" LOC = "B14";
 NET "DR_DQML" LOC = "C9";
 
-NET DR_* IOSTANDARD = LVTTL |DRIVE = 16 |SLEW = FAST;
+NET DR_* IOSTANDARD = LVTTL |DRIVE = 8 |SLEW = FAST;
 NET DR_CLK_O BUFG = CLK;
 
 

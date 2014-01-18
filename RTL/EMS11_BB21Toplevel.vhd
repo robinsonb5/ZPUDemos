@@ -46,7 +46,15 @@ port
 	
 		-- VGA Connector
 	N_CTS2_FROM_FPGA : out std_logic; -- Actually used for VGA
-	M1_S : inout std_logic_vector(39 downto 0)
+	M1_S : inout std_logic_vector(39 downto 0);
+
+		-- LEDs
+	LED1 : out std_logic;
+	LED2 : out std_logic;
+
+		-- Buttons
+	DIAG_N : in std_logic;
+	RESET_N : in std_logic
 );
 end entity;
 
@@ -89,6 +97,9 @@ signal ps2k_dat_out : std_logic;
 begin
 N_CTS1_FROM_FPGA<='1';  -- safe default since we're not using handshaking.
 
+LED1 <= RESET_N;
+LED2 <= DIAG_N;
+
 -- DR_CLK_O<='1';
 
 ps2m_dat_in<=PS2_MDAT;
@@ -105,33 +116,34 @@ PS2_CLK <= '0' when ps2k_clk_out='0' else 'Z';
 ---- Limitations of the Spartan 6 mean we need to "forward" the SDRAM clock
 ---- to the io pin.
 
-mysysclk : entity work.EMS11_BB21_sysclk_fb
-port map(
-	CLK_IN1 => CLK50,
-	RESET => '0',
-	CLK_OUT1 => sysclk,
-	LOCKED => clklocked
-);
-
-mysdramclk : entity work.EMS11_BB21_sdramclk_fb
-port map(
-	CLK_IN1 => sysclk,
-	RESET => '0',
-	CLK_OUT1 => sdram_clk,
-	CLKFB_IN => DR_CLK_I,
-	LOCKED => clklocked
-);
-
---
---myclock : entity work.EMS11_BB21_sysclock
+--mysysclk : entity work.EMS11_BB21_sysclk_fb
 --port map(
 --	CLK_IN1 => CLK50,
 --	RESET => '0',
 --	CLK_OUT1 => sysclk,
---	CLK_OUT2 => sdram_clk,
 --	LOCKED => clklocked
 --);
 --
+--mysdramclk : entity work.EMS11_BB21_sdramclk_fb
+--port map(
+--	CLK_IN1 => sysclk,
+--	RESET => '0',
+--	CLK_OUT1 => sdram_clk,
+--	CLKFB_IN => DR_CLK_I,
+--	LOCKED => clklocked
+--);
+--
+--
+
+myclock : entity work.EMS11_BB21_sysclock
+port map(
+	CLK_IN1 => CLK50,
+	RESET => '0',
+	CLK_OUT1 => sysclk,
+	CLK_OUT2 => sdram_clk,
+	LOCKED => clklocked
+);
+
 sysclk_inv <= not sysclk;
 sdram_clk_inv <= not sdram_clk;
 
@@ -217,17 +229,15 @@ M1_S(29)<=vga_red(1);
 M1_S(31)<=vga_red(0);
 M1_S(38)<='1';
 
-DR_A(12)<='0'; -- Temporary measure
-
 project: entity work.VirtualToplevel
 	generic map (
-		sdram_rows => 12,
-		sdram_cols => 8,
-		sysclk_frequency => 1250 -- Sysclk frequency * 10
+		sdram_rows => 13,
+		sdram_cols => 10,
+		sysclk_frequency => 1000 -- Sysclk frequency * 10
 	)
 	port map (
 		clk => sysclk,
-		reset_in => '1',
+		reset_in => RESET_N,
 	
 		-- VGA
 		vga_red => vga_red(9 downto 2),
@@ -239,7 +249,7 @@ project: entity work.VirtualToplevel
 
 		-- SDRAM
 		sdr_data => DR_D,
-		sdr_addr => DR_A(11 downto 0),
+		sdr_addr => DR_A,
 		sdr_dqm(1) => DR_DQMH,
 		sdr_dqm(0) => DR_DQML,
 		sdr_we => DR_WE,

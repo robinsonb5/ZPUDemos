@@ -1,0 +1,7 @@
+# Timing constraints for SDRAM
+
+NET "sysclk" PERIOD = 10ns;
+TIMESPEC "TS_SYSCLK" = PERIOD "sysclk" 20 ns HIGH 50 %;
+
+NET DR_* OFFSET=OUT : 2.5 : BEFORE : sysclk;
+NET DR_D<*> OFFSET=IN : 6.3 : AFTER : sysclk;
