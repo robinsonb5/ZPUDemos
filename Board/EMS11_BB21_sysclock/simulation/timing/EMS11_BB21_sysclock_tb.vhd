@@ -82,7 +82,7 @@ architecture test of EMS11_BB21_sysclock_tb is
 
 
   -- we'll be using the period in many locations
-  constant PER1        : time := 20.0 ns;
+  constant PER1        : time := 20.000 ns;
 
 
   -- Declare the input clock signals

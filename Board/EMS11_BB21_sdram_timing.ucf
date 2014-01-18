@@ -1,7 +1,18 @@
 # Timing constraints for SDRAM
 
-NET "sysclk" PERIOD = 10ns;
-TIMESPEC "TS_SYSCLK" = PERIOD "sysclk" 20 ns HIGH 50 %;
+# myclock_clkout0 creted by PLL
 
-NET DR_* OFFSET=OUT : 2.5 : BEFORE : sysclk;
-NET DR_D<*> OFFSET=IN : 6.3 : AFTER : sysclk;
+# OK, these need to be specified relative to the system clock, rather
+# than the phase-shifted variant of the system clock which is fed to
+# the SDRAM chip, yes?
+# So how on earth can I reference the system clock, given that it
+# doesn't have a physical pin and exists only as the output of a
+# PLL?
+
+# If I call it sysclk and create a net for it, it gets optimised
+# away. The reports say that the PLL's output is automatically
+# generated as myclock_clkout0 and myclock_clkout1, but if I use
+# those, the build fails, claiming they don't exist.
+
+#NET DR_* OFFSET=OUT : 2.5 : BEFORE : myclock_clkout0;
+#NET DR_D<*> OFFSET=IN : 6.3 : AFTER : myclock_clkout0;

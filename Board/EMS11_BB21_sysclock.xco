@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version 14.3
-# Date: Wed Jan  8 19:21:41 2014
+# Date: Sat Jan 18 20:39:02 2014
 #
 ##############################################################
 #
@@ -75,7 +75,7 @@ CSET clkout1_requested_phase=0.000
 CSET clkout2_drives=BUFG
 CSET clkout2_requested_duty_cycle=50.000
 CSET clkout2_requested_out_freq=100.000
-CSET clkout2_requested_phase=0
+CSET clkout2_requested_phase=30
 CSET clkout2_used=true
 CSET clkout3_drives=BUFG
 CSET clkout3_requested_duty_cycle=50.000
@@ -197,7 +197,7 @@ CSET override_pll=false
 CSET platform=lin64
 CSET pll_bandwidth=OPTIMIZED
 CSET pll_clk_feedback=CLKFBOUT
-CSET pll_clkfbout_mult=12
+CSET pll_clkfbout_mult=15
 CSET pll_clkfbout_phase=0.000
 CSET pll_clkin_period=20.000
 CSET pll_clkout0_divide=6
@@ -205,7 +205,7 @@ CSET pll_clkout0_duty_cycle=0.500
 CSET pll_clkout0_phase=0.000
 CSET pll_clkout1_divide=6
 CSET pll_clkout1_duty_cycle=0.500
-CSET pll_clkout1_phase=-60.000
+CSET pll_clkout1_phase=30.000
 CSET pll_clkout2_divide=1
 CSET pll_clkout2_duty_cycle=0.500
 CSET pll_clkout2_phase=0.000
@@ -266,4 +266,4 @@ CSET use_status=false
 MISC pkg_timestamp=2012-05-10T12:44:55Z
 # END Extra information
 GENERATE
-# CRC: 97ef0794
+# CRC: ef6337fe
