@@ -1,26 +1,29 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
+
+library work;
 use work.zpu_config.all;
 use work.zpupkg.ALL;
+use work.DMACache_pkg.ALL;
+use work.DMACache_config.ALL;
 
 entity VirtualToplevel is
 	generic (
 		sdram_rows : integer := 12;
 		sdram_cols : integer := 8;
-		sysclk_frequency : integer := 1000; -- Sysclk frequency * 10
-		vga_bits : integer := 4
+		sysclk_frequency : integer := 1000 -- Sysclk frequency * 10
 	);
 	port (
 		clk 			: in std_logic;
 		reset_in 	: in std_logic;
 
 		-- VGA
-		vga_red 		: out unsigned(vga_bits-1 downto 0);
-		vga_green 	: out unsigned(vga_bits-1 downto 0);
-		vga_blue 	: out unsigned(vga_bits-1 downto 0);
+		vga_red 		: out unsigned(7 downto 0);
+		vga_green 	: out unsigned(7 downto 0);
+		vga_blue 	: out unsigned(7 downto 0);
 		vga_hsync 	: out std_logic;
-		vga_vsync 	: buffer std_logic;
+		vga_vsync 	: out std_logic;
 		vga_window	: out std_logic;
 
 		-- SDRAM
@@ -43,7 +46,11 @@ entity VirtualToplevel is
 		
 		-- UART
 		rxd	: in std_logic;
-		txd	: out std_logic
+		txd	: out std_logic;
+
+		-- Sound
+		audio_l : out signed(15 downto 0);
+		audio_r : out signed(15 downto 0)
 );
 end entity;
 
@@ -98,7 +105,7 @@ signal zpu_to_rom : ZPU_ToROM;
 signal zpu_from_rom : ZPU_FromROM;
 
 
--- Plumbing between VGA controller and SDRAM
+-- Plumbing between DMA controller and SDRAM
 
 signal vga_addr : std_logic_vector(31 downto 0);
 signal vga_data : std_logic_vector(15 downto 0);
@@ -108,6 +115,16 @@ signal vga_refresh : std_logic;
 signal vga_newframe : std_logic;
 signal vga_reservebank : std_logic; -- Keep bank clear for instant access.
 signal vga_reserveaddr : std_logic_vector(31 downto 0); -- to SDRAM
+
+signal dma_data : std_logic_vector(15 downto 0);
+
+
+-- Plumbing between VGA controller and DMA controller
+
+signal vgachannel_fromhost : DMAChannel_FromHost;
+signal vgachannel_tohost : DMAChannel_ToHost;
+signal spr0channel_fromhost : DMAChannel_FromHost;
+signal spr0channel_tohost : DMAChannel_ToHost;
 
 
 -- VGA register block signals
@@ -142,6 +159,8 @@ signal sdram_state : sdram_states;
 
 begin
 
+audio_l <= (others => '0');
+audio_r <= (others => '0');
 sdr_cke <='1';
 
 
@@ -245,6 +264,30 @@ spi : entity work.spi_interface
 	);
 
 
+-- DMA controller
+
+	mydmacache : entity work.DMACache
+		port map(
+			clk => clk,
+			reset_n => reset,
+
+			channels_from_host(0) => vgachannel_fromhost,
+			channels_from_host(1) => spr0channel_fromhost,
+			channels_to_host(0) => vgachannel_tohost,	
+			channels_to_host(1) => spr0channel_tohost,
+
+			data_out => dma_data,
+
+			-- SDRAM interface
+			sdram_addr=> vga_addr,
+			sdram_reserveaddr(31 downto 0) => vga_reserveaddr,
+			sdram_reserve => vga_reservebank,
+			sdram_req => vga_req,
+			sdram_ack => vga_ack,
+			sdram_fill => vga_fill,
+			sdram_data => vga_data
+		);	
+
 	
 -- SDRAM
 mysdram : entity work.sdram_simple
@@ -297,8 +340,7 @@ mysdram : entity work.sdram_simple
 	
 	myvga : entity work.vga_controller
 		generic map (
-			enable_sprite => false,
-			vga_bits => vga_bits
+			enable_sprite => false
 		)
 		port map (
 		clk => clk,
@@ -310,14 +352,13 @@ mysdram : entity work.sdram_simple
 		reg_rw => vga_reg_rw,
 		reg_req => vga_reg_req,
 
-		sdr_addrout => vga_addr,
-		sdr_datain => vga_data, 
-		sdr_fill => vga_fill,
-		sdr_req => vga_req,
-		sdr_ack => vga_ack,
-		sdr_reservebank => vga_reservebank,
-		sdr_reserveaddr => vga_reserveaddr,
 		sdr_refresh => vga_refresh,
+
+		dma_data => dma_data,
+		vgachannel_fromhost => vgachannel_fromhost,
+		vgachannel_tohost => vgachannel_tohost,
+		spr0channel_fromhost => spr0channel_fromhost,
+		spr0channel_tohost => spr0channel_tohost,
 
 		hsync => vga_hsync,
 		vsync => vga_vsync,

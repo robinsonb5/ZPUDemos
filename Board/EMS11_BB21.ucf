@@ -76,7 +76,7 @@ NET "FPGA_SD_D2" LOC = "A23";
 NET "FPGA_SD_D3" LOC = "L17";
 NET "FPGA_SD_SCLK" LOC = "N17";
 
-NET "FPGA_SD_*" IOSTANDARD = LVTTL;
+NET "FPGA_SD_*" IOSTANDARD = LVTTL | DRIVE = 12 | SLEW = FAST;
 
 #
 #	SDRAM mt48lc32m16A2_75 __________________________________________
