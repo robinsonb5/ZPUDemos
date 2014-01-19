@@ -415,12 +415,12 @@ begin
 
 		-- Write from CPU?
 		if mem_writeEnable='1' then
-			case mem_addr(31 downto 28) is
-				when X"E" =>	-- VGA controller
+			case mem_addr(31)&mem_addr(10 downto 8) is
+				when X"E" =>	-- VGA controller at 0xFFFFFE00
 					vga_reg_rw<='0';
 					vga_reg_req<='1';
 					mem_busy<='0';
-				when X"F" =>	-- Peripherals
+				when X"F" =>	-- Peripherals at 0xFFFFFF00
 					case mem_addr(7 downto 0) is
 						when X"C0" => -- UART
 							ser_txdata<=mem_write(7 downto 0);
@@ -460,7 +460,7 @@ begin
 			end case;
 
 		elsif mem_readEnable='1' then -- Read from CPU?
-			case mem_addr(31 downto 28) is
+			case mem_addr(31)&mem_addr(10 downto 8) is
 
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
