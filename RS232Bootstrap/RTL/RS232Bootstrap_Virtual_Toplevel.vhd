@@ -10,17 +10,16 @@ entity VirtualToplevel is
 	generic (
 		sdram_rows : integer := 12;
 		sdram_cols : integer := 8;
-		sysclk_frequency : integer := 1000; -- Sysclk frequency * 10
-		vga_bits : integer := 4
+		sysclk_frequency : integer := 1000 -- Sysclk frequency * 10
 	);
 	port (
 		clk 			: in std_logic;
 		reset_in 	: in std_logic;
 
 		-- VGA
-		vga_red 		: out unsigned(vga_bits-1 downto 0);
-		vga_green 	: out unsigned(vga_bits-1 downto 0);
-		vga_blue 	: out unsigned(vga_bits-1 downto 0);
+		vga_red 		: out unsigned(7 downto 0);
+		vga_green 	: out unsigned(7 downto 0);
+		vga_blue 	: out unsigned(7 downto 0);
 		vga_hsync 	: out std_logic;
 		vga_vsync 	: buffer std_logic;
 		vga_window	: out std_logic;
@@ -339,8 +338,7 @@ mysdram : entity work.sdram_simple
 	
 	myvga : entity work.vga_controller
 		generic map (
-			enable_sprite => false,
-			vga_bits => vga_bits
+			enable_sprite => false
 		)
 		port map (
 		clk => clk,
@@ -415,12 +413,12 @@ begin
 
 		-- Write from CPU?
 		if mem_writeEnable='1' then
-			case mem_addr(31 downto 28) is
-				when X"E" =>	-- VGA controller
+			case mem_addr(31)&mem_addr(10 downto 8) is
+				when X"E" =>	-- VGA controller at 0xFFFFFE00
 					vga_reg_rw<='0';
 					vga_reg_req<='1';
 					mem_busy<='0';
-				when X"F" =>	-- Peripherals
+				when X"F" =>	-- Peripherals at 0xFFFFFFF00
 					case mem_addr(7 downto 0) is
 						when X"C0" => -- UART
 							ser_txdata<=mem_write(7 downto 0);
@@ -460,7 +458,7 @@ begin
 			end case;
 
 		elsif mem_readEnable='1' then -- Read from CPU?
-			case mem_addr(31 downto 28) is
+			case mem_addr(31)&mem_addr(10 downto 8) is
 
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
