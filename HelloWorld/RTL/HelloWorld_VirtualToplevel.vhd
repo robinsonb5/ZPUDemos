@@ -8,17 +8,16 @@ entity VirtualToplevel is
 	generic (
 		sdram_rows : integer := 12;
 		sdram_cols : integer := 8;
-		sysclk_frequency : integer := 1000; -- Sysclk frequency * 10
-		vga_bits : integer := 4
+		sysclk_frequency : integer := 1000 -- Sysclk frequency * 10
 	);
 	port (
 		clk 			: in std_logic;
 		reset_in 	: in std_logic;
 
 		-- VGA
-		vga_red 		: out unsigned(vga_bits-1 downto 0);
-		vga_green 	: out unsigned(vga_bits-1 downto 0);
-		vga_blue 	: out unsigned(vga_bits-1 downto 0);
+		vga_red 		: out unsigned(7 downto 0);
+		vga_green 	: out unsigned(7 downto 0);
+		vga_blue 	: out unsigned(7 downto 0);
 		vga_hsync 	: out std_logic;
 		vga_vsync 	: buffer std_logic;
 		vga_window	: out std_logic;
@@ -89,6 +88,18 @@ audio_r <= X"0000";
 
 sdr_cke <='0'; -- Disable SDRAM for now
 sdr_cs <='1'; -- Disable SDRAM for now
+
+sdr_data <=(others => 'Z');
+sdr_addr <=(others => '1');
+sdr_dqm <=(others => '1');
+sdr_we <='1';
+sdr_cas <='1';
+sdr_ras <='1';
+sdr_ba <=(others => '1');
+
+spi_mosi <='1';
+spi_clk <='1';
+spi_cs<='1';
 
 
 -- Reset counter.
@@ -177,9 +188,7 @@ myuart : entity work.simple_uart
 
 process(clk)
 begin
-	if reset='0' then
-		spi_cs<='1';
-	elsif rising_edge(clk) then
+	if rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';
 		

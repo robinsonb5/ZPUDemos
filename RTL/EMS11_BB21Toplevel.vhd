@@ -95,10 +95,10 @@ signal ps2k_dat_in : std_logic;
 signal ps2k_dat_out : std_logic;
 
 begin
-N_CTS1_FROM_FPGA<='1';  -- safe default since we're not using handshaking.
+N_CTS1_FROM_FPGA<='0';  -- safe default since we're not using handshaking.
 
 LED1 <= RESET_N;
-LED2 <= DIAG_N;
+LED2 <= TXD1_TO_FPGA;
 
 -- DR_CLK_O<='1';
 

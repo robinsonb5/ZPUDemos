@@ -8,28 +8,7 @@
 <!-- Copyright (c) 1995-2012 Xilinx, Inc.  All rights reserved.    -->
 
 <messages>
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/amr/FPGA/Projects/ZPUDemos/HelloWorld/Firmware/HelloWorld_ROM.vhd&quot; into library work</arg>
-</msg>
-
 <msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/amr/FPGA/Projects/ZPUDemos/HelloWorld/RTL/HelloWorld_VirtualToplevel.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/amr/FPGA/Projects/ZPUDemos/HelloWorld/RTL/Toplevel_Config.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/amr/FPGA/Projects/ZPUDemos/RTL/EMS11_BB21Toplevel.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/amr/FPGA/Projects/ZPUDemos/RTL/simple_uart.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/amr/FPGA/Projects/ZPUDemos/ZPUFlex/RTL/zpu_config.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/amr/FPGA/Projects/ZPUDemos/ZPUFlex/RTL/zpu_core_flex.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/amr/FPGA/Projects/ZPUDemos/ZPUFlex/RTL/zpupkg.vhd&quot; into library work</arg>
 </msg>
 
 </messages>
