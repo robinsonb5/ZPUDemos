@@ -233,7 +233,7 @@ project: entity work.VirtualToplevel
 	generic map (
 		sdram_rows => 13,
 		sdram_cols => 10,
-		sysclk_frequency => 1250 -- Sysclk frequency * 10
+		sysclk_frequency => 1000 -- Sysclk frequency * 10
 	)
 	port map (
 		clk => sysclk,

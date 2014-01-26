@@ -43,12 +43,14 @@ void HandleByte(char d0)
 		SREC_ADDR=0;
 		SREC_BYTECOUNT=0;
 		SREC_TYPE=0;
+		Breadcrumb('S');
 	}
 	else
 	{
 		if(SREC_COLUMN==1)
 		{
 			int t;
+			Breadcrumb('t');
 			t=SREC_TYPE=DoDecode(SREC_TYPE,d0);	// Called once, should result in type being in the lowest nybble bye of SREC_TYPE
 
 			if(t>3)
@@ -57,10 +59,11 @@ void HandleByte(char d0)
 			SREC_ADDRSIZE=(t+1)<<1;
 
 			printf("SREC_TYPE: %d, SREC_ADDRSIZE: %d\n",SREC_TYPE,SREC_ADDRSIZE);
-			Breadcrumb('t');
+//			Breadcrumb(t+48);
 		}
 		else if((SREC_TYPE<=9)||(SREC_TYPE>0))
 		{
+			Breadcrumb(SREC_TYPE+48);
 			if(SREC_COLUMN<=3)	// Columns 2 and 3 contain byte count.
 			{
 				SREC_BYTECOUNT=DoDecode(SREC_BYTECOUNT,d0);
@@ -120,6 +123,9 @@ void HandleByte(char d0)
 				_boot();
 #endif
 			}
+			else
+				Breadcrumb(48+SREC_TYPE);
+
 		}
 	}
 }
@@ -143,8 +149,19 @@ int main(int argc,char **argv)
 	putchar('\n');
 	while(1)
 	{
-		int c=getserial();
-		HandleByte(c);
+		int c;
+		int timeout=1000000;
+		putchar('.');
+		while(timeout--)
+		{
+			int r=HW_UART(REG_UART);
+			if(r&(1<<REG_UART_RXINT))
+			{
+				c=r&255;
+				HandleByte(c);
+				timeout=1000000;
+			}
+		}
 	}
 #endif
 	return(0);

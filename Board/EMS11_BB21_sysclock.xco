@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version 14.3
-# Date: Sat Jan 18 20:39:02 2014
+# Date: Thu Jan 23 00:09:28 2014
 #
 ##############################################################
 #
@@ -197,7 +197,7 @@ CSET override_pll=false
 CSET platform=lin64
 CSET pll_bandwidth=OPTIMIZED
 CSET pll_clk_feedback=CLKFBOUT
-CSET pll_clkfbout_mult=15
+CSET pll_clkfbout_mult=12
 CSET pll_clkfbout_phase=0.000
 CSET pll_clkin_period=20.000
 CSET pll_clkout0_divide=6
@@ -266,4 +266,4 @@ CSET use_status=false
 MISC pkg_timestamp=2012-05-10T12:44:55Z
 # END Extra information
 GENERATE
-# CRC: ef6337fe
+# CRC: 9f4e6807
