@@ -8,7 +8,7 @@ int SDHCtype;
 // #define SPI_READ(x) (HW_PER(PER_SPI)&255)
 
 #define SPI(x) HW_SPI(HW_SPI_DATA)=(x)
-#define SPI_PUMP(x) HW_SPI(HW_SPI_PUMP)
+// #define SPI_PUMP(x) HW_SPI(HW_SPI_PUMP)
 #define SPI_READ(x) (HW_SPI(HW_SPI_DATA)&255)
 
 #define SPI_CS(x) {while((HW_SPI(HW_SPI_CS)&(1<<HW_SPI_BUSY))); HW_SPI(HW_SPI_CS)=(x);}
@@ -31,18 +31,20 @@ int SDHCtype;
 
 unsigned char SPI_R1[6];
 
-#if 0
+
 int SPI_PUMP()
 {
 	int r=0;
+	SPI(0xFF);
 	r=SPI_READ();
+	SPI(0xFF);
 	r=(r<<8)|SPI_READ();
+	SPI(0xFF);
 	r=(r<<8)|SPI_READ();
+	SPI(0xFF);
 	r=(r<<8)|SPI_READ();
 	return(r);
 }
-#endif
-
 
 int cmd_write(unsigned long cmd, unsigned long lba)
 {
@@ -164,42 +166,14 @@ int is_sdhc()
 		wait_init();
 		return(0);
 	}
-#if 0
-	SPI(0xff);
-//	SPI_WAIT();
-	r=SPI_READ();
-//	printf("CMD8_1 response: %d\n",r);
-	SPI(0xff);
-//	SPI_WAIT();
-	r=SPI_READ();
-//	printf("CMD8_2 response: %d\n",r);
-	SPI(0xff);
-//	SPI_WAIT();
-	r=SPI_READ();
-	if(r!=1)
-	{
-		wait_init();
-		return(0);
-	}
 
-//	printf("CMD8_3 response: %d\n",r);
-	SPI(0xff);
-//	SPI_WAIT();
-	r=SPI_READ();
-	if(r!=0xaa)
-	{
-		wait_init();
-		return(0);
-	}
-#endif
 	r=SPI_PUMP();
 	if((r&0xffff)!=0x01aa)
 	{
+		printf("CMD8_4 response: %d\n",r);
 		wait_init();
 		return(0);
 	}
-
-	printf("CMD8_4 response: %d\n",r);
 
 	SPI(0xff);
 
@@ -318,6 +292,7 @@ int sd_read_sector(unsigned long lba,unsigned char *buf)
 			for(j=0;j<128;++j)
 			{
 				int t,v;
+
 				t=SPI_PUMP();
 				*(int *)buf=t;
 //				printf("%d: %d\n",buf,t);

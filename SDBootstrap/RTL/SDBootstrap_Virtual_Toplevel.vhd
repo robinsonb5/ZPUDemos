@@ -253,7 +253,7 @@ spi : entity work.spi_interface
 		spiclk_in => spiclk_in,
 		host_to_spi => host_to_spi,
 		spi_to_host => spi_to_host,
-		wide => spi_wide,
+--		wide => spi_wide,
 		trigger => spi_trigger,
 		busy => spi_busy,
 
@@ -438,11 +438,11 @@ begin
 							host_to_spi<=mem_write(7 downto 0);
 							spi_active<='1';
 						
-						when X"D8" => -- SPI Pump (32-bit read)
-							spi_wide<='1';
-							spi_trigger<='1';
-							host_to_spi<=mem_write(7 downto 0);
-							spi_active<='1';
+--						when X"D8" => -- SPI Pump (32-bit read)
+--							spi_wide<='1';
+--							spi_trigger<='1';
+--							host_to_spi<=mem_write(7 downto 0);
+--							spi_active<='1';
 
 						when others =>
 							mem_busy<='0';
@@ -482,12 +482,12 @@ begin
 						when X"D4" => -- SPI read (blocking)
 							spi_active<='1';
 
-						when X"D8" => -- SPI wide read (blocking)
-							spi_wide<='1';
-							spi_trigger<='1';
-							spi_active<='1';
-							host_to_spi<=X"FF";
-
+--						when X"D8" => -- SPI wide read (blocking)
+--							spi_wide<='1';
+--							spi_trigger<='1';
+--							spi_active<='1';
+--							host_to_spi<=X"FF";
+--
 						when others =>
 							mem_busy<='0';
 							null;

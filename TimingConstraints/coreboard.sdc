@@ -46,8 +46,8 @@ create_clock -name {clock_50} -period 20.000 -waveform { 0.000 0.500 } [get_port
 #**************************************************************
 
 derive_pll_clocks 
-create_generated_clock -name sd1clk_pin -source [get_pins {MyPLL|altpll_component|pll|clk[0]}] [get_ports {SDRAM_CLK}]
-create_generated_clock -name sysclk -source [get_pins {MyPLL|altpll_component|pll|clk[1]}]
+create_generated_clock -name sd1clk_pin -source [get_pins {MyPLL|altpll_component|auto_generated|pll1|clk[0]}] [get_ports {SDRAM_CLK}]
+create_generated_clock -name sysclk -source [get_pins {MyPLL|altpll_component|auto_generated|pll1|clk[1]}]
 
 #**************************************************************
 # Set Clock Latency
@@ -98,9 +98,9 @@ set_output_delay -clock sysclk -max 0.0 [get_ports {IO_D*}]
 #set_multicycle_path -from [get_clocks {mypll|altpll_component|auto_generated|pll1|clk[0]}] -to [get_clocks {sd2clk_pin}] -setup -end 2
 #set_multicycle_path -from [get_clocks {mypll2|altpll_component|auto_generated|pll1|clk[0]}] -to [get_clocks {sd2clk_pin}] -setup -end 2
 
-set_multicycle_path -from [get_clocks {sd1clk_pin}] -to [get_clocks {MyPLL|altpll_component|pll|clk[1]}] -setup -end 2
-set_multicycle_path -from {*myrom*} -to {*|zpu_core:zpu|*} -setup -end 2
-set_multicycle_path -from {*myrom*} -to {*|zpu_core:zpu|*} -hold -end 2
+set_multicycle_path -from [get_clocks {sd1clk_pin}] -to [get_clocks {MyPLL|altpll_component|auto_generated|pll1|clk[1]}] -setup -end 2
+#set_multicycle_path -from {*myrom*} -to {*|zpu_core:zpu|*} -setup -end 2
+#set_multicycle_path -from {*myrom*} -to {*|zpu_core:zpu|*} -hold -end 2
 
 #**************************************************************
 # Set Maximum Delay
