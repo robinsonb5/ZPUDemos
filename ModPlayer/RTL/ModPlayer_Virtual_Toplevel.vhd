@@ -400,7 +400,7 @@ myaudio : entity work.sound_wrapper
 
 		reg_addr_in => mem_addr(7 downto 0),
 		reg_data_in => mem_write,
-		reg_rw => '0', -- we never read from the timers
+		reg_rw => '0', -- we never read from the sound controller
 		reg_req => audio_reg_req,
 
 		dma_data => dma_data,
