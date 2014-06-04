@@ -318,9 +318,8 @@ myproject : entity work.VirtualToplevel
 		generic map(
 			sdram_rows => 12,
 			sdram_cols => 10,
-			sysclk_frequency => 1250,
-			vga_bits => 1
-	)
+			sysclk_frequency => 1250
+		)
 		port map(
 			clk => clk,
 			reset_in => reset,

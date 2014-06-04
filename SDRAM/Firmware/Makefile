@@ -31,6 +31,10 @@ MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/boot_standalone_remapped.ld # We use a link script here to make the program run from 0x04000000
 
+SANITYCHECK_PRJ = sanitycheck
+SANITYCHECK_SRC = sanitycheck.s
+SANITYCHECK_OBJ = $(patsubst %.s,%.o,$(SANITYCHECK_SRC))
+
 
 # Commandline options for each tool.
 
@@ -41,7 +45,7 @@ LFLAGS  = -nostartfiles -Wl,--relax -Os
 
 
 # Our target.
-all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ)_ROM.vhd $(MAIN_PRJ).rpt
+all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ)_ROM.vhd $(MAIN_PRJ).rpt $(SANITYCHECK_PRJ).bin $(SANITYCHECK_PRJ)_ROM.vhd
 
 clean:
 	rm -f $(BUILD_DIR)/*.o *.hex *.elf *.map *.lst *.srec $(MAIN_PRJ).rom *~ */*.o *.bin
@@ -71,6 +75,9 @@ $(ROMGEN): $(ZPUFLEXDIR)/Firmware/zpuromgen.c
 # Link - this produces an ELF binary.
 
 $(MAIN_PRJ).elf: $(MINSTARTUP_OBJ) $(MAIN_OBJ)
+	$(LD) $(LFLAGS) -T $(LINKMAP) -o $@ $+ $(LIBS)
+
+$(SANITYCHECK_PRJ).elf: $(SANITYCHECK_OBJ)
 	$(LD) $(LFLAGS) -T $(LINKMAP) -o $@ $+ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile

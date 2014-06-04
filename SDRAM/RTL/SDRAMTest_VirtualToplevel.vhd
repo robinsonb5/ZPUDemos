@@ -10,17 +10,16 @@ entity VirtualToplevel is
 	generic (
 		sdram_rows : integer := 12;
 		sdram_cols : integer := 8;
-		sysclk_frequency : integer := 1000; -- Sysclk frequency * 10
-		vga_bits : integer := 8
+		sysclk_frequency : integer := 1000 -- Sysclk frequency * 10
 	);
 	port (
 		clk 			: in std_logic;
 		reset_in 	: in std_logic;
 
 		-- VGA
-		vga_red 		: out unsigned(vga_bits-1 downto 0);
-		vga_green 	: out unsigned(vga_bits-1 downto 0);
-		vga_blue 	: out unsigned(vga_bits-1 downto 0);
+		vga_red 		: out unsigned(7 downto 0);
+		vga_green 	: out unsigned(7 downto 0);
+		vga_blue 	: out unsigned(7 downto 0);
 		vga_hsync 	: out std_logic;
 		vga_vsync 	: buffer std_logic;
 		vga_window	: out std_logic;
@@ -166,7 +165,7 @@ myuart : entity work.simple_uart
 
 -- Hello World ROM
 
-	myrom : entity work.SDRAMTest_ROM
+	myrom : entity work.sanitycheck_ROM
 	generic map
 	(
 		maxAddrBitBRAM => 13
@@ -312,7 +311,19 @@ begin
 				sdram_wr<='1';
 				sdram_req<='1';
 				if sdram_ack='0' then
-					mem_read<=sdram_read;
+					if mem_WriteEnableh='1' then -- halfword read						
+						mem_read(31 downto 16) <= (others=>'0');
+						mem_read(15 downto 0)<=sdram_read(31 downto 16);
+					elsif mem_WriteEnableb='1' then -- Byte read
+						mem_read(31 downto 8) <= (others=>'0');
+						if mem_Addr(0)='0' then -- even address
+							mem_read(7 downto 0)<=sdram_read(31 downto 24);
+						else
+							mem_read(7 downto 0)<=sdram_read(23 downto 16);
+						end if;
+					else
+						mem_read<=sdram_read;
+					end if;
 					sdram_req<='0';
 					sdram_state<=idle;
 					mem_busy<='0';
