@@ -552,7 +552,6 @@ set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_config.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/SDRAMTest_VirtualToplevel.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_global_assignment -name VHDL_FILE ../../Firmware/sanitycheck_ROM.vhd
 set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
 set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
 set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "VirtualToplevel:myVirtualToplevel|clk" -section_id auto_signaltap_0

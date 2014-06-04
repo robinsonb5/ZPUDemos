@@ -514,7 +514,19 @@ begin
 				sdram_wr<='1';
 				sdram_req<='1';
 				if sdram_ack='0' then
-					mem_read<=sdram_read;
+					if mem_WriteEnableh='1' then -- halfword read						
+						mem_read(31 downto 16) <= (others=>'0');
+						mem_read(15 downto 0)<=sdram_read(31 downto 16);
+					elsif mem_WriteEnableb='1' then -- Byte read
+						mem_read(31 downto 8) <= (others=>'0');
+						if mem_Addr(0)='0' then -- even address
+							mem_read(7 downto 0)<=sdram_read(31 downto 24);
+						else
+							mem_read(7 downto 0)<=sdram_read(23 downto 16);
+						end if;
+					else
+						mem_read<=sdram_read;
+					end if;
 					sdram_req<='0';
 					sdram_state<=idle;
 					mem_busy<='0';
