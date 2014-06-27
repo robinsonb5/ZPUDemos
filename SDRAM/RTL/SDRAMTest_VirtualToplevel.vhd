@@ -165,7 +165,8 @@ myuart : entity work.simple_uart
 
 -- Hello World ROM
 
-	myrom : entity work.SDRAMTest_ROM
+--	myrom : entity work.SDRAMTest_ROM
+	myrom : entity work.sanitycheck_ROM
 	generic map
 	(
 		maxAddrBitBRAM => 13

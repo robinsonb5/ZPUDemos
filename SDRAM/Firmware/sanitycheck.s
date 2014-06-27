@@ -44,6 +44,53 @@ SanityCheck:
 	im 0x10000
 	load
 
+	; Exhaustive storeh / loadh test
+
+.hloop:
+	im 0x00112233
+	nop
+	im 0x11000
+	store
+
+	im 0x44556677
+	nop
+	im 0x11004
+	store
+
+	im 0x8899aabb
+	nop
+	im 0x11008
+	store
+
+	im 0xccddeeff
+	nop
+	im 0x1100c
+	store
+
+	im	0x1234
+	nop
+	im 0x11004
+	storeh
+	im	0x5678
+	nop
+	im	0x1100a
+	storeh
+
+	im 0x11002
+	loadh
+	im 0x11004
+	loadh
+	im 0x1100c
+	loadh
+	im 0x1100a
+	loadh
+
+	im 4
+	addsp
+
+	im .hloop
+	poppc
+
 finalloop:
 	im finalloop
 	poppc

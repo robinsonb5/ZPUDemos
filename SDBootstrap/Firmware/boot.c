@@ -18,6 +18,7 @@
 
 #include "stdarg.h"
 
+#include "uart.h"
 #include "spi.h"
 #include "vga.h"
 #include "minfat.h"
@@ -53,6 +54,7 @@ int main(int argc,char **argv)
 				// Parse address
 				while((c=*buffer++)!=' ')
 				{
+					HW_UART(REG_UART)=c;
 					if(c=='#') // Comment line?
 						break;
 					if(c=='G')
@@ -89,6 +91,10 @@ int main(int argc,char **argv)
 				while((c=*buffer++)!='\n')
 					;
 			}
+		}
+		else
+		{
+			puts("Loading manifest failed\n");
 		}
 	}
 	puts("Returning\n");
