@@ -19,9 +19,9 @@ int main(int argc, char **argv)
 	TFT_CS_Write(0);
 	TFT_Init(1); // 0 - vert  1 - horizontal	
 
-	TFT_DrawString("Loading...",   50, 90,   1,  WHITE);
+	TFT_DrawString("Hello, world!",   20, 20,   1,  WHITE);
 	while(1)
-		TFT_FillRectangle(5, 119, 310, 110,c++);		// X, Y, length, width, colour
+		TFT_FillRectangle(32, 64, 64, 64,c++);		// X, Y, length, width, colour
 
 	return(0);
 }
