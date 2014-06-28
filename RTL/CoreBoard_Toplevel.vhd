@@ -149,6 +149,15 @@ myproject : entity work.VirtualToplevel
 			spi_clk => spi_clk,
 			spi_cs => spi_cs,
 
+			-- TFT
+			tft_miso	=> tft_miso,
+			tft_mosi => tft_mosi,
+			tft_cs => tft_cs,
+			tft_sck => tft_sck,
+			tft_d_c => tft_d_c,
+			tft_led => tft_led,
+			tft_reset => tft_reset,
+
 			-- audio
 			audio_l => audio_l,
 			audio_r => audio_r
