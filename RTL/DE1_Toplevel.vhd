@@ -132,7 +132,7 @@ generic map
 (
 	sdram_rows => 12,
 	sdram_cols => 8,
-	sysclk_frequency => 1250
+	sysclk_frequency => 1000
 )
 port map
 (	

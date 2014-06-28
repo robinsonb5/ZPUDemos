@@ -85,8 +85,7 @@ SanityCheck:
 	im 0x1100a
 	loadh
 
-	im 4
-	addsp
+	addsp 4
 
 	im .hloop
 	poppc

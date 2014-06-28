@@ -38,7 +38,7 @@ JB:
 2012-07-24  - Major changes to fit the MiniSOC project - AMR
 */
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <string.h>
 //#include <ctype.h>
 
@@ -46,6 +46,7 @@ JB:
 
 #include "minfat.h"
 #include "swap.h"
+#include "uart.h"
 #include "small_printf.h"
 
 #define tolower(x) (x|32)
@@ -80,6 +81,7 @@ unsigned long buffered_fat_index;       // index of buffered FAT sector
 #define BootPrint(x) puts(x);
 
 
+
 int compare(const char *s1, const char *s2,int b)
 {
 	int i;
@@ -106,6 +108,7 @@ unsigned char FindDrive(void)
 		puts("Read of MBR failed\n");
         return(0);
 	}
+//	hexdump(sector_buffer,512);
 
 	puts("MBR successfully read\n");
 
@@ -136,6 +139,7 @@ unsigned char FindDrive(void)
 		printf("Reading boot sector %d\n",boot_sector);
 		if (!sd_read_sector(boot_sector, sector_buffer)) // read discriptor
 		    return(0);
+//		hexdump(sector_buffer,512);
 		puts("Read boot sector from first partition\n");
 	}
 
@@ -165,6 +169,8 @@ unsigned char FindDrive(void)
 
     // calculate cluster mask
     cluster_mask = cluster_size - 1;
+
+	printf("Cluster size: %d, Cluster mask, %d\n",cluster_size,cluster_mask);
 
     fat_start = boot_sector + sector_buffer[0x0E] + (sector_buffer[0x0F] << 8); // reserved sector count before FAT table (usually 32 for FAT32)
 	fat_number = sector_buffer[0x10];
@@ -220,8 +226,10 @@ int GetCluster(int cluster)
     // read sector of FAT if not already in the buffer
     if (sb != buffered_fat_index)
     {
+		printf("GetCluster reading sector %d\n",fat_start+sb);
         if (!sd_read_sector(fat_start + sb, (unsigned char*)&fat_buffer))
             return(0);
+//		hexdump(sector_buffer,512);
 
         // remember current buffer index
         buffered_fat_index = sb;
@@ -254,6 +262,7 @@ unsigned char FileOpen(fileTYPE *file, const char *name)
             {
 				printf("Reading directory sector %d\n",iDirectorySector);
                 sd_read_sector(iDirectorySector++, sector_buffer); // root directory is linear
+//				hexdump(sector_buffer,512);
                 pEntry = (DIRENTRY*)sector_buffer;
             }
             else
@@ -267,10 +276,9 @@ unsigned char FileOpen(fileTYPE *file, const char *name)
                     if (compare((const char*)pEntry->Name, name,11) == 0)
                     {
                         file->size = SwapBBBB(pEntry->FileSize); 		// for 68000
-                        file->cluster = SwapBB(pEntry->StartCluster) + (fat32 ? (SwapBB(pEntry->HighCluster) & 0x0FFF) << 16 : 0);
+                        file->cluster = SwapBB(pEntry->StartCluster);
+						file->cluster += (fat32 ? (SwapBB(pEntry->HighCluster) & 0x0FFF) << 16 : 0);
                         file->sector = 0;
-
-                        printf("file \"%s\" found\r", name);
 
                         return(1);
                     }
@@ -355,6 +363,7 @@ int LoadFile(const char *fn, unsigned char *buf)
 
 			if (!sd_read_sector(sb, buf)) // read sector from drive
 				return(0);
+//			hexdump(sector_buffer,512);
 
 			puts("block read.\n");
 

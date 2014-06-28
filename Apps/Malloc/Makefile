@@ -21,21 +21,23 @@ BUILD_DIR=zpu_obj
 STARTUP_SRC = $(STARTUP_DIR)/crt0.s
 STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
-COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h
-COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
+COMMON_SRC = small_printf.c uart.c syscalls.c malloc.c
+
+COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
+COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
 MAIN_PRJ = Malloc
-MAIN_SRC = main.c syscalls.c malloc.c malloc.h
-MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
+MAIN_SRC = main.c
+MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC)) $(STARTUP_OBJ) 
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 
 # Commandline options for each tool.
 
-CFLAGS  = -I. -I$(COMMON_DIR) -c -Os -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
+CFLAGS  = -I. -I$(COMMON_DIR) -c -Os -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_FILESYSTEM -DDISABLE_UART_RX
 
-LFLAGS  = -mboard=phi -Wl,--relax -Os
+LFLAGS  = -mboard=phi -nostartfiles -Wl,--gc-sections -Wl,--relax -Os
 
 
 # Our target.
