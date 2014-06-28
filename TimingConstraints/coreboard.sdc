@@ -102,6 +102,9 @@ set_multicycle_path -from [get_clocks {sd1clk_pin}] -to [get_clocks {MyPLL|altpl
 #set_multicycle_path -from {*myrom*} -to {*|zpu_core:zpu|*} -setup -end 2
 #set_multicycle_path -from {*myrom*} -to {*|zpu_core:zpu|*} -hold -end 2
 
+set_multicycle_path -through [get_nets {*zpu|Mult0*}] -setup -end 2
+set_multicycle_path -through [get_nets {*zpu|Mult0*}] -hold -end 2
+
 #**************************************************************
 # Set Maximum Delay
 #**************************************************************
