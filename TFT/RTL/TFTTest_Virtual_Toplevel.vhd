@@ -99,6 +99,7 @@ signal tft_spiclk_in : std_logic;
 signal tft_dma : std_logic;
 signal tft_dma_data : std_logic_vector(15 downto 0);
 signal tft_even : std_logic;
+signal tft_pending : std_logic;
 
 -- UART signals
 
@@ -429,8 +430,15 @@ begin
 		vgachannel_fromhost.setreqlen<='0';
 		vgachannel_fromhost.req<='0';
 
+		if tft_pending='1' then
+			vgachannel_fromhost.req<='1';	
+			tft_pending<='0';
+		end if;
+
 		if vgachannel_tohost.valid='1' then
+			tft_dma<='1';
 			tft_dma_data<=dma_data;
+			tft_even<='0';
 		end if;
 		
 		-- Handle TFT DMA
@@ -439,7 +447,10 @@ begin
 				tft_host_to_spi<=tft_dma_data(7 downto 0);
 				tft_spi_trigger<='1';
 				tft_even<='0';
-				vgachannel_fromhost.req<='1';
+				tft_dma<='0';
+				if vgachannel_tohost.done='0' then
+					vgachannel_fromhost.req<='1';
+				end if;
 			else
 				tft_host_to_spi<=tft_dma_data(15 downto 8);
 				tft_spi_trigger<='1';
@@ -480,7 +491,6 @@ begin
 							spi_active<='1';
 
 						when X"E0" => -- TFT control
-							tft_dma<='0';
 							tft_cs <= mem_write(0);
 							tft_d_c <= mem_write(1);
 							tft_reset <= mem_write(2);
@@ -488,7 +498,6 @@ begin
 							mem_busy<='0';
 						
 						when X"E4" => -- TFT SPI
-							tft_dma<='0';
 							tft_spi_active<='1';
 							tft_spi_trigger<='1';
 							tft_host_to_spi<=mem_write(7 downto 0);
@@ -501,7 +510,7 @@ begin
 						when X"EC" => -- TFT Framebuffer size
 							vgachannel_fromhost.reqlen<=unsigned(mem_write(15 downto 0));
 							vgachannel_fromhost.setreqlen<='1';
-							tft_dma<='1';
+							tft_pending<='1';
 							mem_busy<='0';
 
 						when others =>
@@ -566,7 +575,7 @@ begin
 		mem_busy<='0';
 	end if;
 
-	if tft_spi_active='1' and tft_spi_busy='0' and tft_dma='0' then
+	if tft_spi_active='1' and tft_spi_busy='0' then
 		mem_read<=tft_spi_to_host;
 		tft_spi_active<='0';
 		mem_busy<='0';

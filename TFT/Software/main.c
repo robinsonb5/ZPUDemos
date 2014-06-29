@@ -38,8 +38,6 @@ int main(int argc, char **argv)
 		unsigned short *p=framebuffer;
 		int t=c++;
 
-		TFT_FillBitmap(0,319,0,239,framebuffer);
-
 		for(y=0;y<240;++y)
 		{
 			for(x=0;x<320;++x)
@@ -47,6 +45,9 @@ int main(int argc, char **argv)
 				*p++=x+y+c;
 			}
 		}
+
+		TFT_FillBitmap(0,319,0,239,framebuffer);
+		while(1) ;
 	}
 	return(0);
 }

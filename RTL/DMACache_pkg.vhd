@@ -19,6 +19,7 @@ package DMACache_pkg is
 
 	type DMAChannel_ToHost is record
 		valid : std_logic;
+		done : std_logic;
 	end record;
 
 	type DMAChannels_FromHost is array (DMACache_MaxChannel downto 0) of DMAChannel_FromHost;
