@@ -11,12 +11,11 @@
 // Bit 1: D/C
 // Bit 2: Reset
 // Bit 3: LED
-// Bit 8: DMA
 
 #define REG_TFT_SPI 0x4
 
-#define REG_TFT_FRAMEBUFFER 0x8
-#define REG_TFT_FRAMESIZE 0xc
+#define REG_TFT_FRAMEBUFFER 0x8 // Not yet implemented
+#define REG_TFT_FRAMESIZE 0xc // Not yet implemented
 
 void D_C_Write(int d);
 void SPIM_WriteTxData(int d);
