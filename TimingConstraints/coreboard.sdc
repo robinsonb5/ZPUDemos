@@ -77,8 +77,8 @@ set_output_delay -clock sd1clk_pin -max 1.5 [get_ports SDRAM_*]
 set_output_delay -clock sd1clk_pin -min -0.8 [get_ports SDRAM_*]
 set_output_delay -clock sd1clk_pin -min 0.5 [get_ports SDRAM_CLK]
 set_output_delay -clock sd1clk_pin -max 0.5 [get_ports SDRAM_CLK]
-set_output_delay -clock sysclk -min 0.0 [get_ports {IO_D*}]
-set_output_delay -clock sysclk -max 0.0 [get_ports {IO_D*}]
+set_output_delay -clock sysclk -min 0.5 [get_ports {IO_D*}]
+set_output_delay -clock sysclk -max 0.5 [get_ports {IO_D*}]
 
 #**************************************************************
 # Set Clock Groups

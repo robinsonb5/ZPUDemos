@@ -408,7 +408,7 @@ void TFT_FillBitmap(int XL, int XR, int YU, int YD, unsigned short *Bitmap)
 	D_C_Write(1);	// Specify data coming by DMA
 
 	HW_TFT(REG_TFT_FRAMEBUFFER)=Bitmap;
-	HW_TFT(REG_TFT_FRAMESIZE)=XY;
+	HW_TFT(REG_TFT_FRAMESIZE)=65535;
 
 
 #if 0
@@ -416,8 +416,10 @@ void TFT_FillBitmap(int XL, int XR, int YU, int YD, unsigned short *Bitmap)
 	{										 //color[i] =( ~color[i+1]);	
 	int Hcolor = (~Bitmap[i])>>8;
 	int Lcolor = (~Bitmap[i])&0xff;	
-		TFT_WriteData(Hcolor);
-		TFT_WriteData(Lcolor);
+		SPIM_WriteTxData(Hcolor);
+		SPIM_WriteTxData(Lcolor);
+//		TFT_WriteData(Hcolor);
+//		TFT_WriteData(Lcolor);
 	}
 #endif
 

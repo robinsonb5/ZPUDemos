@@ -130,6 +130,12 @@ begin
 					activereq:='1';
 				end if;
 
+				for I in 0 to DMACache_MaxChannel loop
+					if internals(I).count=X"0000" then
+						channels_to_host(I).done<='1';
+					end if;
+				end loop;
+
 				if activereq='1' then
 					cache_wraddr<=std_logic_vector(to_unsigned(activechannel,3))&std_logic_vector(internals(activechannel).wrptr);
 					sdram_req<='1';
@@ -187,6 +193,7 @@ begin
 			end if;
 			if channels_from_host(I).setreqlen='1' then
 				internals(I).count<=channels_from_host(I).reqlen;
+				channels_to_host(I).done<='0';
 			end if;
 		end loop;
 
