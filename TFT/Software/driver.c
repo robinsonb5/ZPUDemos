@@ -409,8 +409,7 @@ void TFT_FillBitmap(int XL, int XR, int YU, int YD, unsigned short *Bitmap)
 	D_C_Write(1);	// Specify data coming by DMA
 
 	HW_TFT(REG_TFT_FRAMEBUFFER)=Bitmap;
-	HW_TFT(REG_TFT_FRAMESIZE)=65520;
-
+	HW_TFT(REG_TFT_FRAMESIZE)=XY;
 
 #if 0
 	for(i=0; i < XY; i++)
@@ -419,48 +418,9 @@ void TFT_FillBitmap(int XL, int XR, int YU, int YD, unsigned short *Bitmap)
 	int Lcolor = (~Bitmap[i])&0xff;	
 		SPIM_WriteTxData(Hcolor);
 		SPIM_WriteTxData(Lcolor);
-//		TFT_WriteData(Hcolor);
-//		TFT_WriteData(Lcolor);
 	}
 #endif
 
 }
-
-
-
-//----------------------------------------------------------------------------------
-void TFT_Graf(int XL, int YU, int YD, char  Ydata , char last)
-{
-	unsigned long  XY=0;
-	unsigned long i=0;
-//	volatile char last;
-	//XY = (XR-XL+1);
-	XY = YD-YU+1;
-
-	TFT_SetCol(XL,XL);
-	TFT_SetPage(YU, YD);
-	TFT_SendCMD(0x2c);                     /* start to write to display ra */
-
-	for(i=0; i < XY; i++)
-	{										 //color[i] =( ~color[i+1]);	
-   //  int Hcolor = 255*( (i<last )    );
-	//int Hcolor = ~(255*( ((i>=last)&(i<=Ydata))|((i<=last)&(i>=Ydata))  ) );
- int Hcolor =  (255*( ((i<last)|(i>Ydata))&((i>last)|(i<Ydata))  ) );
-	//int Hcolor = 255*(Ydata!=i);//(~Bitmap[i])>>8;
-	int Lcolor = 128;//(~Bitmap[i])&0xff;	
-		TFT_WriteData(Hcolor);
-		TFT_WriteData(Lcolor);
-		
-		
-	}
-last =Ydata;
-
-}
-
-
-
-
-
-
 
 

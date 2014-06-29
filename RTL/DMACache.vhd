@@ -57,7 +57,7 @@ type DMAChannel_Internal is record
 	wrptr_next : unsigned(DMACache_MaxCacheBit downto 0);
 	rdptr : unsigned(DMACache_MaxCacheBit downto 0);
 	addr : std_logic_vector(31 downto 0); -- Current RAM address
-	count : unsigned(15 downto 0); -- Number of words to transfer.
+	count : unsigned(DMACache_ReqLenMaxBit downto 0); -- Number of words to transfer.
 	pending : std_logic; -- Host has a request pending on this channel.
 	sdram_pending : std_logic; -- A request to the SDRAM is in progress.
 end record;

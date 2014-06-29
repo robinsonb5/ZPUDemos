@@ -12,7 +12,7 @@ package DMACache_pkg is
 	type DMAChannel_FromHost is record
 		addr : std_logic_vector(31 downto 0);
 		setaddr : std_logic;
-		reqlen : unsigned(15 downto 0);
+		reqlen : unsigned(DMACache_ReqLenMaxBit downto 0);
 		setreqlen : std_logic;
 		req : std_logic;
 	end record;
