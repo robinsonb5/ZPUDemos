@@ -43,10 +43,10 @@ char *LoadFile(const char *filename)
 int main(int argc, char **argv)
 {
 	char *ptr;
-	if((ptr=LoadFile("DRUMLOOPRAW")))
+	if((ptr=LoadFile("A320X480RAW")))
 		printf("File successfully loaded to %d\n",ptr);
 	else
-		printf("Loading failedn\n");
+		printf("Loading failed\n");
 	return(0);
 }
 

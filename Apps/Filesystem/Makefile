@@ -21,11 +21,11 @@ BUILD_DIR=zpu_obj
 STARTUP_SRC = $(STARTUP_DIR)/crt0.s $(STARTUP_DIR)/premain.s
 STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
-COMMON_SRC = small_printf.c uart.c swap.c spi.c
+COMMON_SRC = small_printf.c uart.c swap.c spi.c syscalls.c malloc.c fat.c rafile.c
 COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
 MAIN_PRJ = Filesystem
-MAIN_SRC = main.c syscalls.c malloc.c malloc.h fat.c fat.h rafile.c rafile.h
+MAIN_SRC = main.c
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
