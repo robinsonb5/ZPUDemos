@@ -12,6 +12,7 @@
  *
  */ 
 #include "driver.h"
+#include "tft.h"
 #include "fonts.h"
 
 int MAX_X=0, MAX_Y = 0;
@@ -23,13 +24,13 @@ int constrain(int a, int b, int c)
 	else return a;
 }
 //*************************************************************************************
-void TFT_SendCMD(int cmd)
+__inline void TFT_SendCMD(int cmd)
 { D_C_Write(0);   SPIM_WriteTxData(cmd); CyDelayUs(1);}
 //*************************************************************************************
-void TFT_WriteData(int Data)
-{ D_C_Write(1); SPIM_WriteTxData(Data);CyDelayUs(1);}
+__inline void TFT_WriteData(int Data)
+{ D_C_Write(1); SPIM_WriteTxData(Data);} // CyDelayUs(1);}
 //*************************************************************************************
-void TFT_SendData(int Data)
+__inline void TFT_SendData(int Data)
 {
 	int data1 = Data>>8;
 	int data2 = Data&0xff;
@@ -404,6 +405,13 @@ void TFT_FillBitmap(int XL, int XR, int YU, int YD, unsigned short *Bitmap)
 	TFT_SetPage(YU, YD);
 	TFT_SendCMD(0x2c);                     /* start to write to display ra */
 
+	D_C_Write(1);	// Specify data coming by DMA
+
+	HW_TFT(REG_TFT_FRAMEBUFFER)=Bitmap;
+	HW_TFT(REG_TFT_FRAMESIZE)=XY;
+
+
+#if 0
 	for(i=0; i < XY; i++)
 	{										 //color[i] =( ~color[i+1]);	
 	int Hcolor = (~Bitmap[i])>>8;
@@ -411,6 +419,8 @@ void TFT_FillBitmap(int XL, int XR, int YU, int YD, unsigned short *Bitmap)
 		TFT_WriteData(Hcolor);
 		TFT_WriteData(Lcolor);
 	}
+#endif
+
 }
 
 

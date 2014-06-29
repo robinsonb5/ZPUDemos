@@ -94,7 +94,11 @@ signal tft_spi_wide : std_logic;
 signal tft_spi_trigger : std_logic;
 signal tft_spi_busy : std_logic;
 signal tft_spi_active : std_logic;
+signal tft_spiclk_in : std_logic;
 
+signal tft_dma : std_logic;
+signal tft_dma_data : std_logic_vector(15 downto 0);
+signal tft_even : std_logic;
 
 -- UART signals
 
@@ -216,6 +220,12 @@ begin
 			millisecond_counter<=millisecond_counter+1;
 			millisecond_tick<=X"00000";
 		end if;
+		-- Generate refresh pulse
+		vga_refresh<='0';
+		vga_newframe<=millisecond_counter(4); -- Save current value for edge detection
+		if millisecond_counter(4)='1' and vga_newframe='0' then
+			vga_refresh<='1';
+		end if;
 	end if;
 end process;
 
@@ -248,10 +258,12 @@ begin
 	if rising_edge(clk) then
 		spiclk_in<='0';
 		spi_tick<=spi_tick+1;
-		if (spi_fast='1' and spi_tick(2)='1') or spi_tick(8)='1' then
+		if (spi_fast='1' and spi_tick(4)='1') or spi_tick(8)='1' then
 			spiclk_in<='1'; -- Momentary pulse for SPI host.
 			spi_tick<='0'&X"00";
 		end if;
+		
+		tft_spiclk_in<=not tft_spiclk_in;
 	end if;
 end process;
 
@@ -282,7 +294,7 @@ tft_spi : entity work.spi_interface
 		reset => reset,
 
 		-- Host interface
-		spiclk_in => spiclk_in,
+		spiclk_in => tft_spiclk_in,
 		host_to_spi => tft_host_to_spi,
 		spi_to_host => tft_spi_to_host,
 		trigger => tft_spi_trigger,
@@ -367,41 +379,6 @@ mysdram : entity work.sdram_simple
 	);
 
 	
--- VGA controller
--- Video
-	
-	myvga : entity work.vga_controller
-		generic map (
-			enable_sprite => false
-		)
-		port map (
-		clk => clk,
-		reset => reset,
-
-		reg_addr_in => mem_addr(7 downto 0),
-		reg_data_in => mem_write,
---		reg_data_out => vga_reg_dataout,
-		reg_rw => vga_reg_rw,
-		reg_req => vga_reg_req,
-
-		sdr_refresh => vga_refresh,
-
-		dma_data => dma_data,
-		vgachannel_fromhost => vgachannel_fromhost,
-		vgachannel_tohost => vgachannel_tohost,
-		spr0channel_fromhost => spr0channel_fromhost,
-		spr0channel_tohost => spr0channel_tohost,
-
-		hsync => vga_hsync,
-		vsync => vga_vsync,
-		vblank_int => vblank_int,
-		red => vga_red,
-		green => vga_green,
-		blue => vga_blue,
-		vga_window => vga_window
-	);
-
-	
 -- Main CPU
 
 	zpu: zpu_core 
@@ -441,13 +418,36 @@ begin
 		spi_active<='0';
 		tft_cs<='1';
 		tft_spi_active<='0';
+		tft_dma<='0';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';
 		vga_reg_req<='0';
 		spi_trigger<='0';
 		tft_spi_trigger<='0';
+		vgachannel_fromhost.setaddr<='0';
+		vgachannel_fromhost.setreqlen<='0';
+		vgachannel_fromhost.req<='0';
 
+		if vgachannel_tohost.valid='1' then
+			tft_dma_data<=dma_data;
+		end if;
+		
+		-- Handle TFT DMA
+		if tft_dma='1' and tft_spi_busy='0' then
+			if tft_even='1' then
+				tft_host_to_spi<=tft_dma_data(7 downto 0);
+				tft_spi_trigger<='1';
+				tft_even<='0';
+				vgachannel_fromhost.req<='1';
+			else
+				tft_host_to_spi<=tft_dma_data(15 downto 8);
+				tft_spi_trigger<='1';
+				tft_even<='1';
+			end if;
+		end if;
+
+	
 		-- Write from CPU?
 		if mem_writeEnable='1' then
 			case mem_addr(31)&mem_addr(10 downto 8) is
@@ -480,6 +480,7 @@ begin
 							spi_active<='1';
 
 						when X"E0" => -- TFT control
+							tft_dma<='0';
 							tft_cs <= mem_write(0);
 							tft_d_c <= mem_write(1);
 							tft_reset <= mem_write(2);
@@ -487,9 +488,21 @@ begin
 							mem_busy<='0';
 						
 						when X"E4" => -- TFT SPI
+							tft_dma<='0';
 							tft_spi_active<='1';
 							tft_spi_trigger<='1';
 							tft_host_to_spi<=mem_write(7 downto 0);
+
+						when X"E8" => -- TFT Framebuffer address
+							vgachannel_fromhost.addr<=mem_write;
+							vgachannel_fromhost.setaddr<='1';
+							mem_busy<='0';
+							
+						when X"EC" => -- TFT Framebuffer size
+							vgachannel_fromhost.reqlen<=unsigned(mem_write(15 downto 0));
+							vgachannel_fromhost.setreqlen<='1';
+							tft_dma<='1';
+							mem_busy<='0';
 
 						when others =>
 							mem_busy<='0';
@@ -553,12 +566,12 @@ begin
 		mem_busy<='0';
 	end if;
 
-	if tft_spi_active='1' and tft_spi_busy='0' then
+	if tft_spi_active='1' and tft_spi_busy='0' and tft_dma='0' then
 		mem_read<=tft_spi_to_host;
 		tft_spi_active<='0';
 		mem_busy<='0';
 	end if;
-
+	
 	-- SDRAM state machine
 	
 		case sdram_state is

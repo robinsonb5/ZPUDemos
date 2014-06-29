@@ -22,8 +22,8 @@ BUILD_DIR=zpu_obj
 STARTUP_SRC = $(STARTUP_DIR)/crt0.s
 STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
-COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h
-COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
+COMMON_SRC = syscalls.c small_printf.c uart.c malloc.c spi.c fat.c swap.c rafile.c
+COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
 MAIN_PRJ = TFTTest
 MAIN_SRC = main.c driver.c tft.c
@@ -34,10 +34,10 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 ZPUFLAGS = -DDEBUG
-CFLAGS  = -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -DDISABLE_UART_RX
+CFLAGS  = -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
-
+LFLAGS  = -nostartfiles -Wl,--relax -Wl,--gc-sections -Os
+LIBS = -lgcc
 
 # Our target.
 all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ).srec
