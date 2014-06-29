@@ -40,7 +40,7 @@ void frame_interrupt()
 	if(offset>479)
 		offset=0;
 
-	TFT_FillBitmap(0,319,0,239,framebuffer+640*fbo);
+	TFT_FillBitmap(0,319,0,239,framebuffer+320*fbo);
 	EnableInterrupts();
 }
 
