@@ -158,6 +158,17 @@ signal vga_ack : std_logic;
 signal vblank_int : std_logic;
 
 
+-- Interrupt signals
+
+constant int_max : integer := 0;
+signal int_triggers : std_logic_vector(int_max downto 0);
+signal int_status : std_logic_vector(int_max downto 0);
+signal int_ack : std_logic;
+signal int_req : std_logic;
+signal int_enabled : std_logic :='0'; -- Disabled by default
+signal int_trigger : std_logic;
+
+
 -- SDRAM signals
 
 signal sdr_ready : std_logic;
@@ -185,6 +196,7 @@ audio_r <= X"0000";
 -- ROM
 
 	myrom : entity work.RS232Bootstrap_ROM
+--	myrom : entity work.SDBootstrap_ROM
 	generic map
 	(
 		maxAddrBitBRAM => 13
@@ -333,6 +345,22 @@ tft_spi : entity work.spi_interface
 			sdram_data => vga_data
 		);
 
+-- Interrupt controller
+
+intcontroller: entity work.interrupt_controller
+generic map (
+	max_int => int_max
+)
+port map (
+	clk => clk,
+	reset_n => reset,
+	trigger => int_triggers, -- Again, thanks ISE.
+	ack => int_ack,
+	int => int_req,
+	status => int_status
+);
+
+int_trigger<=int_req and int_enabled;
 	
 -- SDRAM
 mysdram : entity work.sdram_simple
@@ -399,6 +427,7 @@ mysdram : entity work.sdram_simple
 	port map (
 		clk                 => clk,
 		reset               => not reset,
+		interrupt			  => int_trigger, -- Thanks, ISE.  int_req and int_enabled,
 		in_mem_busy         => mem_busy,
 		mem_read            => mem_read,
 		mem_write           => mem_write,
@@ -420,6 +449,7 @@ begin
 		tft_cs<='1';
 		tft_spi_active<='0';
 		tft_dma<='0';
+		int_enabled<='0';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';
@@ -430,6 +460,10 @@ begin
 		vgachannel_fromhost.setreqlen<='0';
 		vgachannel_fromhost.req<='0';
 
+		int_ack<='0';
+		int_triggers(0)<='0';
+
+		
 		if tft_pending='1' then
 			vgachannel_fromhost.req<='1';	
 			tft_pending<='0';
@@ -448,7 +482,9 @@ begin
 				tft_spi_trigger<='1';
 				tft_even<='0';
 				tft_dma<='0';
-				if vgachannel_tohost.done='0' then
+				if vgachannel_tohost.done='1' then
+					int_triggers(0)<='1';
+				else
 					vgachannel_fromhost.req<='1';
 				end if;
 			else
@@ -468,6 +504,11 @@ begin
 					mem_busy<='0';
 				when X"F" =>	-- Peripherals at 0xFFFFFFF00
 					case mem_addr(7 downto 0) is
+
+						when X"B0" => -- Interrupts
+							int_enabled<=mem_write(0);
+							mem_busy<='0';
+
 						when X"C0" => -- UART
 							ser_txdata<=mem_write(7 downto 0);
 							ser_txgo<='1';
@@ -508,7 +549,7 @@ begin
 							mem_busy<='0';
 							
 						when X"EC" => -- TFT Framebuffer size
-							vgachannel_fromhost.reqlen<=unsigned(mem_write(15 downto 0));
+							vgachannel_fromhost.reqlen<=unsigned(mem_write(DMACache_ReqLenMaxBit downto 0));
 							vgachannel_fromhost.setreqlen<='1';
 							tft_pending<='1';
 							mem_busy<='0';
@@ -533,6 +574,13 @@ begin
 
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
+
+						when X"B0" => -- Interrupt
+							mem_read<=(others=>'X');
+							mem_read(int_max downto 0)<=int_status;
+							int_ack<='1';
+							mem_busy<='0';
+
 						when X"C0" => -- UART
 							mem_read<=(others=>'X');
 							mem_read(9 downto 0)<=ser_rxrecv&ser_txready&ser_rxdata;

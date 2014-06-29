@@ -6,8 +6,31 @@
 #include "driver.h"
 #include "tft.h"
 #include "spi.h"
+#include "interrupts.h"
+#include "timer.h"
 
 unsigned short *framebuffer;
+
+static int framecounter=0;
+static int prevtime;
+
+void frame_interrupt()
+{
+	static int c=0;
+	DisableInterrupts();
+	int ints=GetInterrupts();
+
+	++c;
+	if((c&31)==0)
+	{
+		framecounter=HW_TIMER(REG_MILLISECONDS)-prevtime;
+		prevtime=HW_TIMER(REG_MILLISECONDS);
+	}
+
+	TFT_FillBitmap(0,319,0,239,framebuffer);
+	EnableInterrupts();
+}
+
 
 int main(int argc, char **argv)
 {
@@ -30,7 +53,11 @@ int main(int argc, char **argv)
 //	while(1)
 //		TFT_FillRectangle(32, 64, 64, 64,c++);		// X, Y, length, width, colour
 
-	TFT_FillBitmap(0,319,0,239,framebuffer);
+	SetIntHandler(frame_interrupt);
+	EnableInterrupts();
+
+	prevtime=HW_TIMER(REG_MILLISECONDS);
+	frame_interrupt();
 
 	while(1)
 	{
@@ -46,7 +73,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		TFT_FillBitmap(0,319,0,239,framebuffer);
+		printf("Screen updating at %d frames per second\n",32000/framecounter);
 //		while(1) ;
 	}
 	return(0);
