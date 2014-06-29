@@ -195,8 +195,8 @@ audio_r <= X"0000";
 
 -- ROM
 
-	myrom : entity work.RS232Bootstrap_ROM
---	myrom : entity work.SDBootstrap_ROM
+--	myrom : entity work.RS232Bootstrap_ROM
+	myrom : entity work.SDBootstrap_ROM
 	generic map
 	(
 		maxAddrBitBRAM => 13
