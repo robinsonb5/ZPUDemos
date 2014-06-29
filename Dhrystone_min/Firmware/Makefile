@@ -19,11 +19,11 @@ COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
-STARTUP_SRC = $(STARTUP_DIR)/crt0.s
+STARTUP_SRC = $(STARTUP_DIR)/crt0.s $(STARTUP_DIR)/premain.s
 STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
-COMMON_SRC = $(COMMON_DIR)/small_printf.c  $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h $(COMMON_DIR)/timer.h
-COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
+COMMON_SRC = small_printf.c uart.c 
+COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
 
 MAIN_PRJ = Dhrystone_min
 MAIN_SRC = dhry_1.c dhry_2.c

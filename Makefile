@@ -1,6 +1,5 @@
 
 all:
-#	make -C Apps/Firmware
 	make -C Dhrystone_fast/Firmware
 	make -C Dhrystone_min/Firmware
 	make -C HelloTinyROM/Firmware
@@ -10,9 +9,9 @@ all:
 	make -C SDBootstrap/Firmware
 	make -C SDRAM/Firmware
 	make -C VGA/Firmware
+	make -C Apps
 
 clean:
-#	make -C Apps/Firmware
 	make -C Dhrystone_fast/Firmware clean
 	make -C Dhrystone_min/Firmware clean
 	make -C HelloTinyROM/Firmware clean
@@ -22,5 +21,6 @@ clean:
 	make -C SDBootstrap/Firmware clean
 	make -C SDRAM/Firmware clean
 	make -C VGA/Firmware clean
+	make -C Apps clean
 
 
