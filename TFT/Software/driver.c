@@ -51,7 +51,7 @@ TFT_WriteData(0x00);
 TFT_WriteData(0x34);
 TFT_WriteData(0x02);
 
-//Power control A
+//Power control B
 TFT_SendCMD  (0xCF);
 TFT_WriteData(0x00);
 TFT_WriteData(0XC1);
@@ -103,7 +103,7 @@ TFT_WriteData(0x1B);	// 10
 //Display Function Control
 TFT_SendCMD(0xB6);
 TFT_WriteData(0x0A);
-TFT_WriteData(0x02);	// A2
+TFT_WriteData(0x82);	// A2  (02 inverts display)
 
 //Enable 3G
 TFT_SendCMD(0xF2);
@@ -112,10 +112,10 @@ TFT_WriteData(0x02);  //off
 
 //COLMOD: Pixel Format Set
 TFT_SendCMD(0x3a);
-TFT_WriteData(0x05);
+TFT_WriteData(0x05);  // 0x03 for 19-bit
 
 //Gamma Set
-TFT_SendCMD(0x26);   //Gamma curve 3
+TFT_SendCMD(0x26);   //Gamma
 TFT_WriteData(0x01);
 
 //Positive Gamma Correction
@@ -153,6 +153,7 @@ TFT_WriteData(0x0C);
 TFT_WriteData(0x31);
 TFT_WriteData(0x36);
 TFT_WriteData(0x0F);
+
 // Sleep Out
 TFT_SendCMD(0x11);
 CyDelay(120);
@@ -408,7 +409,7 @@ void TFT_FillBitmap(int XL, int XR, int YU, int YD, unsigned short *Bitmap)
 	D_C_Write(1);	// Specify data coming by DMA
 
 	HW_TFT(REG_TFT_FRAMEBUFFER)=Bitmap;
-	HW_TFT(REG_TFT_FRAMESIZE)=65535;
+	HW_TFT(REG_TFT_FRAMESIZE)=65520;
 
 
 #if 0

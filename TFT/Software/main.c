@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 		}
 
 		TFT_FillBitmap(0,319,0,239,framebuffer);
-		while(1) ;
+//		while(1) ;
 	}
 	return(0);
 }
