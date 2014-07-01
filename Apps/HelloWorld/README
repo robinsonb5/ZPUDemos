@@ -1,0 +1,16 @@
+Hello World
+
+The Hello World app demonstrates writing to the UART, using the small_printf
+function, and keeping the code size small by omitting the standard C library.
+
+The makefile specifies the full startup code, crt0.s since we need the
+emulation table for unimplemented instructions.  We also specify premain.s
+since we're not including the standard C library.
+
+We leave out the stock startup code and C library by specifying -nostartfile
+-nostdlib at the linker stage, and pull in the requisite math functions by
+adding -lgcc to the LIBS variable.  The latter is tested in main.c by
+performing a division as part of the printf call.  (We ensure that the
+division isn't optimised out by making the source of the division a volatile
+variable.)
+

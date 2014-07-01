@@ -26,7 +26,7 @@ COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
 MAIN_PRJ = Filesystem
 MAIN_SRC = main.c
-MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
+MAIN_OBJ = $(STARTUP_OBJ) $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
@@ -36,8 +36,8 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 ZPUFLAGS = # -DDEBUG # -mno-shortop -mno-byteop
 CFLAGS  = -I. -I$(COMMON_DIR) -c -Os $(ZPUFLAGS) -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
 
-LFLAGS  = -mboard=phi -Wl,--gc-sections -Wl,--relax -Os
-
+LFLAGS  = -nostartfiles -Wl,--gc-sections -Wl,--relax -Os
+LIBS = -lgcc
 
 # Our target.
 all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ).srec 

@@ -19,8 +19,8 @@ COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
-STARTUP_SRC = $(STARTUP_DIR)/crt0.s $(STARTUP_DIR)/premain.s
-STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
+STARTUP_SRC = crt0.s premain.s
+STARTUP_OBJ = $(patsubst %.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
 COMMON_SRC = small_printf.c uart.c
 COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
@@ -36,8 +36,8 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 ZPUFLAGS = -DDEBUG
 CFLAGS  = -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -DDISABLE_UART_RX
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
-
+LFLAGS  = -nostdlib -nostartfiles -Wl,--relax -Os
+LIBS = -lgcc
 
 # Our target.
 all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ).srec
@@ -65,6 +65,9 @@ $(BUILD_DIR)/%.o: $(COMMON_DIR)/%.c Makefile
 	$(CC) $(CFLAGS)  -o $@ -c $<
 
 $(BUILD_DIR)/%.o: %.s
+	$(AS) -o $@ $<
+
+$(BUILD_DIR)/%.o: $(STARTUP_DIR)/%.s
 	$(AS) -o $@ $<
 
 $(BUILD_DIR)/%.o: $(STARTUP_DIR)/%.s
