@@ -1,0 +1,24 @@
+Dhrystone
+
+The Hello World app demonstrates writing to the UART, using the small_printf
+function, making limited use the the standard C library and maximising
+performance.
+
+The makefile specifies the full startup code, crt0.s since we need the
+emulation table for unimplemented instructions.  We also specify premain.s
+since we're not making use of the standard C library for anything beyond
+strcmp and memcpy, so don't need to worry about initialising malloc heaps
+or file descriptors.
+
+We leave out the stock startup code specifying -nostartfile at the linker
+stage.  Everything is compiled with high optimisation (-O6) and we tell GCC
+to avoid instructions we don't implement in hardware with
+	-mno-callpcrel -mno-pushspadd -mno-poppcrel -mno-poppcrel -mno-div
+	-mno-mod -mno-neg
+thus saving the overhead of an emulation call.
+
+The makefile creates .elf, .bin and .sre files.
+The .bin file, when placed on an SD card alongside the manifest.mst file,
+can be booted and run by the SDBootstrap demo project, while the .sre file
+can be sent over RS232 Serial to the RS232Bootstrap demo project.
+

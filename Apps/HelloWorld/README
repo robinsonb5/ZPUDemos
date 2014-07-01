@@ -14,3 +14,8 @@ performing a division as part of the printf call.  (We ensure that the
 division isn't optimised out by making the source of the division a volatile
 variable.)
 
+The makefile creates .elf, .bin and .sre files.
+The .bin file, when placed on an SD card alongside the manifest.mst file,
+can be booted and run by the SDBootstrap demo project, while the .sre file
+can be sent over RS232 Serial to the RS232Bootstrap demo project.
+
