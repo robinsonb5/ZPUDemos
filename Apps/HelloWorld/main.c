@@ -4,10 +4,17 @@
 
 volatile int t;
 
+char charbuffer[40];
+
 int main(int argc, char **argv)
 {
-	t=12345678;
-	printf("Hello, world! %d\n",t/1234); // Test that division is working.
+	int i;
+	printf("Hello, world!\n");
+	// Test that division is working correctly
+	for(i=0;i<10;++i)
+	{
+		printf("%d\n",(i*100)/37);
+	}
 	return(0);
 }
 

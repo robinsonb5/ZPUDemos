@@ -3,8 +3,12 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use IEEE.numeric_std.ALL;
 
+library altera;
+use altera.altera_syn_attributes.all;
+
 library work;
 use work.Toplevel_Config.ALL;
+
 
 entity C3BoardToplevel is
 port(
@@ -167,8 +171,10 @@ attribute chip_pin of misc_ios_3 : signal is "95,177";
 -- Signals internal to the project
 
 signal clk : std_logic;
+signal clk_fast : std_logic;
 signal reset : std_logic;  -- active low
-signal counter : unsigned(34 downto 0);
+signal pll1_locked : std_logic;
+signal pll2_locked : std_logic;
 
 signal debugvalue : std_logic_vector(15 downto 0);
 
@@ -226,26 +232,12 @@ COMPONENT hybrid_pwm_sd
 	);
 END COMPONENT;
 
-COMPONENT video_vga_dither
-	generic (
-		outbits : integer :=4
-	);
-	port (
-		clk : in std_logic;
-		hsync : in std_logic;
-		vsync : in std_logic;
-		vid_ena : in std_logic;
-		iRed : in unsigned(7 downto 0);
-		iGreen : in unsigned(7 downto 0);
-		iBlue : in unsigned(7 downto 0);
-		oRed : out unsigned(outbits-1 downto 0);
-		oGreen : out unsigned(outbits-1 downto 0);
-		oBlue : out unsigned(outbits-1 downto 0)
-	);
-end COMPONENT;
-
-
 begin
+
+	power_led(5 downto 2)<=unsigned(debugvalue(15 downto 12));
+	disk_led(5 downto 2)<=unsigned(debugvalue(11 downto 8));
+	net_led(5 downto 2)<=unsigned(debugvalue(7 downto 4));
+	odd_led(5 downto 2)<=unsigned(debugvalue(3 downto 0));
 
 	ps2m_dat_in<=ps2m_dat;
 	ps2m_dat <= '0' when ps2m_dat_out='0' else 'Z';
@@ -276,30 +268,29 @@ begin
 	sd2_cs <= sdr_cs;
 	sd2_ba <= sdr_ba;
 	sd2_cke <= sdr_cke;
-	
-	reset<=btn1;
 		
-	mypll : entity work.PLL_50to125
+	mypll : entity work.Clock_50to100Split
 		port map (
 			inclk0 => clk_50,
-			c0 => clk,
-			c1 => sdram1_clk
+			c0 => clk_fast,
+			c1 => sdram1_clk,
+			c2 => clk,
+			locked => pll1_locked
 		);
 		
-	mypll2 : entity work.PLL_50to125_2
+	mypll2 : entity work.Clock_50to100Split_2ndRAM
 		port map (
 			inclk0 => clk_50,
-			c1 => sdram2_clk
+			c1 => sdram2_clk,
+			locked => pll2_locked
 		);
 
-video1: if Toplevel_UseVGA = true generate
-
-	mydither : component video_vga_dither
+	mydither : entity work.video_vga_dither
 		generic map(
 			outbits => 6
 		)
 		port map(
-			clk=>clk,
+			clk=>clk_fast,
 			hsync=>vga_hsync,
 			vsync=>vga_vsync,
 			vid_ena=>vga_window,
@@ -310,20 +301,17 @@ video1: if Toplevel_UseVGA = true generate
 			oGreen => vga_green,
 			oBlue => vga_blue
 		);
-
-end generate;
-
-
-myproject : entity work.VirtualToplevel
+	
+	myvirtualtoplevel : entity work.VirtualToplevel
 		generic map(
 			sdram_rows => 12,
 			sdram_cols => 10,
-			sysclk_frequency => 1250
+			sysclk_frequency => 1000
 		)
 		port map(
-			clk => clk,
-			reset_in => reset,
-
+			clk => clk_fast,
+			reset_in => reset_n and pll1_locked and pll2_locked,
+			
 			-- SDRAM - presenting a single interface to both chips.
 			sdr_addr => sdr_addr,
 			sdr_data(15 downto 8) => sd2_data,
@@ -336,21 +324,44 @@ myproject : entity work.VirtualToplevel
 			sdr_cas => sdr_cas,
 			sdr_ras => sdr_ras,
 			
+			-- VGA
+			vga_red => vga_r,
+			vga_green => vga_g,
+			vga_blue => vga_b,
+			
+			vga_hsync => vga_hsync,
+			vga_vsync => vga_vsync,
+			
+			vga_window => vga_window,
+
 			-- UART
 			rxd => rs232_rxd,
 			txd => rs232_txd,
-
+				
+--			-- PS/2
+--			ps2k_clk_in => ps2k_clk_in,
+--			ps2k_dat_in => ps2k_dat_in,
+--			ps2k_clk_out => ps2k_clk_out,
+--			ps2k_dat_out => ps2k_dat_out,
+--			ps2m_clk_in => ps2m_clk_in,
+--			ps2m_dat_in => ps2m_dat_in,
+--			ps2m_clk_out => ps2m_clk_out,
+--			ps2m_dat_out => ps2m_dat_out,
+			
+			-- SD Card interface
 			spi_cs => sd_cs,
 			spi_miso => sd_miso,
 			spi_mosi => sd_mosi,
 			spi_clk => sd_clk,
-
-			-- audio
+			
+			-- Audio - FIXME abstract this out, too.
 			audio_l => audio_l,
 			audio_r => audio_r
+			
+			-- LEDs
 		);
 
--- Do we have audio?  If so, instantiate a two DAC channels.
+		-- Do we have audio?  If so, instantiate a two DAC channels.
 audio2: if Toplevel_UseAudio = true generate
 leftsd: component hybrid_pwm_sd
 	port map
@@ -379,7 +390,6 @@ audio3: if Toplevel_UseAudio = false generate
 	aud_l<='Z';
 	aud_r<='Z';
 end generate;
-		
+
 end RTL;
 
-	

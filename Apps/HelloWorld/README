@@ -7,12 +7,12 @@ The makefile specifies the full startup code, crt0.s since we need the
 emulation table for unimplemented instructions.  We also specify premain.s
 since we're not including the standard C library.
 
-We leave out the stock startup code and C library by specifying -nostartfile
+We use the minimal small_print() function since we're not using the C library.
+
+We leave out the stock startup code and C library by specifying -nostartfiles
 -nostdlib at the linker stage, and pull in the requisite math functions by
 adding -lgcc to the LIBS variable.  The latter is tested in main.c by
-performing a division as part of the printf call.  (We ensure that the
-division isn't optimised out by making the source of the division a volatile
-variable.)
+performing some divisions and printing the results.
 
 The makefile creates .elf, .bin and .sre files.
 The .bin file, when placed on an SD card alongside the manifest.mst file,
