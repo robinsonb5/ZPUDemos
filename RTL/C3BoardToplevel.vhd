@@ -221,6 +221,26 @@ signal vga_window : std_logic;
 signal audio_l : signed(15 downto 0);
 signal audio_r : signed(15 downto 0);
 
+-- Video dither
+COMPONENT video_vga_dither
+	generic (
+		outbits : integer :=4
+		);
+	port (
+		clk : in std_logic;
+		hsync : in std_logic;
+		vsync : in std_logic;
+		vid_ena : in std_logic;
+		iRed : in unsigned(7 downto 0);
+		iGreen : in unsigned(7 downto 0);
+		iBlue : in unsigned(7 downto 0);
+		oRed : out unsigned(outbits-1 downto 0);
+		oGreen : out unsigned(outbits-1 downto 0);
+		oBlue : out unsigned(outbits-1 downto 0)
+	);
+end component;
+
+
 -- Sigma Delta audio
 COMPONENT hybrid_pwm_sd
 	PORT
@@ -285,22 +305,6 @@ begin
 			locked => pll2_locked
 		);
 
-	mydither : entity work.video_vga_dither
-		generic map(
-			outbits => 6
-		)
-		port map(
-			clk=>clk_fast,
-			hsync=>vga_hsync,
-			vsync=>vga_vsync,
-			vid_ena=>vga_window,
-			iRed => vga_r,
-			iGreen => vga_g,
-			iBlue => vga_b,
-			oRed => vga_red,
-			oGreen => vga_green,
-			oBlue => vga_blue
-		);
 	
 	myvirtualtoplevel : entity work.VirtualToplevel
 		generic map(
@@ -360,6 +364,26 @@ begin
 			
 			-- LEDs
 		);
+
+
+video: if Toplevel_UseVGA = true generate
+	mydither : component video_vga_dither
+		generic map(
+			outbits => 6
+	)
+		port map(
+			clk=>clk_fast,
+			hsync=>vga_hsync,
+			vsync=>vga_vsync,
+			vid_ena=>vga_window,
+			iRed => vga_r,
+			iGreen => vga_g,
+			iBlue => vga_b,
+			oRed => vga_red,
+			oGreen => vga_green,
+			oBlue => vga_blue
+		);
+end generate;
 
 		-- Do we have audio?  If so, instantiate a two DAC channels.
 audio2: if Toplevel_UseAudio = true generate
