@@ -359,7 +359,7 @@ int LoadFile(const char *fn, unsigned char *buf)
 			sb += cluster_size * (file.cluster-2);  // cluster offset
 			sb += sector & cluster_mask;      // sector offset in cluster
 
-			printf("Reading block %d (%d, %d, %d)...",sb,data_start,file.cluster,sector);
+//			printf("Reading block %d (%d, %d, %d)...",sb,data_start,file.cluster,sector);
 
 			if (!sd_read_sector(sb, buf)) // read sector from drive
 				return(0);
@@ -372,7 +372,7 @@ int LoadFile(const char *fn, unsigned char *buf)
 		    // cluster's boundary crossed?
     		if((sector&cluster_mask) == 0)
 		    {
-				puts("Getting next cluster.\n");
+//				puts("Getting next cluster.\n");
 				file.cluster=GetCluster(file.cluster);
 		    }
 

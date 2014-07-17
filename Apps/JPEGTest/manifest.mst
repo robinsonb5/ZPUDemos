@@ -1,0 +1,13 @@
+# Example manifest file
+# Hexadecimal address comes first, followed by spaces, followed by the filename
+# To avoid mangling the filename any more than needed in the limited boot firmware
+# the filename should be 11 characters long, the last three being the file extension
+# all upper case and padded out with spaces, like so:
+# 10000  FN      EXT
+# 20000  FILE2   IMG
+#
+# Finish the file with either "Go" to launch the loaded firmware,
+# Loop to restart, or a blank line to stop the CPU
+0 JPEGTESTBIN
+Go
+

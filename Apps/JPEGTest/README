@@ -1,0 +1,11 @@
+JPEGTest
+
+JPEGTest demonstrates running full-featured software on the ZPUDemos SOC
+platform, including loading files from disk, and making use of libJPEG.
+The project can be bootstrapped either over RS232 or by SD card, but either
+way the SD card needs to contain the bird.jpeg file.
+
+If bootstrapping over RS232, simply upload the JPEGTest.sre file.
+If bootstrapping by SD card, the card needs to contain JPEGTest.bin
+and manifest.mst
+

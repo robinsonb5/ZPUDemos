@@ -1,0 +1,5 @@
+CmpTest
+
+CmpTest is just a small test application to verify the operation of the
+lessthan, ulessthan, lessthanorequal and ulessthanorequal instructions.
+
