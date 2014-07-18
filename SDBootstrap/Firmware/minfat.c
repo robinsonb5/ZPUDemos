@@ -365,7 +365,7 @@ int LoadFile(const char *fn, unsigned char *buf)
 				return(0);
 //			hexdump(sector_buffer,512);
 
-			puts("block read.\n");
+//			puts("block read.\n");
 
 			++sector;
 
