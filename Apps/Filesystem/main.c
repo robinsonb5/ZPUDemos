@@ -43,6 +43,9 @@ char *LoadFile(const char *filename)
 int main(int argc, char **argv)
 {
 	char *ptr;
+
+	puts("Testing...\n");
+
 	if((ptr=LoadFile("A320X480RAW")))
 		printf("File successfully loaded to %d\n",ptr);
 	else

@@ -18,7 +18,7 @@ COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
-STARTUP_SRC = $(STARTUP_DIR)/crt0.s $(STARTUP_DIR)/premain.s
+STARTUP_SRC = $(STARTUP_DIR)/crt0.s # $(STARTUP_DIR)/premain.s
 STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
 COMMON_SRC = small_printf.c uart.c swap.c spi.c syscalls.c malloc.c fat.c rafile.c
@@ -34,7 +34,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 # Commandline options for each tool.
 
 ZPUFLAGS = # -DDEBUG # -mno-shortop -mno-byteop
-CFLAGS  = -I. -I$(COMMON_DIR) -c -Os $(ZPUFLAGS) -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
+CFLAGS  = -I. -I$(COMMON_DIR) -c -Os $(ZPUFLAGS) -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff -DDISABLE_UART_RX
 
 LFLAGS  = -nostartfiles -Wl,--gc-sections -Wl,--relax -Os
 LIBS = -lgcc

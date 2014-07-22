@@ -219,6 +219,7 @@ int spi_init()
 	SDHCtype=1;
 	SPI_CS(0);	// Disable CS
 	spi_spin();
+	puts("SPI Init()\n");
 	DBG("Activating CS\n");
 	SPI_CS(1);
 	i=8;
