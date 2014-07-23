@@ -1,0 +1,10 @@
+This Hello World project demonstrates reducing the size of the ZPUFlex
+process to the absolute minimum, by reducing the address bus width.
+
+In the RTL we provide a simple UART (transmitter portion only), and
+instantiate the ZPUFlex core with all the optional features disabled.
+The entire project, including UART, is just 546 logic elements on the DE1.
+
+Quartus projects are provided for the DE1 board to date -
+others may follow.
+
