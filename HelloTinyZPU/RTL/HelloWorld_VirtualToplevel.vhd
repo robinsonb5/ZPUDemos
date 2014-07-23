@@ -168,7 +168,6 @@ myuart : entity work.simple_uart
 		IMPL_XOR => false,
 		REMAP_STACK => false,
 		EXECUTE_RAM => false,
-		stackBit => 11,
 		maxAddrBitBRAM => 10
 	)
 	port map (
