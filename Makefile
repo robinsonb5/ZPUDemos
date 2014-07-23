@@ -4,6 +4,7 @@ all:
 	make -C Dhrystone_min/Firmware
 	make -C HelloTinyROM/Firmware
 	make -C HelloWorld/Firmware
+	make -C HelloTinyZPU/Firmware
 	make -C Interrupt/Firmware
 	make -C RS232Bootstrap/Firmware
 	make -C SDBootstrap/Firmware
@@ -16,6 +17,7 @@ clean:
 	make -C Dhrystone_min/Firmware clean
 	make -C HelloTinyROM/Firmware clean
 	make -C HelloWorld/Firmware clean
+	make -C HelloTinyZPU/Firmware clean
 	make -C Interrupt/Firmware clean
 	make -C RS232Bootstrap/Firmware clean
 	make -C SDBootstrap/Firmware clean
