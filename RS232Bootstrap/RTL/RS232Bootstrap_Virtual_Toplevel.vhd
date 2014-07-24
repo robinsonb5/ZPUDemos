@@ -381,7 +381,8 @@ mysdram : entity work.sdram_simple
 		IMPL_XOR => true,
 		REMAP_STACK => true, -- We need to remap the Boot ROM / Stack RAM so we can access SDRAM
 		EXECUTE_RAM => true, -- We might need to execute code from SDRAM, too.
-		maxAddrBitBRAM => 13
+		maxAddrBitBRAM => 13,
+		stackbit => 24
 	)
 	port map (
 		clk                 => clk,
@@ -412,7 +413,7 @@ begin
 
 		-- Write from CPU?
 		if mem_writeEnable='1' then
-			case mem_addr(31)&mem_addr(10 downto 8) is
+			case mem_addr(23)&mem_addr(10 downto 8) is
 				when X"E" =>	-- VGA controller at 0xFFFFFE00
 					vga_reg_rw<='0';
 					vga_reg_req<='1';
@@ -457,7 +458,7 @@ begin
 			end case;
 
 		elsif mem_readEnable='1' then -- Read from CPU?
-			case mem_addr(31)&mem_addr(10 downto 8) is
+			case mem_addr(23)&mem_addr(10 downto 8) is
 
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
@@ -507,7 +508,8 @@ begin
 	
 		case sdram_state is
 			when read1 => -- read first word from RAM
-				sdram_addr<=mem_Addr;
+				sdram_addr<=(others=>'0');
+				sdram_addr(maxAddrBitIncIO downto 0)<=mem_Addr;
 				sdram_wr<='1';
 				sdram_req<='1';
 				if sdram_ack='0' then
@@ -529,7 +531,8 @@ begin
 					mem_busy<='0';
 				end if;
 			when write1 => -- write 32-bit word to SDRAM
-				sdram_addr<=mem_Addr;
+				sdram_addr<=(others=>'0');
+				sdram_addr(maxAddrBitIncIO downto 0)<=mem_Addr;
 				sdram_wr<='0';
 				sdram_req<='1';
 				sdram_write<=mem_write; -- 32-bits now
@@ -539,7 +542,8 @@ begin
 					mem_busy<='0';
 				end if;
 			when writeb => -- write 8-bit value to SDRAM
-				sdram_addr<=mem_Addr;
+				sdram_addr<=(others=>'0');
+				sdram_addr(maxAddrBitIncIO downto 0)<=mem_Addr;
 				sdram_wr<='0';
 				sdram_req<='1';
 				sdram_write<=mem_write; -- 32-bits now

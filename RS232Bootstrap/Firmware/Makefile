@@ -22,14 +22,14 @@ BUILD_DIR=zpu_obj
 MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s
 MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
-COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h
+COMMON_SRC = $(COMMON_DIR)/small_printf.c
 COMMON_OBJ = $(patsubst $(COMMON_DIR)/%.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
 
 MAIN_PRJ = RS232Bootstrap
-MAIN_SRC = rs232boot.c
+MAIN_SRC = rs232boot.c uart.c
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
-LINKMAP  = $(ZPUFLEXDIR)/Firmware/boot_mixed_remapped.ld
+LINKMAP  = boot_mixed_remapped.ld
 
 
 # Commandline options for each tool.
