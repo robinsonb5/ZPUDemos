@@ -548,17 +548,17 @@ set_global_assignment -name VHDL_FILE ../../../RTL/DE1_Toplevel.vhd
 set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneII/PLL.qip
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
-set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_config.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/toplevel_config.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/video_vga_master.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/video_vga_dither.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/vga_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/DMACache.vhd
-set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/SDBootstrap/fpga/de1/stp1_auto_stripped.stp
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/RS232Bootstrap_Virtual_Toplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/DMACache_config.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/DMACache_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../Firmware/RS232Bootstrap_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/spi.vhd
+set_global_assignment -name SIGNALTAP_FILE stp1.stp
+set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/RS232Bootstrap/fpga/de1/stp1_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

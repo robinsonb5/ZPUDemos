@@ -139,9 +139,26 @@ COMPONENT hybrid_pwm_sd
 	);
 END COMPONENT;
 
+COMPONENT video_vga_dither
+	GENERIC ( outbits : INTEGER := 4 );
+	PORT
+	(
+		clk		:	 IN STD_LOGIC;
+		hsync		:	 IN STD_LOGIC;
+		vsync		:	 IN STD_LOGIC;
+		vid_ena		:	 IN STD_LOGIC;
+		iRed		:	 IN UNSIGNED(7 DOWNTO 0);
+		iGreen		:	 IN UNSIGNED(7 DOWNTO 0);
+		iBlue		:	 IN UNSIGNED(7 DOWNTO 0);
+		oRed		:	 OUT UNSIGNED(outbits-1 DOWNTO 0);
+		oGreen		:	 OUT UNSIGNED(outbits-1 DOWNTO 0);
+		oBlue		:	 OUT UNSIGNED(outbits-1 DOWNTO 0)
+	);
+END COMPONENT;
+
 begin
 	
-	sd_addr(12)<='0'; -- FIXME - genericise the SDRAM size
+--	sd_addr(12)<='0'; -- FIXME - genericise the SDRAM size
 	
 -- -----------------------------------------------------------------------
 -- Clocks and PLL
@@ -217,17 +234,17 @@ begin
 					mux_d_regd <= "10" & led_green & led_red;
 					mux_regd <= X"B";
 				when X"B" =>
-				   -- FIXME - RS232 serial over IEC port?
+				   -- RS232 serial over IEC port; TxD -> ATN as per Christian Vogelgsang's Minimig core
 --					mux_d_reg <= iec_reg;
 					mux_d_regd <= "1111";
-					mux_d_regd(2) <= rs232_txd;
+					mux_d_regd(3) <= rs232_txd; -- ATN
 					mux_regd <= X"D";
 --					docking_ena <= '1';
 				when X"C" =>
 					mux_reg <= mux_regd;
 					mux_d_reg <= mux_d_regd;
 				when X"D" =>
-					rs232_rxd <= mux_q(1); -- IEC_CLK = amiga serial rxd
+					rs232_rxd <= mux_q(1); -- IEC_CLK -> RxD
 					mux_d_regd(0) <= ps2_keyboard_dat_out;
 					mux_d_regd(1) <= ps2_keyboard_clk_out;
 					mux_d_regd(2) <= ps2_mouse_dat_out;
@@ -256,7 +273,10 @@ begin
 --			reset_out => reset
 --		);
 
-	mydither : entity work.video_vga_dither
+dither1: if Toplevel_UseVGA=true generate
+-- Dither the video down to 5 bits per gun.
+
+	mydither : component video_vga_dither
 		generic map(
 			outbits => 5
 		)
@@ -272,10 +292,11 @@ begin
 			oGreen => grn,
 			oBlue => blu
 		);
+end generate;
 
 	myproject : entity work.VirtualToplevel
 		generic map(
-			sdram_rows => 12,
+			sdram_rows => 13,
 			sdram_cols => 9,
 			sysclk_frequency => 1000
 		)
@@ -284,7 +305,7 @@ begin
 			reset_in => freeze_n and pll_locked,
 			
 			-- SDRAM
-			sdr_addr => sd_addr(11 downto 0),
+			sdr_addr => sd_addr(12 downto 0),
 			sdr_data(15 downto 0) => sd_data,
 			sdr_ba(1) => sd_ba_1,
 			sdr_ba(0) => sd_ba_0,

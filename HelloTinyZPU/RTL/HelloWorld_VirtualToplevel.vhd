@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
-use work.zpu_config.all;
 use work.zpupkg.ALL;
 
 entity VirtualToplevel is
@@ -52,6 +51,7 @@ end entity;
 
 architecture rtl of VirtualToplevel is
 
+constant maxAddrBit : integer := 11;
 constant sysclk_hz : integer := sysclk_frequency*1000;
 constant uart_divisor : integer := sysclk_hz/1152;
 
@@ -72,7 +72,7 @@ signal ser_rxint : std_logic;
 signal mem_busy           : std_logic;
 signal mem_read             : std_logic_vector(wordSize-1 downto 0);
 signal mem_write            : std_logic_vector(wordSize-1 downto 0);
-signal mem_addr             : std_logic_vector(maxAddrBitIncIO downto 0);
+signal mem_addr             : std_logic_vector(MaxAddrBit downto 0);
 signal mem_writeEnable      : std_logic; 
 signal mem_writeEnableh      : std_logic; 
 signal mem_writeEnableb      : std_logic; 
@@ -156,7 +156,7 @@ myuart : entity work.simple_uart
 
 -- Main CPU
 
-	zpu: zpu_core 
+	zpu: zpu_core_flex
 	generic map (
 		IMPL_MULTIPLY => false,
 		IMPL_COMPARISON_SUB => false,
@@ -168,7 +168,9 @@ myuart : entity work.simple_uart
 		IMPL_XOR => false,
 		REMAP_STACK => false,
 		EXECUTE_RAM => false,
-		maxAddrBitBRAM => 10
+		maxAddrBitBRAM => 10,
+		maxAddrBit => maxAddrBit,
+		maxAddrBitExternalRAM => maxAddrBit-1
 	)
 	port map (
 		clk                 => clk,
@@ -194,7 +196,7 @@ begin
 		
 		-- Write from CPU?
 		if mem_writeEnable='1' then
-			if mem_addr(maxAddrBitIncIO)='1' then
+			if mem_addr(MaxAddrBit)='1' then
 				case mem_addr(7 downto 0) is
 					when X"C0" => -- UART
 						ser_txdata<=mem_write(7 downto 0);
@@ -208,7 +210,7 @@ begin
 			end if;
 
 		elsif mem_readEnable='1' then -- Read from CPU?
-			if mem_addr(maxAddrBitIncIO)='1' then
+			if mem_addr(MaxAddrBit)='1' then
 				case mem_addr(7 downto 0) is
 					when X"C0" => -- UART
 						mem_read<=(others=>'X');

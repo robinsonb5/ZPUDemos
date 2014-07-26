@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
-use work.zpu_config.all;
 use work.zpupkg.ALL;
 
 entity VirtualToplevel is
@@ -54,6 +53,7 @@ architecture rtl of VirtualToplevel is
 
 constant sysclk_hz : integer := sysclk_frequency*1000;
 constant uart_divisor : integer := sysclk_hz/1152;
+constant maxAddrBit : integer := 31;
 
 signal reset : std_logic := '0';
 signal reset_counter : unsigned(15 downto 0) := X"FFFF";
@@ -72,7 +72,7 @@ signal ser_rxint : std_logic;
 signal mem_busy           : std_logic;
 signal mem_read             : std_logic_vector(wordSize-1 downto 0);
 signal mem_write            : std_logic_vector(wordSize-1 downto 0);
-signal mem_addr             : std_logic_vector(maxAddrBitIncIO downto 0);
+signal mem_addr             : std_logic_vector(maxAddrBit downto 0);
 signal mem_writeEnable      : std_logic; 
 signal mem_writeEnableh      : std_logic; 
 signal mem_writeEnableb      : std_logic; 
@@ -156,7 +156,7 @@ myuart : entity work.simple_uart
 
 -- Main CPU
 
-	zpu: zpu_core 
+	zpu: zpu_core_flex
 	generic map (
 		IMPL_MULTIPLY => false,
 		IMPL_COMPARISON_SUB => false,

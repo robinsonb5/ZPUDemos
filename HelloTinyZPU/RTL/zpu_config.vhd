@@ -40,14 +40,5 @@ use ieee.numeric_std.all;
 package zpu_config is
   -- generate trace output or not.
   constant Generate_Trace  : boolean                      := false;
-  constant wordPower       : integer                      := 5;
-  -- during simulation, set this to '0' to get matching trace.txt 
-  constant DontCareValue   : std_logic                    := 'X';
-  -- Clock frequency in MHz.
-  constant ZPU_Frequency   : std_logic_vector(7 downto 0) := x"64";
-  -- This is the msb address bit. bytes=2^(maxAddrBitIncIO+1)
-  constant maxAddrBitIncIO : integer                      := 11;
-  constant maxAddrBit : integer := maxAddrBitIncIO-1; -- Address range for PC and Stack
-  constant maxAddrBitBRAMLimit : integer := 15; -- Address up to 64K of program ROM.  Note, this is a maximum size and the actual size will be specified in generics.
 
 end zpu_config;

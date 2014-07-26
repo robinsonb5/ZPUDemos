@@ -548,7 +548,6 @@ set_global_assignment -name VHDL_FILE ../../../RTL/DE1_Toplevel.vhd
 set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneII/PLL.qip
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
-set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_config.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/SDRAMTest_VirtualToplevel.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd

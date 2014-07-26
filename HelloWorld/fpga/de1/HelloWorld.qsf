@@ -541,7 +541,6 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_MAP_LOGIC_TO_MEMORY_FOR_AREA ON
 set_global_assignment -name VHDL_FILE ../../../RTL/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
-set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_config.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/DE1_Toplevel.vhd
 set_global_assignment -name VHDL_FILE ../../Firmware/HelloWorld_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/HelloWorld_VirtualToplevel.vhd
