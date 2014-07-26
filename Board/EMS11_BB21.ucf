@@ -24,7 +24,6 @@ TIMESPEC "TS_CLK50" = PERIOD "CLK50" 20 ns HIGH 50 %;
 
 # HACK - will need to address this later.
 # PIN "mysysclk/clkout1_buf.O" CLOCK_DEDICATED_ROUTE = FALSE;
-
 # NET "80MHZ" LOC = "A13";
 #
 #	LEDS
@@ -56,17 +55,14 @@ NET "N_RTS1_TO_FPGA" IOSTANDARD = LVTTL;
 NET "TXD1_TO_FPGA" IOSTANDARD = LVTTL;
 
 # NET "RXD2(FROM_FPGA)" LOC = "K18";
-
 NET "N_CTS2_FROM_FPGA" LOC = "A25";
 NET "N_CTS2_FROM_FPGA" IOSTANDARD = LVTTL;
 
 # NET "#RTS2(TO_FPGA)" LOC = "K24";
 # NET "TXD2(TO_FPGA)" LOC = "N20";
-
 #
 #	SD_Flash ________________________________________________________
 #
-
 NET "FPGA_SD_CDET" LOC = "D24";
 NET "FPGA_SD_WPROT" LOC = "N18";
 NET "FPGA_SD_CMD" LOC = "B23";
@@ -76,7 +72,7 @@ NET "FPGA_SD_D2" LOC = "A23";
 NET "FPGA_SD_D3" LOC = "L17";
 NET "FPGA_SD_SCLK" LOC = "N17";
 
-NET "FPGA_SD_*" IOSTANDARD = LVTTL | DRIVE = 12 | SLEW = FAST;
+NET "FPGA_SD_*" IOSTANDARD = LVTTL |DRIVE = 12 |SLEW = FAST;
 
 #
 #	SDRAM mt48lc32m16A2_75 __________________________________________
@@ -398,3 +394,6 @@ NET M1_S* IOSTANDARD = LVTTL |DRIVE = 16 |SLEW = FAST;
 #	end _____________________________________________________________
 #
 NET DR_D<*> NODELAY;
+
+NET "project/zpu/*Mmult*" TPTHRU = "MULT";
+TIMESPEC TS_MULT_MUTLICYCLE = FROM "myclock_clkout0" TO "myclock_clkout0" TS_myclock_clkout0 * 2;
