@@ -1,0 +1,5 @@
+This project demonstrates using multiple ZPUs in a single project.
+Unlike the other demos, this one only has a toplevel for the DE1 board so
+far.  It makes each LED on the DE1 blink at a different rate - each one is
+controlled by a different instance of the ZPU!
+
