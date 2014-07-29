@@ -169,8 +169,7 @@ myuart : entity work.simple_uart
 		REMAP_STACK => false,
 		EXECUTE_RAM => false,
 		maxAddrBitBRAM => 10,
-		maxAddrBit => maxAddrBit,
-		maxAddrBitExternalRAM => maxAddrBit-1
+		maxAddrBit => maxAddrBit
 	)
 	port map (
 		clk                 => clk,
