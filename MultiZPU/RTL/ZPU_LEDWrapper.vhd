@@ -16,7 +16,7 @@ end entity;
 
 architecture rtl of ZPU_LEDWrapper is
 
-constant maxAddrBit : integer := 11;
+constant maxAddrBit : integer := 10;
 
 signal mem_busy           : std_logic;
 signal mem_read             : std_logic_vector(wordSize-1 downto 0);
@@ -37,7 +37,7 @@ begin
 	myrom : entity work.MultiZPU_ROM
 	generic map
 	(
-		maxAddrBitBRAM => 10
+		maxAddrBitBRAM => 8
 	)
 	port map (
 		clk => clk,
@@ -51,16 +51,16 @@ begin
 	zpu: zpu_core_flex
 	generic map (
 		IMPL_MULTIPLY => false,
-		IMPL_COMPARISON_SUB => false,
-		IMPL_EQBRANCH => false,
+		IMPL_COMPARISON_SUB => true,
+		IMPL_EQBRANCH => true,
 		IMPL_STOREBH => false,
 		IMPL_LOADBH => false,
-		IMPL_CALL => false,
-		IMPL_SHIFT => false,
-		IMPL_XOR => false,
+		IMPL_CALL => true,
+		IMPL_SHIFT => true,
+		IMPL_XOR => true,
 		REMAP_STACK => false,
 		EXECUTE_RAM => false,
-		maxAddrBitBRAM => 10,
+		maxAddrBitBRAM => 8,
 		maxAddrBit => maxAddrBit
 	)
 	port map (

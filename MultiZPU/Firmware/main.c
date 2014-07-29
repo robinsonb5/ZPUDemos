@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 		{
 			int j;
 			int t;
-			for(j=0;j<100;++j)
+			for(j=0;j<512;++j)
 				t=HW_REG(REG_DELAY);
 		}
 		HW_REG(REG_LED)=p;

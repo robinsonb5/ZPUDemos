@@ -99,6 +99,11 @@ set_output_delay -clock sysclk -max 0.5 [get_ports {SD_CMD}]
 set_output_delay -clock sysclk -min 0.5 [get_ports {VGA_*}]
 set_output_delay -clock sysclk -max 0.5 [get_ports {VGA_*}]
 
+set_output_delay -clock sysclk -min 0.5 [get_ports {LED*}]
+set_output_delay -clock sysclk -max 0.5 [get_ports {LED*}]
+set_output_delay -clock sysclk -min 0.5 [get_ports {HEX*}]
+set_output_delay -clock sysclk -max 0.5 [get_ports {HEX*}]
+
 #**************************************************************
 # Set Clock Groups
 #**************************************************************

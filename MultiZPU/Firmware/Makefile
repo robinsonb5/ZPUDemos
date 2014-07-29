@@ -8,7 +8,7 @@ DUMP    = $(BASE)-objdump
 ZPUFLEXDIR = ../../ZPUFlex
 ROMGEN = $(ZPUFLEXDIR)/Firmware/zpuromgen
 
-# we use crt0.s from here
+# we use mincrt0.s from here
 STARTUP_DIR = $(ZPUFLEXDIR)/Firmware/startup
 
 # we fetch ROM prologue / epilogue from here
@@ -17,8 +17,8 @@ RTL_DIR = $(ZPUFLEXDIR)/RTL/
 
 BUILD_DIR=zpu_obj
 
-STARTUP_SRC = $(STARTUP_DIR)/crt0.s $(STARTUP_DIR)/premain.s
-STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
+MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s
+MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
 MAIN_PRJ = MultiZPU
 MAIN_SRC = main.c
@@ -29,7 +29,8 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 
-CFLAGS  = -I. -c -Os -DDISABLE_UART_RX
+ZPUOPTS= -mno-mult -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg # No-neg requires bugfixed toolchain
+CFLAGS  = -I. -c -Os $(ZPUOPTS) -DDISABLE_UART_RX
 
 LFLAGS  = -nostartfiles -Wl,--relax -Os
 
@@ -64,7 +65,7 @@ $(ROMGEN): $(ZPUFLEXDIR)/Firmware/zpuromgen.c
 
 # Link - this produces an ELF binary.
 
-$(MAIN_PRJ).elf: $(STARTUP_OBJ) $(MAIN_OBJ)
+$(MAIN_PRJ).elf: $(MINSTARTUP_OBJ) $(MAIN_OBJ)
 	$(LD) $(LFLAGS) -T $(LINKMAP) -o $@ $+ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile

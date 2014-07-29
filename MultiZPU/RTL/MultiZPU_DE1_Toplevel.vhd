@@ -119,7 +119,7 @@ greenleds: for i in 0 to 7 generate
 	end generate;
 
 
-redleds: for i in 0 to 4 generate
+redleds: for i in 0 to 9 generate
 	redled : entity work.ZPU_LEDWrapper
 		generic map
 		(
@@ -133,5 +133,18 @@ redleds: for i in 0 to 4 generate
 		);
 	end generate;
 
+hexleds: for i in 0 to 6 generate
+	hexled : entity work.ZPU_LEDWrapper
+		generic map
+		(
+			delay => (i+17)
+		)
+		port map
+		(	
+			clk => sysclk,
+			reset_in => reset,
+			led => HEX0(i)
+		);
+	end generate;
 
 end architecture;
