@@ -123,7 +123,7 @@ redleds: for i in 0 to 9 generate
 	redled : entity work.ZPU_LEDWrapper
 		generic map
 		(
-			delay => (i+7)
+			delay => (i+8)
 		)
 		port map
 		(	
@@ -137,7 +137,7 @@ hexleds: for i in 0 to 6 generate
 	hexled : entity work.ZPU_LEDWrapper
 		generic map
 		(
-			delay => (i+17)
+			delay => (i+18)
 		)
 		port map
 		(	
@@ -146,5 +146,17 @@ hexleds: for i in 0 to 6 generate
 			led => HEX0(i)
 		);
 	end generate;
+
+	hexled2 : entity work.ZPU_LEDWrapper
+		generic map
+		(
+			delay => (25)
+		)
+		port map
+		(	
+			clk => sysclk,
+			reset_in => reset,
+			led => HEX1(0)
+		);
 
 end architecture;
