@@ -40,12 +40,12 @@ entity VirtualToplevel is
 		spi_cs 		: out std_logic;
 
 		-- PS/2 signals
-		ps2k_clk_in : in std_logic;
-		ps2k_dat_in : in std_logic;
+		ps2k_clk_in : in std_logic := '1';
+		ps2k_dat_in : in std_logic := '1';
 		ps2k_clk_out : out std_logic;
 		ps2k_dat_out : out std_logic;
-		ps2m_clk_in : in std_logic;
-		ps2m_dat_in : in std_logic;
+		ps2m_clk_in : in std_logic := '1';
+		ps2m_dat_in : in std_logic := '1';
 		ps2m_clk_out : out std_logic;
 		ps2m_dat_out : out std_logic;
 

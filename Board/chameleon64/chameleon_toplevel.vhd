@@ -332,14 +332,14 @@ end generate;
 			txd => rs232_txd, -- rs232_txd,
 			
 --			-- PS/2
---			ps2k_clk_in => ps2_keyboard_clk_in,
---			ps2k_dat_in => ps2_keyboard_dat_in,
---			ps2k_clk_out => ps2_keyboard_clk_out,
---			ps2k_dat_out => ps2_keyboard_dat_out,
---			ps2m_clk_in => ps2_mouse_clk_in,
---			ps2m_dat_in => ps2_mouse_dat_in,
---			ps2m_clk_out => ps2_mouse_clk_out,
---			ps2m_dat_out => ps2_mouse_dat_out,
+			ps2k_clk_in => ps2_keyboard_clk_in,
+			ps2k_dat_in => ps2_keyboard_dat_in,
+			ps2k_clk_out => ps2_keyboard_clk_out,
+			ps2k_dat_out => ps2_keyboard_dat_out,
+			ps2m_clk_in => ps2_mouse_clk_in,
+			ps2m_dat_in => ps2_mouse_dat_in,
+			ps2m_clk_out => ps2_mouse_clk_out,
+			ps2m_dat_out => ps2_mouse_dat_out,
 			
 			-- SD Card interface
 			spi_cs => spi_cs,
