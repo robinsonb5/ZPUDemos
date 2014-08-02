@@ -5,7 +5,7 @@
 
 // FIXME - create another ring buffer for ASCII keystrokes
 
-unsigned char kblookup[2][128] =
+unsigned int kblookup[2][128] =
 {
 	{
 	0,0,0,0,0,0,0,0,
@@ -60,6 +60,7 @@ int HandlePS2RawCodes()
 	static short extkey=0;
 	int updateleds=0;
 	int key;
+
 	while((key=PS2KeyboardRead())>-1)
 	{
 		if(key==KEY_KEYUP)
