@@ -35,7 +35,7 @@ LINKMAP  = standalone_simple_debug.ld
 
 # Commandline options for each tool.
 
-CFLAGS  = -I. -I$(COMMON_DIR) -c -g -Os -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
+CFLAGS  = -g -I. -I$(COMMON_DIR) -c -g -Os -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
 
 LFLAGS  = -nostartfiles -Wl,--relax -Os -g
 

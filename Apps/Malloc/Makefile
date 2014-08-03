@@ -35,7 +35,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 
-CFLAGS  = -I. -I$(COMMON_DIR) -c -Os -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_FILESYSTEM -DDISABLE_UART_RX
+CFLAGS  = -g -I. -I$(COMMON_DIR) -c -Os -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff -DPRINTF_HEX_ONLY -DDISABLE_FILESYSTEM -DDISABLE_UART_RX
 
 LFLAGS  = -mboard=phi -nostartfiles -Wl,--gc-sections -Wl,--relax -Os
 
