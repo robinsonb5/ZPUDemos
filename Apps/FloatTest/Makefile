@@ -34,7 +34,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 ZPUFLAGS = -DDEBUG
-CFLAGS  = -mboard=phi -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -DDISABLE_FILESYSTEM -DRAMTOP=0x7fffff -Os -DDISABLE_UART_RX
+CFLAGS  = -mboard=phi -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -DDISABLE_FILESYSTEM -Os -DDISABLE_UART_RX
 
 LFLAGS  = -mboard=phi -Wl,--relax -Os
 LIBS = 

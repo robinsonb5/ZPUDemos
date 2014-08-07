@@ -34,7 +34,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 # Commandline options for each tool.
 
 ZPUFLAGS = # -DDEBUG # -mno-shortop -mno-byteop
-CFLAGS  = -I. -g -I$(COMMON_DIR) -c -Os $(ZPUFLAGS) -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff -DDISABLE_UART_RX
+CFLAGS  = -I. -g -I$(COMMON_DIR) -c -Os $(ZPUFLAGS) -ffunction-sections -fdata-sections -DDISABLE_UART_RX
 
 LFLAGS  = -nostartfiles -Wl,--gc-sections -Wl,--relax -Os
 LIBS = -lgcc

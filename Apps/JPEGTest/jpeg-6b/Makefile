@@ -9,7 +9,7 @@
 CC= zpu-elf-gcc
 
 # You may need to adjust these cc options:
-CFLAGS= -O6
+CFLAGS= -O6 -g
 # Generally, we recommend defining any configuration symbols in jconfig.h,
 # NOT via -D switches here.
 
