@@ -561,4 +561,5 @@ set_global_assignment -name VHDL_FILE ../../Firmware/RS232Bootstrap_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/spi.vhd
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/RS232Bootstrap/fpga/de1/stp1_auto_stripped.stp
+set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
