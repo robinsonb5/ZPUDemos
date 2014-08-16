@@ -117,6 +117,14 @@ signal sdram_state : sdram_states;
 
 begin
 
+ps2k_dat_out<='1';
+ps2k_clk_out<='1';
+ps2m_dat_out<='1';
+ps2m_clk_out<='1';
+
+audio_l <= X"0000";
+audio_r <= X"0000";
+
 spi_mosi <='1';
 spi_clk <='1';
 spi_cs <='1';

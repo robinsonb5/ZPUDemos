@@ -39,6 +39,16 @@ entity VirtualToplevel is
 		spi_clk		: out std_logic;
 		spi_cs 		: out std_logic;
 		
+		-- PS/2 signals
+		ps2k_clk_in : in std_logic := '1';
+		ps2k_dat_in : in std_logic := '1';
+		ps2k_clk_out : out std_logic;
+		ps2k_dat_out : out std_logic;
+		ps2m_clk_in : in std_logic := '1';
+		ps2m_dat_in : in std_logic := '1';
+		ps2m_clk_out : out std_logic;
+		ps2m_dat_out : out std_logic;
+
 		-- UART
 		rxd	: in std_logic;
 		txd	: out std_logic;
@@ -97,6 +107,11 @@ signal zpu_to_rom : ZPU_ToROM;
 signal zpu_from_rom : ZPU_FromROM;
 
 begin
+
+ps2k_dat_out<='1';
+ps2k_clk_out<='1';
+ps2m_dat_out<='1';
+ps2m_clk_out<='1';
 
 audio_l <= X"0000";
 audio_r <= X"0000";
