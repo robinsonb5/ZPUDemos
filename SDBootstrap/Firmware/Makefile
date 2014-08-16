@@ -19,7 +19,7 @@ COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
-MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s
+MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s $(STARTUP_DIR)/premain.s
 MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
 COMMON_SRC = $(COMMON_DIR)/small_printf.c $(COMMON_DIR)/uart.c $(COMMON_DIR)/uart.h $(COMMON_DIR)/vga.h \
@@ -38,7 +38,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/boot_mixed_remapped.ld
 ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg -mno-div -mno-mod # No-neg requires bugfixed toolchain
 CFLAGS  = -I. -I$(COMMON_DIR)/ -c -Os $(ZPUOPTS) -DDISABLE_UART_RX -DPRINTF_HEX_ONLY # -DDISABLE_PRINTF -DDISABLE_UART_TX
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
+LFLAGS  = -nostartfiles -nostdlib -Wl,--relax -Os -Wl,-Map,$(MAIN_PRJ).map
 
 
 # Our target.

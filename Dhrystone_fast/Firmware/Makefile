@@ -37,7 +37,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg -mno-div -mno-mod # No-neg requires bugfixed toolchain
 CFLAGS  = -I. -I$(COMMON_DIR)/ -c -O6 $(ZPUOPTS) -DDISABLE_UART_RX # -DPRINTF_HEX_ONLY
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
+LFLAGS  = -nostartfiles -nostdib -Wl,--relax -Os
 
 
 # Our target.

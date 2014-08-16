@@ -17,7 +17,7 @@ RTL_DIR = $(ZPUFLEXDIR)/RTL/
 
 BUILD_DIR=zpu_obj
 
-MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s
+MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s $(STARTUP_DIR)/premain.s
 MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
 MAIN_PRJ = MultiZPU
@@ -32,7 +32,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 ZPUOPTS= -mno-mult -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg # No-neg requires bugfixed toolchain
 CFLAGS  = -I. -c -Os $(ZPUOPTS) -DDISABLE_UART_RX
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
+LFLAGS  = -nostartfiles -nostdlib -Wl,--relax -Os
 
 
 # Our target.

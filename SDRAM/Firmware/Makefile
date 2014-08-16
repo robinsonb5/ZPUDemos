@@ -19,7 +19,7 @@ COMMON_DIR = ../../Common_Firmware
 
 BUILD_DIR=zpu_obj
 
-MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s
+MINSTARTUP_SRC = $(STARTUP_DIR)/mincrt0.s $(STARTUP_DIR)/premain.s
 MINSTARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(MINSTARTUP_SRC))
 
 COMMON_SRC = $(COMMON_DIR)/small_printf.c  $(COMMON_DIR)/uart.c  $(COMMON_DIR)/uart.h
@@ -41,7 +41,7 @@ SANITYCHECK_OBJ = $(patsubst %.s,%.o,$(SANITYCHECK_SRC))
 ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-neg # No-neg requires bugfixed toolchain
 CFLAGS  = -I. -I$(COMMON_DIR)/ -c -O6 $(ZPUOPTS) -DDISABLE_UART_RX -DPRINTF_HEX_ONLY
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
+LFLAGS  = -nostartfiles -nostdlib -Wl,--relax -Os
 
 
 # Our target.
