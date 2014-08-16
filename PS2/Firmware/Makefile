@@ -6,6 +6,7 @@ CP      = $(BASE)-objcopy
 DUMP    = $(BASE)-objdump
 
 ZPUFLEXDIR = ../../ZPUFlex
+ROMGEN = $(ZPUFLEXDIR)/Firmware/zpuromgen
 
 # we use crt0.s from here
 STARTUP_DIR = $(ZPUFLEXDIR)/Firmware/startup
@@ -16,32 +17,31 @@ RTL_DIR = $(ZPUFLEXDIR)/RTL/
 # we use printf from here
 COMMON_DIR = ../../Common_Firmware
 
-
 BUILD_DIR=zpu_obj
 
-STARTUP_SRC = crt0.s premain.s
-STARTUP_OBJ = $(patsubst %.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
+STARTUP_SRC = $(STARTUP_DIR)/crt0.s $(STARTUP_DIR)/premain.s
+STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
-COMMON_SRC = small_printf.c uart.c
+COMMON_SRC = small_printf.c uart.c interrupts.c 
 COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
- 
-MAIN_PRJ = Hello
-MAIN_SRC = main.c
+
+MAIN_PRJ = PS2
+MAIN_SRC = main.c ps2.c keyboard.c
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 
 # Commandline options for each tool.
-ZPUFLAGS = -DDEBUG
-CFLAGS  = -mboard=phi -g -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -DDISABLE_FILESYSTEM -DDISABLE_UART_RX
 
-LFLAGS  = -nostartfiles -nostdlib -Wl,--relax -Os -mboard=phi
-LIBS = -lgcc
+CFLAGS  = -I. -I$(COMMON_DIR) -c -Os -DDISABLE_UART_RX
+
+LFLAGS  = -nostartfiles -Wl,--relax -Os
+
 
 # Our target.
-all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ).srec
- 
+all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ)_ROM.vhd $(MAIN_PRJ).rpt
+
 clean:
 	rm -f $(BUILD_DIR)/*.o *.hex *.elf *.map *.lst *.srec $(MAIN_PRJ).rom *~ */*.o *.bin
 
@@ -50,8 +50,22 @@ clean:
 %.bin: %.elf
 	$(CP) -O binary $< $@
 
-%.srec: %.elf
-	$(CP) -O srec $< $@
+%.rpt: %.elf
+	echo >$@ -n "End of code:\t"
+	$(DUMP) -x $< | grep >>$@ _romend
+	echo >>$@ -n "Start of BSS:\t"
+	$(DUMP) -x $< | grep  >>$@ __bss_start__
+	echo >>$@ -n "End of BSS:\t"
+	$(DUMP) -x $< | grep >>$@ __bss_end__
+	cat $@
+
+$(ROMGEN): $(ZPUFLEXDIR)/Firmware/zpuromgen.c
+	gcc -o $(ZPUFLEXDIR)/Firmware/zpuromgen $(ZPUFLEXDIR)/Firmware/zpuromgen.c
+
+%_ROM.vhd: %.bin $(ROMGEN)
+	sed 's/dualportram/$*_ROM/' >$*_ROM.vhd <$(RTL_DIR)/rom_prologue.vhd
+	$(ROMGEN) $*.bin >>$*_ROM.vhd
+	cat >>$*_ROM.vhd $(RTL_DIR)/rom_epilogue.vhd
 
 # Link - this produces an ELF binary.
 
@@ -65,9 +79,6 @@ $(BUILD_DIR)/%.o: $(COMMON_DIR)/%.c Makefile
 	$(CC) $(CFLAGS)  -o $@ -c $<
 
 $(BUILD_DIR)/%.o: %.s
-	$(AS) -o $@ $<
-
-$(BUILD_DIR)/%.o: $(STARTUP_DIR)/%.s
 	$(AS) -o $@ $<
 
 $(BUILD_DIR)/%.o: $(STARTUP_DIR)/%.s

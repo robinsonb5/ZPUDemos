@@ -75,6 +75,11 @@ set_input_delay -clock sysclk -max 0.5 [get_ports {UART_RXD}]
 set_input_delay -clock sysclk -min 0.5 [get_ports {SD_DAT}]
 set_input_delay -clock sysclk -max 0.5 [get_ports {SD_DAT}]
 
+set_input_delay -clock sysclk -min 0.5 [get_ports {GPIO*}]
+set_input_delay -clock sysclk -max 0.5 [get_ports {GPIO*}]
+set_input_delay -clock sysclk -min 0.5 [get_ports {PS2_*}]
+set_input_delay -clock sysclk -max 0.5 [get_ports {PS2_*}]
+
 #**************************************************************
 # Set Output Delay
 #**************************************************************
@@ -103,6 +108,12 @@ set_output_delay -clock sysclk -min 0.5 [get_ports {LED*}]
 set_output_delay -clock sysclk -max 0.5 [get_ports {LED*}]
 set_output_delay -clock sysclk -min 0.5 [get_ports {HEX*}]
 set_output_delay -clock sysclk -max 0.5 [get_ports {HEX*}]
+
+set_output_delay -clock sysclk -min 0.5 [get_ports {GPIO*}]
+set_output_delay -clock sysclk -max 0.5 [get_ports {GPIO*}]
+set_output_delay -clock sysclk -min 0.5 [get_ports {PS2_*}]
+set_output_delay -clock sysclk -max 0.5 [get_ports {PS2_*}]
+
 
 #**************************************************************
 # Set Clock Groups

@@ -531,37 +531,25 @@ set_location_assignment PIN_W20 -to SD_DAT
 set_location_assignment PIN_U20 -to SD_DAT3
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE BALANCED
+set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE AREA
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
 set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS ON
 set_global_assignment -name MUX_RESTRUCTURE ON
 set_global_assignment -name ALLOW_SHIFT_REGISTER_MERGING_ACROSS_HIERARCHIES ALWAYS
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_MAP_LOGIC_TO_MEMORY_FOR_AREA ON
-set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
-set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 set_global_assignment -name SDC_FILE ../../../TimingConstraints/de1.sdc
-set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneII/DMACacheRAM.qip
-set_global_assignment -name VHDL_FILE ../../../RTL/sdram_simple.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/simple_uart.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/DE1_Toplevel.vhd
-set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneII/PLL.qip
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/toplevel_config.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/video_vga_master.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/video_vga_dither.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/vga_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/DMACache.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/RS232Bootstrap_Virtual_Toplevel.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/DMACache_config.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/DMACache_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../Firmware/RS232Bootstrap_ROM.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/spi.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/DE1_Toplevel.vhd
+set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneII/PLL.qip
 set_global_assignment -name SIGNALTAP_FILE stp1.stp
-set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/RS232Bootstrap/fpga/de1/stp1_auto_stripped.stp
-set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
-set_global_assignment -name VHDL_FILE ../../../RTL/io_ps2_com.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/interrupt_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/timer_controller.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/PS2_VirtualToplevel.vhd
+set_global_assignment -name VHDL_FILE ../../Firmware/PS2_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/io_ps2_com.vhd
+set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/PS2/fpga/de1/stp1_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -82,6 +82,7 @@ set_multicycle_path -through *zpu*Mult0* -hold -end 2
 #**************************************************************
 
 set_false_path -from {freeze_n} -to {*}
+set_false_path -from {phi2_n*} -to {*}
 set_false_path -to {red*} -from {*}
 set_false_path -to {grn*} -from {*}
 set_false_path -to {blu*} -from {*}

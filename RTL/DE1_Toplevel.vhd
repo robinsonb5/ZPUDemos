@@ -57,8 +57,8 @@ entity DE1_Toplevel is
 		TDO		:	 out STD_LOGIC;
 		I2C_SDAT		:	 inout STD_LOGIC;
 		I2C_SCLK		:	 out STD_LOGIC;
-		PS2_DAT		:	 in STD_LOGIC;
-		PS2_CLK		:	 in STD_LOGIC;
+		PS2_DAT		:	 inout STD_LOGIC;
+		PS2_CLK		:	 inout STD_LOGIC;
 		VGA_HS		:	 buffer STD_LOGIC;
 		VGA_VS		:	 buffer STD_LOGIC;
 		VGA_R		:	 out unsigned(3 downto 0);
@@ -83,6 +83,21 @@ signal pll_locked : std_logic;
 
 signal audio_l : signed(15 downto 0);
 signal audio_r : signed(15 downto 0);
+
+
+signal ps2m_clk_in : std_logic;
+signal ps2m_clk_out : std_logic;
+signal ps2m_dat_in : std_logic;
+signal ps2m_dat_out : std_logic;
+
+signal ps2k_clk_in : std_logic;
+signal ps2k_clk_out : std_logic;
+signal ps2k_dat_in : std_logic;
+signal ps2k_dat_out : std_logic;
+
+alias PS2_MDAT : std_logic is GPIO_1(19);
+alias PS2_MCLK : std_logic is GPIO_1(18);
+
 
 signal vga_tred : unsigned(7 downto 0);
 signal vga_tgreen : unsigned(7 downto 0);
@@ -114,6 +129,19 @@ SRAM_DQ <= (others => 'Z');
 I2C_SDAT	<= 'Z';
 GPIO_0 <= (others => 'Z');
 GPIO_1 <= (others => 'Z');
+
+-- PS2 keyboard & mouse
+ps2m_dat_in<=PS2_MDAT;
+PS2_MDAT <= '0' when ps2m_dat_out='0' else 'Z';
+ps2m_clk_in<=PS2_MCLK;
+PS2_MCLK <= '0' when ps2m_clk_out='0' else 'Z';
+
+ps2k_dat_in<=PS2_DAT;
+PS2_DAT <= '0' when ps2k_dat_out='0' else 'Z';
+ps2k_clk_in<=PS2_CLK;
+PS2_CLK <= '0' when ps2k_clk_out='0' else 'Z';
+
+
 
 mypll : entity work.PLL
 port map
@@ -171,6 +199,17 @@ port map
 	spi_mosi => SD_CMD,
 	spi_clk => SD_CLK,
 	
+	-- PS/2
+	ps2k_clk_in => ps2k_clk_in,
+	ps2k_dat_in => ps2k_dat_in,
+	ps2k_clk_out => ps2k_clk_out,
+	ps2k_dat_out => ps2k_dat_out,
+	ps2m_clk_in => ps2m_clk_in,
+	ps2m_dat_in => ps2m_dat_in,
+	ps2m_clk_out => ps2m_clk_out,
+	ps2m_dat_out => ps2m_dat_out,
+
+	-- Audio
 	audio_l => audio_l,
 	audio_r => audio_r
 );
