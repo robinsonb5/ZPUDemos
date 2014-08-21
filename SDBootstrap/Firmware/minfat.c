@@ -75,7 +75,7 @@ unsigned char sector_buffer[512];       // sector buffer
 int partitioncount;
 
 #define fat_buffer (*(FATBUFFER*)&sector_buffer) // Don't need a separate buffer for this.
-unsigned long buffered_fat_index;       // index of buffered FAT sector
+// unsigned long buffered_fat_index;       // index of buffered FAT sector
 
 
 #define BootPrint(x) puts(x);
@@ -95,10 +95,10 @@ int compare(const char *s1, const char *s2,int b)
 
 
 // FindDrive() checks if a card is present and contains FAT formatted primary partition
-unsigned char FindDrive(void)
+unsigned int FindDrive(void)
 {
 	unsigned long boot_sector;              // partition boot sector
-    buffered_fat_index = -1;
+//    buffered_fat_index = -1;
 	fat32=0;
 
 	puts("Reading MBR\n");
@@ -224,22 +224,23 @@ int GetCluster(int cluster)
     }
 
     // read sector of FAT if not already in the buffer
-    if (sb != buffered_fat_index)
-    {
+	// (Minimal FAT implementation doesn't have a separate buffer for FAT blocks, so always read.)
+//    if (sb != buffered_fat_index)
+//    {
 		printf("GetCluster reading sector %d\n",fat_start+sb);
         if (!sd_read_sector(fat_start + sb, (unsigned char*)&fat_buffer))
             return(0);
 //		hexdump(sector_buffer,512);
 
         // remember current buffer index
-        buffered_fat_index = sb;
-    }
+//        buffered_fat_index = sb;
+ //   }
     i = fat32 ? SwapBBBB(fat_buffer.fat32[i]) & 0x0FFFFFFF : SwapBB(fat_buffer.fat16[i]); // get FAT link for 68000 
 	return(i);
 }
 
 
-unsigned char FileOpen(fileTYPE *file, const char *name)
+unsigned int FileOpen(fileTYPE *file, const char *name)
 {
     unsigned long  iDirectory = 0;       // only root directory is supported
     DIRENTRY      *pEntry = NULL;        // pointer to current entry in sector buffer
@@ -248,7 +249,7 @@ unsigned char FileOpen(fileTYPE *file, const char *name)
     unsigned long  iEntry;               // entry index in directory cluster or FAT16 root directory
     unsigned long  nEntries;             // number of entries per cluster or FAT16 root directory size
 
-	buffered_fat_index=-1;
+//	buffered_fat_index=-1;
 
     iDirectoryCluster = root_directory_cluster;
     iDirectorySector = root_directory_start;
@@ -260,7 +261,7 @@ unsigned char FileOpen(fileTYPE *file, const char *name)
         {
             if ((iEntry & 0x0F) == 0) // first entry in sector, load the sector
             {
-				printf("Reading directory sector %d\n",iDirectorySector);
+//				printf("Reading directory sector %d\n",iDirectorySector);
                 sd_read_sector(iDirectorySector++, sector_buffer); // root directory is linear
 //				hexdump(sector_buffer,512);
                 pEntry = (DIRENTRY*)sector_buffer;
@@ -273,6 +274,7 @@ unsigned char FileOpen(fileTYPE *file, const char *name)
             {
                 if (!(pEntry->Attributes & (ATTR_VOLUME | ATTR_DIRECTORY))) // not a volume nor directory
                 {
+//					puts(pEntry->Name);
                     if (compare((const char*)pEntry->Name, name,11) == 0)
                     {
                         file->size = SwapBBBB(pEntry->FileSize); 		// for 68000
@@ -304,9 +306,7 @@ unsigned char FileOpen(fileTYPE *file, const char *name)
     return(0);
 }
 
-#if 0
-
-unsigned char FileNextSector(fileTYPE *file)
+unsigned int FileNextSector(fileTYPE *file)
 {
     unsigned long sb;
     unsigned short i;
@@ -316,16 +316,12 @@ unsigned char FileNextSector(fileTYPE *file)
 
     // cluster's boundary crossed?
     if ((file->sector&cluster_mask) == 0)
-    {
 		file->cluster=GetCluster(file->cluster);
-//        file->cluster = fat32 ? fat_buffer.fat32[i] & 0x0FFFFFFF: fat_buffer.fat16[i]; // get FAT link
-//        file->cluster = fat32 ? SwapBBBB(fat_buffer.fat32[i]) & 0x0FFFFFFF : SwapBB(fat_buffer.fat16[i]); // get FAT link for 68000 
-    }
 
     return(1);
 }
 
-unsigned char FileRead(fileTYPE *file, unsigned char *pBuffer)
+unsigned int FileRead(fileTYPE *file, unsigned char *pBuffer)
 {
     unsigned long sb;
 
@@ -338,7 +334,6 @@ unsigned char FileRead(fileTYPE *file, unsigned char *pBuffer)
     else
         return(1);
 }
-#endif
 
 fileTYPE file;
 
@@ -353,28 +348,9 @@ int LoadFile(const char *fn, unsigned char *buf)
 
 		while(c<imgsize)
 		{
-			unsigned long sb;
-
-			sb = data_start;                         // start of data in partition
-			sb += cluster_size * (file.cluster-2);  // cluster offset
-			sb += sector & cluster_mask;      // sector offset in cluster
-
-//			printf("Reading block %d (%d, %d, %d)...",sb,data_start,file.cluster,sector);
-
-			if (!sd_read_sector(sb, buf)) // read sector from drive
+			if(!FileRead(&file,buf))
 				return(0);
-//			hexdump(sector_buffer,512);
-
-//			puts("block read.\n");
-
-			++sector;
-
-		    // cluster's boundary crossed?
-    		if((sector&cluster_mask) == 0)
-		    {
-//				puts("Getting next cluster.\n");
-				file.cluster=GetCluster(file.cluster);
-		    }
+			FileNextSector(&file);
 
 			buf+=512;
 			++c;
