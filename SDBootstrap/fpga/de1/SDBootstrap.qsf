@@ -798,5 +798,5 @@ set_global_assignment -name VHDL_FILE ../../../VGA/RTL/Toplevel_Config.vhd
 set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
 set_global_assignment -name VHDL_FILE ../../../RTL/io_ps2_com.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/interrupt_controller.vhd
-set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/SDBootstrap/fpga/de1/stp1_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/SDBootstrap/fpga/de1/stp1_auto_stripped.stp
