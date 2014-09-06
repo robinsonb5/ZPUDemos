@@ -9,6 +9,7 @@ void SetOSDPos()
 {
 	int hf, vf;
 	int hh,hl,vh,vl;
+	int enable=1;
 	hf=HW_OSD(REG_OSD_HFRAME);
 	vf=HW_OSD(REG_OSD_VFRAME);
 
@@ -21,6 +22,7 @@ void SetOSDPos()
 	{
 		hl=hh;
 		hh=hf&0xff;
+		enable|=2; // Flip HSync polarity
 	}
 
 		
@@ -31,6 +33,7 @@ void SetOSDPos()
 	{
 		vl=vh;
 		vh=vf&0xff;
+		enable|=4; // Flip VSync polarity
 	}
 
 	hh<<=2+pixelclock;
@@ -43,6 +46,8 @@ void SetOSDPos()
 
 	printf("OSD Offsets: %d, %d\n",hl,vl);
 
+	HW_OSD(REG_OSD_XPOS)=-hl;
+	HW_OSD(REG_OSD_YPOS)=-vl;
 }
 
 
