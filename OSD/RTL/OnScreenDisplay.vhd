@@ -59,8 +59,8 @@ signal pixelcounter : unsigned(3 downto 0);
 signal pix : std_logic; -- Triggered momentarily at a pixel boundary
 
 -- Pixel-clock-based signals
-signal xpixelpos : unsigned(15 downto 0);
-signal ypixelpos : unsigned(15 downto 0);
+signal xpixelpos : unsigned(11 downto 0);
+signal ypixelpos : unsigned(11 downto 0);
 signal hwindowactive : std_logic;
 signal vwindowactive : std_logic;
 signal hactive : std_logic;
@@ -73,6 +73,7 @@ signal charram_wr : std_logic;
 signal osd_enable : std_logic;
 
 signal char : std_logic_vector(7 downto 0);
+signal charram_rdaddr : std_logic_vector(8 downto 0);
 signal charpixels : std_logic_vector(7 downto 0);
 
 begin
@@ -110,21 +111,21 @@ end process;
 process(clk,hsync_n)
 begin
 	if rising_edge(clk) then
+		newframe<='0';
 		if newline='1' then
 			vsync_p<=vsync_n;
 			vcounter<=vcounter+1;
-			newframe<='0';
 			if vsync_n='1' then
 				if vsync_p='0' then -- rising edge?
 					vframe(15 downto 8)<=std_logic_vector(vcounter(10 downto 3));
 					vcounter<=(others => '0'); -- Reset counter
-					newframe=vsync_pol;
+					newframe<=vsync_pol;
 				end if;
 			else
 				if vsync_p='1' then -- falling edge?
 					vframe(7 downto 0)<=std_logic_vector(vcounter(10 downto 3));
 					vcounter<=(others => '0'); -- Reset counter
-					newframe=not vsync_pol;
+					newframe<=not vsync_pol;
 				end if;		
 			end if;
 		end if;
@@ -151,20 +152,22 @@ end process;
 process(clk,reg_req,addr,data_in,hframe,vframe)
 begin
 
-	if rising_edge(clk) then
+	if reset_n='0' then
+		osd_enable<='0';
+	elsif rising_edge(clk) then
 		reg_ack<='0';
 		
 		if reg_req='1' then
 			reg_ack<='1';
 			if r_w='0' then -- write
-				case addr(3 downto 0) is
-					when X"0" =>
+				case addr(7 downto 0) is
+					when X"00" =>
 						xpos<=unsigned(data_in);
-					when X"1" =>
+					when X"04" =>
 						ypos<=unsigned(data_in);
-					when X"2" =>
+					when X"08" =>
 						pixelclock<=unsigned(data_in(3 downto 0));
-					when X"5" =>
+					when X"14" =>
 						osd_enable<=data_in(0);
 						hsync_pol<=data_in(1);
 						vsync_pol<=data_in(2);
@@ -172,10 +175,10 @@ begin
 						null;
 				end case;
 			else	-- Read
-				case addr(3 downto 0) is
-					when X"3" =>
+				case addr(7 downto 0) is
+					when X"0C" =>
 						data_out<=hframe;
-					when X"4" =>
+					when X"10" =>
 						data_out<=vframe;
 					when others =>
 						null;
@@ -189,43 +192,42 @@ end process;
 
 -- Generate window signal
 
+-- Enable vactive for ypixel positions between 0 and 127, inclusive.
+vactive<='1' when ypixelpos(11 downto 7)="00000" else '0';
+-- Enable hactive for xpixel positions between 0 and 255, inclusive.
+hactive<='1' when xpixelpos(11 downto 8)="0000" else '0';
+
 process(clk)
 begin
 
-	window<=hwindowactive and vwindowactive;
-	pixel<=hactive and vactive;
-
-	-- Enable vactive for ypixel positions between 0 and 127, inclusive.
-	vactive<='1' when ypixelpos(15)='0' and ypixelpos(11 downto 7)=(others=>'0') else '0';
-	-- Enable hactive for xpixel positions between 0 and 255, inclusive.
-	hactive<='1' when ypixelpos(15)='0' and ypixelpos(11 downto 8)=(others=>'0') else '0';
+	window<=osd_enable and hwindowactive and vwindowactive;
 
 	if rising_edge(clk) then
 
 		if pix='1' then
-			if xpixelpos(11 downto 0)=X"FFC" then -- 4 pixel border
+			if xpixelpos(11 downto 0)=X"FFB" then -- 4 pixel border
 				hwindowactive<='1';
 			end if;
-			if xpixelpos(11 downto 0)=X"104" then -- 4 pixel border
+			if xpixelpos(11 downto 0)=X"103" then -- 4 pixel border
 				hwindowactive<='0';
 			end if;
 			xpixelpos<=xpixelpos+1;
 		end if;
 	
 		if newline='1' then	-- Reset horizontal counter
-			if ypixelpos(11 downto 0)=X"FFC" then -- 4 pixel border
+			if ypixelpos(11 downto 0)=X"FFB" then -- 4 pixel border
 				vwindowactive<='1';
 			end if;
-			if ypixelpos(11 downto 0)=X"084" then -- 4 pixel border
+			if ypixelpos(11 downto 0)=X"083" then -- 4 pixel border
 				vwindowactive<='0';
 			end if;
 			
-			xpixelpos<=xpos;
+			xpixelpos<=xpos(11 downto 0);
 			ypixelpos<=ypixelpos+1;
 		end if;
 
-		if newframe<='1' then	-- Reset vertical counter
-			ypixelpos<=ypos;
+		if newframe='1' then	-- Reset vertical counter
+			ypixelpos<=ypos(11 downto 0);
 		end if;
 
 	end if;
@@ -235,7 +237,8 @@ end process;
 
 -- Character RAM
 
-charram_wr <= '1' when char_req='1' and r_w='0';
+charram_wr <= '1' when char_req='1' and r_w='0' else '0';
+charram_rdaddr <= std_logic_vector(ypixelpos(6 downto 3))&std_logic_vector(xpixelpos(7 downto 3));
 
 charram : entity Work.DualPortRAM_Unreg
 	generic map
@@ -246,7 +249,7 @@ charram : entity Work.DualPortRAM_Unreg
 	port map (
 		clock => clk,
 		data => data_in(7 downto 0),
-		rdaddress => (others => '0'),
+		rdaddress => charram_rdaddr,
 		wraddress => addr(8 downto 0),
 		wren => charram_wr,
 		q => char
@@ -263,5 +266,15 @@ charrom: entity Work.CharROM_ROM
 	q => charpixels
 );
 
+with (hactive and vactive)&std_logic_vector(xpixelpos(2 downto 0)) select pixel<=
+	charpixels(7) when "1000",
+	charpixels(6) when "1001",
+	charpixels(5) when "1010",
+	charpixels(4) when "1011",
+	charpixels(3) when "1100",
+	charpixels(2) when "1101",
+	charpixels(1) when "1110",
+	charpixels(0) when "1111",
+	'0' when others;
 
 end architecture;

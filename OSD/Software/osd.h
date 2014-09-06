@@ -15,7 +15,7 @@
 #define REG_OSD_ENABLE 20
 
 #define OSDCHARBUFFERBASE 0xFFFFFC00
-#define OSD_CHARBUFFER ((volatile unsigned char *)(OSDCHARBUFFERBASE+512)) // Byte accesses only
+#define OSD_CHARBUFFER ((volatile unsigned char *)(OSDCHARBUFFERBASE)) // Byte accesses only
 
 #endif
 

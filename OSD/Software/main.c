@@ -2,10 +2,9 @@
 #include "uart.h"
 #include "small_printf.h"
 
-
 int pixelclock;
 
-void SetOSDPos()
+void ShowOSD()
 {
 	int hf, vf;
 	int hh,hl,vh,vl;
@@ -39,13 +38,17 @@ void SetOSDPos()
 	hh<<=2+pixelclock;
 	vh<<=3;
 
+	pixelclock=2;
+	HW_OSD(REG_OSD_PIXELCLOCK)=(1<<pixelclock)-1;
+
 	printf("Frame width is %d, frame height is %d\n",hh,vh);
 
-	hl=(hh-80)/2;
-	vl=(vh-48)/2;
+	hl=((hh-100)-80)/2;
+	vl=((vh-60)-48)/2;
 
 	printf("OSD Offsets: %d, %d\n",hl,vl);
 
+	HW_OSD(REG_OSD_ENABLE)=enable;
 	HW_OSD(REG_OSD_XPOS)=-hl;
 	HW_OSD(REG_OSD_YPOS)=-vl;
 }
@@ -57,38 +60,14 @@ int main(int argc, char **argv)
 
 	printf("OSD Test\n");
 
-	HW_OSD(REG_OSD_ENABLE)=1;
-	for(i=0;i<4;++i)
-	{
-		int j;
-		pixelclock=i;
-		printf("Pixel clock: %d\n",1<<pixelclock);
-		HW_OSD(REG_OSD_PIXELCLOCK)=(1<<i)-1;
-		for(j=0;j<10000;++j)
-		{
-			int t=HW_OSD(REG_OSD_HFRAME);
-		}			
-		SetOSDPos();
-	}
-
-	HW_OSD(REG_OSD_ENABLE)=7;
-	for(i=0;i<4;++i)
-	{
-		int j;
-		pixelclock=i;
-		printf("Pixel clock: %d\n",1<<pixelclock);
-		HW_OSD(REG_OSD_PIXELCLOCK)=(1<<i)-1;
-		for(j=0;j<10000;++j)
-		{
-			int t=HW_OSD(REG_OSD_HFRAME);
-		}			
-		SetOSDPos();
-	}
+	ShowOSD();
 
 	for(i=0;i<512;++i)
 	{
 		OSD_CHARBUFFER[i]=i;
 	}	
+
+	ShowOSD();
 
 	return(0);
 }

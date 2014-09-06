@@ -153,6 +153,10 @@ signal sdram_state : sdram_states;
 
 signal vga_hsync_i : std_logic;
 signal vga_vsync_i : std_logic;
+signal vga_red_i : unsigned(7 downto 0);
+signal vga_green_i : unsigned(7 downto 0);
+signal vga_blue_i : unsigned(7 downto 0);
+signal vga_window_i	: std_logic;
 signal osd_window : std_logic;
 signal osd_pixel : std_logic;
 
@@ -327,7 +331,7 @@ port map(
 	pixel => osd_pixel,
 	window => osd_window,
 	-- Registers
-	addr => mem_addr(10 downto 2),
+	addr => mem_addr(8 downto 0),
 	data_in => mem_write(15 downto 0),
 	data_out => osd_data(15 downto 0),
 	r_w => osd_r_w,
@@ -365,11 +369,26 @@ port map(
 		hsync => vga_hsync_i,
 		vsync => vga_vsync_i,
 		vblank_int => vblank_int,
-		red => vga_red,
-		green => vga_green,
-		blue => vga_blue,
-		vga_window => vga_window
+		red => vga_red_i,
+		green => vga_green_i,
+		blue => vga_blue_i,
+		vga_window => vga_window_i
 	);
+
+myosdoverlay: entity work.OSD_Overlay
+port map (
+	clk => clk,
+	red_in => vga_red_i,
+	green_in => vga_green_i,
+	blue_in => vga_blue_i,
+	window_in => vga_window_i,
+	osd_window_in => osd_window,
+	osd_pixel_in => osd_pixel,
+	red_out => vga_red,
+	green_out => vga_green,
+	blue_out => vga_blue,
+	window_out => vga_window
+);
 
 	
 -- Main CPU
@@ -413,6 +432,7 @@ begin
 		ser_txgo<='0';
 		vga_reg_req<='0';
 		osd_req<='0';
+		osd_charreq<='0';
 		osd_r_w<='1';
 		
 		-- Write from CPU?
