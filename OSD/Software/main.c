@@ -2,6 +2,60 @@
 #include "uart.h"
 #include "small_printf.h"
 
+
+static int row, col;
+
+void OSD_Scroll()
+{
+	int i;
+	volatile unsigned char *p1,*p2;
+	p1=OSD_CHARBUFFER;
+	p2=OSD_CHARBUFFER+32;
+	printf("Scrolling %d, %d\n",(int)p1,(int)p2);
+	for(i=0;i<(512-32);++i)
+	{
+		*p1++=*p2++;
+	}
+	for(i=0;i<32;++i)
+		*p1++=' ';
+}
+
+
+void OSD_Putchar(int c)
+{
+	while(row>15)
+	{
+		OSD_Scroll();
+		--row;
+	}
+	if(c=='\n')
+	{
+		for(;col<32;++col)
+			OSD_CHARBUFFER[(row<<5)+col]=' ';
+		col=0;
+		++row;
+	}
+	else
+	{
+		OSD_CHARBUFFER[(row<<5)+col]=c;
+		col++;
+	}
+	if(col==32)
+	{
+		col=0;
+		++row;
+	}
+}
+
+
+void OSD_Puts(char *str)
+{
+	int c;
+	while((c=*str++))
+		OSD_Putchar(c);
+}
+
+
 int pixelclock;
 
 void ShowOSD()
@@ -54,6 +108,15 @@ void ShowOSD()
 }
 
 
+void wait()
+{
+	int t;
+	int i;
+	for(i=0;i<100000;++i)
+		t=HW_OSD(REG_OSD_VFRAME);
+}
+
+
 int main(int argc, char **argv)
 {
 	int i;
@@ -61,11 +124,27 @@ int main(int argc, char **argv)
 	printf("OSD Test\n");
 
 	ShowOSD();
+	wait();
+	ShowOSD();
 
-	for(i=0;i<512;++i)
-	{
-		OSD_CHARBUFFER[i]=i;
-	}	
+	OSD_Puts("Hello, world!\n");
+	OSD_Puts("Line 1!\n");
+	OSD_Puts("Line 2!\n");
+	OSD_Puts("Line 3!");
+	OSD_Puts("Line 4!\n");
+	OSD_Puts("Line 5!\n");
+	OSD_Puts("Line 6!\n");
+	OSD_Puts("Line 7!\n");
+	OSD_Puts("Line 8!\n");
+	OSD_Puts("Line 9!\n");
+	OSD_Puts("Line 10!\n");
+	OSD_Puts("Line 11!\n");
+	OSD_Puts("Line 12!\n");
+	OSD_Puts("Line 13!\n");
+	OSD_Puts("Line 14!\n");
+	OSD_Puts("Line 15!\n");
+	OSD_Puts("Line 16!\n");
+	OSD_Puts("Line 17!\n");
 
 	ShowOSD();
 

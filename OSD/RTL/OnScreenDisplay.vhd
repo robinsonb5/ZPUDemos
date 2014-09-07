@@ -30,10 +30,13 @@ port(
 	addr : in std_logic_vector(8 downto 0);
 	data_in : in std_logic_vector(15 downto 0);
 	data_out : out std_logic_vector(15 downto 0);
-	r_w : in std_logic;
-	reg_req : in std_logic;
-	reg_ack : out std_logic;
-	char_req : in std_logic
+	reg_wr : in std_logic;
+--	reg_req : in std_logic;
+--	reg_ack : out std_logic;
+--	char_req : in std_logic;
+--	char_ack : out std_logic;
+	char_wr : in std_logic;
+	char_q : out std_logic_vector(7 downto 0)
 );
 end entity;
 
@@ -149,17 +152,18 @@ begin
 end process;
 
 
-process(clk,reg_req,addr,data_in,hframe,vframe)
+process(clk,addr,data_in,hframe,vframe)
 begin
 
 	if reset_n='0' then
 		osd_enable<='0';
 	elsif rising_edge(clk) then
-		reg_ack<='0';
-		
-		if reg_req='1' then
-			reg_ack<='1';
-			if r_w='0' then -- write
+--		reg_ack<='0';
+--		char_ack<='0';
+
+--		if reg_req='1' then
+--			reg_ack<='1';
+			if reg_wr='1' then -- write
 				case addr(7 downto 0) is
 					when X"00" =>
 						xpos<=unsigned(data_in);
@@ -174,18 +178,23 @@ begin
 					when others =>
 						null;
 				end case;
-			else	-- Read
-				case addr(7 downto 0) is
-					when X"0C" =>
-						data_out<=hframe;
-					when X"10" =>
-						data_out<=vframe;
-					when others =>
-						null;
-				end case;
 			end if;
-		end if;
+--		end if;
+
+--		if char_req='1' then
+--			char_ack<='1';
+--		end if;
 	end if;
+
+	case addr(7 downto 0) is
+		when X"0C" =>
+			data_out<=hframe;
+		when X"10" =>
+			data_out<=vframe;
+		when others =>
+			null;
+	end case;
+
 end process;
 
 
@@ -237,10 +246,9 @@ end process;
 
 -- Character RAM
 
-charram_wr <= '1' when char_req='1' and r_w='0' else '0';
 charram_rdaddr <= std_logic_vector(ypixelpos(6 downto 3))&std_logic_vector(xpixelpos(7 downto 3));
 
-charram : entity Work.DualPortRAM_Unreg
+charram : entity Work.DualPortRAM_2Read_Unreg
 	generic map
 		(
 			AddrBits => 9,
@@ -248,11 +256,14 @@ charram : entity Work.DualPortRAM_Unreg
 		)
 	port map (
 		clock => clk,
-		data => data_in(7 downto 0),
-		rdaddress => charram_rdaddr,
-		wraddress => addr(8 downto 0),
-		wren => charram_wr,
-		q => char
+		data1 => (others => 'X'),
+		data2 => data_in(7 downto 0),
+		address1 => charram_rdaddr,
+		address2 => addr(8 downto 0),
+		wren1 => '0',
+		wren2 => char_wr,
+		q1 => char,
+		q2 => char_q
 	);
 
 charrom: entity Work.CharROM_ROM

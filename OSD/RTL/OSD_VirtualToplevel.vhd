@@ -160,10 +160,13 @@ signal vga_window_i	: std_logic;
 signal osd_window : std_logic;
 signal osd_pixel : std_logic;
 
-signal osd_r_w : std_logic;
-signal osd_req : std_logic;
-signal osd_ack : std_logic;
-signal osd_charreq : std_logic;
+signal osd_wr : std_logic;
+--signal osd_req : std_logic;
+--signal osd_ack : std_logic;
+--signal osd_charreq : std_logic;
+--signal osd_charack : std_logic;
+signal osd_charwr : std_logic;
+signal osd_char_q : std_logic_vector(7 downto 0);
 signal osd_data : std_logic_vector(15 downto 0);
 
 begin
@@ -334,10 +337,14 @@ port map(
 	addr => mem_addr(8 downto 0),
 	data_in => mem_write(15 downto 0),
 	data_out => osd_data(15 downto 0),
-	r_w => osd_r_w,
-	reg_req => osd_req,
-	reg_ack => osd_ack,
-	char_req => osd_charreq
+	reg_wr => osd_wr,
+--	r_w => osd_r_w,
+--	reg_req => osd_req,
+--	reg_ack => osd_ack,
+--	char_req => osd_charreq,
+--	char_ack => osd_charack,
+	char_wr => osd_charwr,
+	char_q => osd_char_q
 );
 
 	
@@ -431,24 +438,22 @@ begin
 		mem_busy<='1';
 		ser_txgo<='0';
 		vga_reg_req<='0';
-		osd_req<='0';
-		osd_charreq<='0';
-		osd_r_w<='1';
+--		osd_req<='0';
+		osd_charwr<='0';
+		osd_wr<='0';
 		
 		-- Write from CPU?
 		if mem_writeEnable='1' then
 			case mem_addr(31)&mem_addr(10 downto 8) is
 				when X"B" =>	-- OSD controller at 0xFFFFFB00
-					osd_r_w<='0';
-					osd_req<='1';
+					osd_wr<='1';
+--					osd_req<='1';
 					mem_busy<='0';
 				when X"C" =>	-- OSD controller at 0xFFFFFC00 & 0xFFFFFD00
-					osd_r_w<='0';
-					osd_charreq<='1';
+					osd_charwr<='1';
 					mem_busy<='0';
 				when X"D" =>	-- OSD controller at 0xFFFFFC00 & 0xFFFFFD00
-					osd_r_w<='0';
-					osd_charreq<='1';
+					osd_charwr<='1';
 					mem_busy<='0';
 				when X"E" =>	-- VGA controller at 0xFFFFFE00
 					vga_reg_rw<='0';
@@ -479,7 +484,18 @@ begin
 			case mem_addr(31)&mem_addr(10 downto 8) is
 
 				when X"B" =>	-- OSD registers
-					osd_req<='1';
+					mem_read(31 downto 16)<=(others => '0');
+					mem_read(15 downto 0)<=osd_data;
+					mem_busy<='0';
+--					osd_req<='1';
+				when X"C" =>	-- OSD controller at 0xFFFFFC00 & 0xFFFFFD00
+					mem_read(31 downto 8)<=(others => 'X');
+					mem_read(7 downto 0)<=osd_char_q;
+					mem_busy<='0';
+				when X"D" =>	-- OSD controller at 0xFFFFFC00 & 0xFFFFFD00
+					mem_read(31 downto 8)<=(others => 'X');
+					mem_read(7 downto 0)<=osd_char_q;
+					mem_busy<='0';
 
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
@@ -505,11 +521,11 @@ begin
 
 -- OSD cycle termination
 
-		if osd_r_w='1' and osd_ack='1' then
-			mem_read(31 downto 16)<=(others => '0');
-			mem_read(15 downto 0)<=osd_data;
-			mem_busy<='0';
-		end if;
+--		if osd_ack='1' then
+--			mem_read(31 downto 16)<=(others => '0');
+--			mem_read(15 downto 0)<=osd_data;
+--			mem_busy<='0';
+--		end if;
 
 		
 -- SDRAM state machine
