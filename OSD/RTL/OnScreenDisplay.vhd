@@ -74,7 +74,7 @@ signal osd_enable : std_logic;
 
 signal char : std_logic_vector(7 downto 0);
 signal charram_rdaddr : std_logic_vector(8 downto 0);
-signal charpixels : std_logic_vector(7 downto 0);
+signal charpixel : std_logic;
 
 begin
 
@@ -258,23 +258,14 @@ charram : entity Work.DualPortRAM_Unreg
 charrom: entity Work.CharROM_ROM
 	generic map
 	(
-		addrbits => 10
+		addrbits => 13
 	)
 	port map (
 	clock => clk,
-	address => char(6 downto 0)&std_logic_vector(ypixelpos(2 downto 0)),
-	q => charpixels
+	address => char(6 downto 0)&std_logic_vector(ypixelpos(2 downto 0))&std_logic_vector(xpixelpos(2 downto 0)),
+	q => charpixel
 );
 
-with (hactive and vactive)&std_logic_vector(xpixelpos(2 downto 0)) select pixel<=
-	charpixels(7) when "1000",
-	charpixels(6) when "1001",
-	charpixels(5) when "1010",
-	charpixels(4) when "1011",
-	charpixels(3) when "1100",
-	charpixels(2) when "1101",
-	charpixels(1) when "1110",
-	charpixels(0) when "1111",
-	'0' when others;
+pixel <=charpixel and hactive and vactive;
 
 end architecture;
