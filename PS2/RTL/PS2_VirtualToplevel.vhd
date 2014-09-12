@@ -91,6 +91,8 @@ signal int_trigger : std_logic;
 -- PS2 signals
 signal ps2_int : std_logic;
 
+signal ps2k_clk_db : std_logic;
+
 signal kbdidle : std_logic;
 signal kbdrecv : std_logic;
 signal kbdrecvreg : std_logic;
@@ -178,7 +180,7 @@ myuart : entity work.simple_uart
 	mykeyboard : entity work.io_ps2_com
 		generic map (
 			clockFilter => 15,
-			ticksPerUsec => sysclk_frequency/10
+			ticksPerUsec => 100
 		)
 		port map (
 			clk => clk,

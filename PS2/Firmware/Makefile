@@ -34,9 +34,9 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 
-CFLAGS  = -I. -I$(COMMON_DIR) -c -Os -DDISABLE_UART_RX
+CFLAGS  = -I. -I$(COMMON_DIR) -c -Os -DDISABLE_UART_RX -g
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
+LFLAGS  = -nostartfiles -Wl,--relax -Os -g
 
 
 # Our target.

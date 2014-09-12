@@ -5,7 +5,7 @@
 
 // FIXME - create another ring buffer for ASCII keystrokes
 
-unsigned int kblookup[2][128] =
+unsigned char kblookup[2][128] =
 {
 	{
 	0,0,0,0,0,0,0,0,
@@ -45,7 +45,12 @@ unsigned int kblookup[2][128] =
 	},
 };
 
-unsigned char keytable[256]={0};
+// Only need 2 bits per key in the keytable,
+// so we'll use 32-bit ints to store the key statuses
+// since that's more convienent for the ZPU.
+// Keycode (0-255)>>4 -> Index
+// Shift each 2-bit tuple by (keycode & 15)*2.
+unsigned int keytable[16]={0};
 
 #define QUAL_SHIFT 0
 
@@ -56,8 +61,8 @@ static int fkeys=0;
 int HandlePS2RawCodes()
 {
 	int result=0;
-	static short keyup=0;
-	static short extkey=0;
+	static int keyup=0;
+	static int extkey=0;
 	int updateleds=0;
 	int key;
 
@@ -73,20 +78,21 @@ int HandlePS2RawCodes()
 //			{
 				int keyidx=extkey ? 128+key : key;
 				if(keyup)
-					keytable[keyidx]&=0xfe;  // Mask off the "currently pressed" bit.
+					keytable[keyidx>>4]&=~(1<<((keyidx&15)*2));  // Mask off the "currently pressed" bit.
 				else
-					keytable[keyidx]=3;	// Currently pressed and pressed since last test.
+					keytable[keyidx>>4]|=3<<((keyidx&15)*2);	// Currently pressed and pressed since last test.
 //			}
 			if(keyup==0)
 			{
 				int a=0;
-				if(key<128)
+//				printf("key %d, qual %d\n",key,qualifiers);
+				if(!extkey)
 				{
 					a=kblookup[ (leds & 4) ? qualifiers | 1 : qualifiers][key];
+//					printf("code %d\n",a);
 					if(a)
 						return(a);
 				}
-				extkey=0;
 				switch(key)
 				{
 					case 0x58:	// Caps lock
@@ -117,6 +123,7 @@ int HandlePS2RawCodes()
 						break;
 				}
 			}
+			extkey=0;
 			keyup=0;
 		}
 	}
@@ -132,7 +139,7 @@ int HandlePS2RawCodes()
 void ClearKeyboard()
 {
 	int i;
-	for(i=0;i<256;++i)
+	for(i=0;i<16;++i)
 		keytable[i]=0;
 }
 
@@ -140,8 +147,8 @@ int TestKey(int rawcode)
 {
 	int result;
 	DisableInterrupts();	// Make sure a new character doesn't arrive halfway through the read
-	result=keytable[rawcode];
-	keytable[rawcode]&=0xfd;	// Mask off the "pressed since last test" bit.
+	result=3&(keytable[rawcode>>4]>>((rawcode&15)*2));
+	keytable[rawcode>>4]&=~(2<<((rawcode&15)*2));	// Mask off the "pressed since last test" bit.
 	EnableInterrupts();
 	return(result);
 }
