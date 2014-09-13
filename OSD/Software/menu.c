@@ -10,39 +10,15 @@ static int menurows;
 static int currentrow;
 
 
-static void reset()
+void Menu_Show()
 {
-
+	OSD_Show(menu_visible=1);
 }
 
-static void exitosd()
+void Menu_Hide()
 {
 	OSD_Show(menu_visible=0);
 }
-
-
-static struct menu_entry topmenu[];
-
-static struct menu_entry dipswitches[]=
-{
-	{MENU_ENTRY_TOGGLE,"SD Card ",0},
-	{MENU_ENTRY_TOGGLE,"Scandoubler ",1},
-	{MENU_ENTRY_TOGGLE,"Sound ",2},
-	{MENU_ENTRY_TOGGLE,"Memory ",3},
-	{MENU_ENTRY_SUBMENU,"Back",MENU_ACTION(topmenu)},
-	
-	{MENU_ENTRY_NULL,0,0},
-};
-
-
-static struct menu_entry topmenu[]=
-{
-	{MENU_ENTRY_SUBMENU,"DIP Switches \x10",MENU_ACTION(dipswitches)},
-	{MENU_ENTRY_CALLBACK,"Reset",MENU_ACTION(&reset)},
-	{MENU_ENTRY_CALLBACK,"Exit",MENU_ACTION(&exitosd)},
-	{MENU_ENTRY_NULL,0,0},
-};
-
 
 void Menu_Draw()
 {
@@ -51,16 +27,28 @@ void Menu_Draw()
 	menurows=0;
 	while(m->type!=MENU_ENTRY_NULL)
 	{
+		int i;
+		char **labels;
 		OSD_SetX(2);
 		OSD_SetY(menurows);
-		if(m->type==MENU_ENTRY_TOGGLE)
+		switch(m->type)
 		{
-			if((menu_toggles>>MENU_ACTION_TOGGLE(m->action))&1)
-				OSD_Puts("\x14 ");
-			else
-				OSD_Puts("\x15 ");
+			case MENU_ENTRY_CYCLE:
+				i=MENU_CYCLE_VALUE(m);	// Access the first byte
+				labels=(char**)m->label;
+				OSD_Puts("\x16 ");
+				OSD_Puts(labels[i]);
+				break;
+			case MENU_ENTRY_TOGGLE:
+				if((menu_toggles>>MENU_ACTION_TOGGLE(m->action))&1)
+					OSD_Puts("\x14 ");
+				else
+					OSD_Puts("\x15 ");
+				// Fall through
+			default:
+				OSD_Puts(m->label);
+				break;
 		}
-		OSD_Puts(m->label);
 		++menurows;
 		m++;
 	}
@@ -69,8 +57,6 @@ void Menu_Draw()
 
 void Menu_Set(struct menu_entry *head)
 {
-	if(!head)
-		head=topmenu;
 	menu=head;
 	Menu_Draw();
 	currentrow=menurows-1;
@@ -107,6 +93,13 @@ void Menu_Run()
 			case MENU_ENTRY_TOGGLE:
 				i=1<<MENU_ACTION_TOGGLE(m->action);
 				menu_toggles^=i;
+				Menu_Draw();
+				break;
+			case MENU_ENTRY_CYCLE:
+				i=MENU_CYCLE_VALUE(m)+1;
+				if(i>=MENU_CYCLE_COUNT(m))
+					i=0;
+				MENU_CYCLE_VALUE(m)=i;
 				Menu_Draw();
 				break;
 			default:
