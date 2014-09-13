@@ -17,5 +17,19 @@
 #define OSDCHARBUFFERBASE 0xFFFFFC00
 #define OSD_CHARBUFFER ((volatile unsigned char *)(OSDCHARBUFFERBASE)) // Byte accesses only
 
+#define OSD_ROWS 16
+#define OSD_COLS 32
+
+extern int osd_cursory, osd_cursorx;
+
+void OSD_Scroll();
+void OSD_Clear();
+#define OSD_SetX(x) (osd_cursorx=(x&(OSD_COLS-1)))
+#define OSD_SetY(x) (osd_cursory=(x&(OSD_ROWS-1)))
+void OSD_Putchar(int c);
+void OSD_Puts(char *str);
+
+void OSD_Show(int visible);
+
 #endif
 

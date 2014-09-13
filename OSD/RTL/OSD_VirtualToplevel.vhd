@@ -169,13 +169,28 @@ signal osd_charwr : std_logic;
 signal osd_char_q : std_logic_vector(7 downto 0);
 signal osd_data : std_logic_vector(15 downto 0);
 
+-- Keyboard signals
+signal kbdidle : std_logic;
+signal kbdrecv : std_logic;
+signal kbdrecvreg : std_logic;
+signal kbdrecvbyte : std_logic_vector(10 downto 0);
+
+-- Interrupt signals
+
+constant int_max : integer := 1;
+signal int_triggers : std_logic_vector(int_max downto 0);
+signal int_status : std_logic_vector(int_max downto 0);
+signal int_ack : std_logic;
+signal int_req : std_logic;
+signal int_enabled : std_logic :='0'; -- Disabled by default
+signal int_trigger : std_logic;
+
+
 begin
 
 vga_hsync<=vga_hsync_i;
 vga_vsync<=vga_vsync_i;
 
-ps2k_dat_out<='1';
-ps2k_clk_out<='1';
 ps2m_dat_out<='1';
 ps2m_clk_out<='1';
 
@@ -251,6 +266,32 @@ myuart : entity work.simple_uart
 		txd => txd
 	);
 
+-- PS2 devices
+
+	mykeyboard : entity work.io_ps2_com
+		generic map (
+			clockFilter => 15,
+			ticksPerUsec => 100
+		)
+		port map (
+			clk => clk,
+			reset => not reset, -- active high!
+			ps2_clk_in => ps2k_clk_in,
+			ps2_dat_in => ps2k_dat_in,
+			ps2_clk_out => ps2k_clk_out,
+			ps2_dat_out => ps2k_dat_out,
+			
+			inIdle => open,	-- Probably don't need this
+			sendTrigger => '0',
+			sendByte => (others =>'X'),
+			sendBusy => open,
+			sendDone => open,
+			recvTrigger => kbdrecv,
+			recvByte => kbdrecvbyte
+		);
+
+	
+	
 -- DMA controller
 
 	mydmacache : entity work.DMACache
@@ -397,6 +438,26 @@ port map (
 	window_out => vga_window
 );
 
+
+-- Interrupt controller
+
+intcontroller: entity work.interrupt_controller
+generic map (
+	max_int => int_max
+)
+port map (
+	clk => clk,
+	reset_n => reset,
+	trigger => int_triggers, -- Again, thanks ISE.
+	ack => int_ack,
+	int => int_req,
+	status => int_status
+);
+
+int_triggers<=(0=>'0',
+					1=>kbdrecv,
+					others => '0');
+
 	
 -- Main CPU
 
@@ -426,17 +487,23 @@ port map (
 		out_mem_bEnable     => mem_writeEnableb,
 		out_mem_readEnable  => mem_readEnable,
 		from_rom => zpu_from_rom,
-		to_rom => zpu_to_rom
+		to_rom => zpu_to_rom,
+		interrupt => int_trigger
 	);
+
+int_trigger<=int_req and int_enabled;
 
 
 process(clk)
 begin
+
 	if reset='0' then
+		kbdrecvreg <='0';
 --		spi_cs<='1';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';
+		int_ack<='0';
 		vga_reg_req<='0';
 --		osd_req<='0';
 		osd_charwr<='0';
@@ -461,6 +528,9 @@ begin
 					mem_busy<='0';
 				when X"F" =>	-- Peripherals at 0xFFFFFF00
 					case mem_addr(7 downto 0) is
+						when X"B0" => -- Interrupts
+							int_enabled<=mem_write(0);
+							mem_busy<='0';
 						when X"C0" => -- UART
 							ser_txdata<=mem_write(7 downto 0);
 							ser_txgo<='1';
@@ -499,6 +569,12 @@ begin
 
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
+						when X"B0" => -- Interrupt
+							mem_read<=(others=>'X');
+							mem_read(int_max downto 0)<=int_status;
+							int_ack<='1';
+							mem_busy<='0';
+							
 						when X"C0" => -- UART
 							mem_read<=(others=>'X');
 							mem_read(9 downto 0)<=ser_rxrecv&ser_txready&ser_rxdata;
@@ -507,6 +583,13 @@ begin
 							
 						when X"C8" => -- Millisecond counter
 							mem_read<=std_logic_vector(millisecond_counter);
+							mem_busy<='0';
+
+						-- Read from PS/2 regs
+						when X"E0" =>
+							mem_read<=(others =>'X');
+							mem_read(11 downto 0)<=kbdrecvreg & '1' & kbdrecvbyte(10 downto 1);
+							kbdrecvreg<='0';
 							mem_busy<='0';
 
 						when others =>
@@ -582,6 +665,10 @@ begin
 		-- Set this after the read operation has potentially cleared it.
 		if ser_rxint='1' then
 			ser_rxrecv<='1';
+		end if;
+
+		if kbdrecv='1' then
+			kbdrecvreg <= '1'; -- remains high until cleared by a read
 		end if;
 
 	end if; -- rising-edge(clk)

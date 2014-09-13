@@ -22,11 +22,11 @@ BUILD_DIR=zpu_obj
 STARTUP_SRC = $(STARTUP_DIR)/crt0.s $(STARTUP_DIR)/premain.s
 STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
 
-COMMON_SRC = small_printf.c uart.c
+COMMON_SRC = small_printf.c uart.c ps2.c keyboard.c interrupts.c
 COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
 MAIN_PRJ = VGA
-MAIN_SRC = main.c
+MAIN_SRC = main.c menu.c osd.c
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
@@ -34,9 +34,10 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 ZPUFLAGS = -DDEBUG
-CFLAGS  = -I. -g -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -DDISABLE_UART_RX
+CFLAGS  = -I. -g -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -ffunction-sections -fdata-sections -DDISABLE_UART_RX
 
-LFLAGS  = -nostartfiles -Wl,--relax -Os
+LFLAGS  = -nostartfiles -nostdlib -Wl,--gc-sections -Wl,--relax -Os
+LIBS=-lgcc
 
 
 # Our target.

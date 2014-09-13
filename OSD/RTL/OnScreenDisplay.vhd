@@ -192,6 +192,7 @@ begin
 		when X"10" =>
 			data_out<=vframe;
 		when others =>
+			data_out<=(others=>'X');
 			null;
 	end case;
 
