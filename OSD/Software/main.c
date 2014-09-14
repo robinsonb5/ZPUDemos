@@ -69,11 +69,9 @@ static struct menu_entry topmenu[]=
 };
 
 
-
-
 int main(int argc, char **argv)
 {
-	int i;
+	int i=0;
 
 	PS2Init();
 	EnableInterrupts();
@@ -84,8 +82,9 @@ int main(int argc, char **argv)
 	{
 		HandlePS2RawCodes();
 		Menu_Run();
+		++i;
+		OSD_ProgressBar(15,i,10);
 	}
-
 	return(0);
 }
 

@@ -28,6 +28,7 @@ void OSD_Clear();
 #define OSD_SetY(x) (osd_cursory=(x&(OSD_ROWS-1)))
 void OSD_Putchar(int c);
 void OSD_Puts(char *str);
+void OSD_ProgressBar(int row, int v,int bits);
 
 void OSD_Show(int visible);
 

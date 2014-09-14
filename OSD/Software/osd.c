@@ -68,6 +68,22 @@ void OSD_Puts(char *str)
 }
 
 
+void OSD_ProgressBar(int row, int v,int bits)
+{
+	int i,j;
+	OSD_SetX(8);
+	OSD_SetY(row);
+	j=(v>>(bits-4))&15;
+	for(i=0;i<j;++i)
+		OSD_Putchar(7);
+	j=v>>(bits-7)&7;
+	if(j)
+		OSD_Putchar(j);
+	for(;i<15;++i)
+		OSD_Putchar(32);
+}
+
+
 static int pixelclock;
 static int osd_syncpolarity;
 
