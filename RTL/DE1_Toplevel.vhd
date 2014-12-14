@@ -130,6 +130,33 @@ I2C_SDAT	<= 'Z';
 GPIO_0 <= (others => 'Z');
 GPIO_1 <= (others => 'Z');
 
+-- Safe defaults for pins we're not using
+HEX0<=(others => '1');
+HEX1<=(others => '1');
+HEX2<=(others => '1');
+HEX3<=(others => '1');
+LEDR<=(others => '0');
+LEDG<=(others => '0');
+
+FL_ADDR<=(others => 'X');
+FL_WE_N<='1';
+FL_OE_N<='1';
+FL_CE_N<='1';
+FL_RST_N<='1';
+SRAM_CE_N<='1';
+SRAM_OE_N<='1';
+SRAM_UB_N<='1';
+SRAM_LB_N<='1';
+SRAM_WE_N<='1';
+SRAM_ADDR<=(others =>'0');
+
+TDO<='1';
+I2C_SCLK<='1';
+AUD_ADCLRCK<='1';
+AUD_DACLRCK<='1';
+AUD_DACDAT<='1';
+AUD_XCK<='1';
+
 -- PS2 keyboard & mouse
 ps2m_dat_in<=PS2_MDAT;
 PS2_MDAT <= '0' when ps2m_dat_out='0' else 'Z';
@@ -210,8 +237,8 @@ port map
 	ps2m_dat_out => ps2m_dat_out,
 
 	-- Audio
-	audio_l => audio_l,
-	audio_r => audio_r
+	audio_l => open, -- audio_l,
+	audio_r => open -- audio_r
 );
 
 dither1: if Toplevel_UseVGA=true generate

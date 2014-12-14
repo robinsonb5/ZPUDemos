@@ -85,7 +85,6 @@ signal cas_sd_cs	:std_logic;	-- Temp registers...
 signal cas_sd_ras	:std_logic;
 signal cas_sd_cas	:std_logic;
 signal cas_sd_we 	:std_logic;
-signal cas_dqm		:std_logic_vector(1 downto 0);	-- ...mask register for entire burst
 signal init_done	:std_logic :='0';
 signal datain		:std_logic_vector(15 downto 0);
 signal casaddr		:std_logic_vector(31 downto 0);
@@ -103,9 +102,7 @@ signal sdram_state		: sdram_states;
 type sdram_ports is (idle,refresh,port0,port1,zpu,writecache);
 
 signal sdram_slot1 : sdram_ports :=refresh;
-signal sdram_slot1_readwrite : std_logic;
 signal sdram_slot2 : sdram_ports :=idle;
-signal sdram_slot2_readwrite : std_logic;
 
 -- Since VGA has absolute priority, we keep track of the next bank and disallow accesses
 -- to either the current or next bank in the interleaved access slots.
@@ -135,38 +132,40 @@ signal zpu_ack : std_logic;
 
 begin
 
-	process(sysclk)
+	process(sysclk,reset,port1_dtack,writecache_dtack,zpu_ack)
 	begin
 	
 	dtack1 <= port1_dtack and writecache_dtack and zpu_ack; -- and not readcache_dtack;
 
 
-	if reset='0' then
-		writecache_req<='0';
-	elsif rising_edge(sysclk) then
+	if rising_edge(sysclk) then
 
-		writecache_dtack<='1';
-
-		-- 32-bit variant of writecache for ZPU...
-		if req1='1' and wr1='0' and writecache_req='0' then
-			writecache_addr(31 downto 3)<=addr1(31 downto 3);
-			if wrU2='1' then -- is this a halfword write?	
-				-- 00 -> 11, 01 -> 00, 10 -> 01, 11 -> 10
-				writecache_addr(2)<=addr1(2) xor not addr1(1);
-				writecache_addr(1)<=not addr1(1);
-			else
-				writecache_addr(2 downto 1)<=addr1(2 downto 1);
-			end if;
-			writecache_word0<=datawr1(31 downto 16);
-			writecache_dqm(1 downto 0)<=wrU2&wrU2; -- Are we writing the upper word?
-			writecache_word1<=datawr1(15 downto 0);
-			writecache_dqm(3 downto 2)<=wrU1&wrL1; -- Are we writing the lower two bytes?
-			writecache_req<='1';
-			writecache_dtack<='0';
-		end if;
-		if writecache_ack='1' then
+		if reset='0' then
 			writecache_req<='0';
-		end if;				
+		else
+			writecache_dtack<='1';
+
+			-- 32-bit variant of writecache for ZPU...
+			if req1='1' and wr1='0' and writecache_req='0' then
+				writecache_addr(31 downto 3)<=addr1(31 downto 3);
+				if wrU2='1' then -- is this a halfword write?	
+					-- 00 -> 11, 01 -> 00, 10 -> 01, 11 -> 10
+					writecache_addr(2)<=addr1(2) xor not addr1(1);
+					writecache_addr(1)<=not addr1(1);
+				else
+					writecache_addr(2 downto 1)<=addr1(2 downto 1);
+				end if;
+				writecache_word0<=datawr1(31 downto 16);
+				writecache_dqm(1 downto 0)<=wrU2&wrU2; -- Are we writing the upper word?
+				writecache_word1<=datawr1(15 downto 0);
+				writecache_dqm(3 downto 2)<=wrU1&wrL1; -- Are we writing the lower two bytes?
+				writecache_req<='1';
+				writecache_dtack<='0';
+			end if;
+			if writecache_ack='1' then
+				writecache_req<='0';
+			end if;				
+		end if;
 	end if;
 end process;
 
@@ -199,7 +198,7 @@ end process;
 
 			case sdram_state is	--LATENCY=3
 				when ph0 =>	
-					if sdram_slot2=writecache then -- port1 and sdram_slot2_readwrite='0' then
+					if sdram_slot2=writecache then
 						sdwrite<='1';
 					end if;
 					sdram_state <= ph1;
@@ -222,7 +221,7 @@ end process;
 				when ph7 =>	sdram_state <= ph8;
 					sdwrite <= '1';
 				when ph8 =>	sdram_state <= ph9;
-					if sdram_slot1=writecache then -- port1 and sdram_slot1_readwrite='0' then
+					if sdram_slot1=writecache then
 						sdwrite<='1';
 					end if;
 					
@@ -257,7 +256,7 @@ end process;
 
 
 	
-	process (sysclk, initstate, datain, init_done, casaddr, refreshcycle) begin
+	process (sysclk, reset, initstate, datain, init_done, casaddr, refreshcycle) begin
 
 
 		if reset='0' then
@@ -436,11 +435,9 @@ end process;
 							sdaddr <= writecache_addr((rows+cols+2) downto (cols+3));
 							ba <= writecache_addr(4 downto 3);
 							slot1_bank <= writecache_addr(4 downto 3);
-							cas_dqm <= wrU1&wrL1;
 							casaddr <= writecache_addr&"0";
 							cas_sd_cas <= '0';
 							cas_sd_we <= '0';
-							sdram_slot1_readwrite <= '0';
 							sd_cs <= '0'; --ACTIVE
 							sd_ras <= '0';
 						elsif req1='1' and wr1='1'
@@ -453,7 +450,6 @@ end process;
 							casaddr <= Addr1(31 downto 1) & "0";
 							cas_sd_cas <= '0';
 							cas_sd_we <= '1';
-							sdram_slot1_readwrite <= '1';
 							sd_cs <= '0'; --ACTIVE
 							sd_ras <= '0';
 						end if;
@@ -522,11 +518,9 @@ end process;
 							sdaddr <= writecache_addr((rows+cols+2) downto (cols+3));
 							ba <= writecache_addr(4 downto 3);
 							slot2_bank <= writecache_addr(4 downto 3);
-							cas_dqm <= wrU1&wrL1;
 							casaddr <= writecache_addr&"0";
 							cas_sd_cas <= '0';
 							cas_sd_we <= '0';
-							sdram_slot2_readwrite <= '0';
 							sd_cs <= '0'; --ACTIVE
 							sd_ras <= '0';
 						elsif req1='1' and wr1='1'
@@ -541,7 +535,6 @@ end process;
 							casaddr <= Addr1(31 downto 1) & "0";
 							cas_sd_cas <= '0';
 							cas_sd_we <= '1';
-							sdram_slot2_readwrite <= '1';
 							sd_cs <= '0'; --ACTIVE
 							sd_ras <= '0';
 						end if;

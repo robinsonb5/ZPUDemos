@@ -92,6 +92,7 @@ signal int_trigger : std_logic;
 signal ps2_int : std_logic;
 
 signal ps2k_clk_db : std_logic;
+signal ps2m_clk_db : std_logic;
 
 signal kbdidle : std_logic;
 signal kbdrecv : std_logic;
@@ -199,6 +200,16 @@ myuart : entity work.simple_uart
 			recvByte => kbdrecvbyte
 		);
 
+--ps2m_db: entity work.Debounce
+--	generic map(
+--		bits => 4
+--	)
+--	port map(
+--	clk => clk,
+--	signal_in => ps2m_clk_in,
+--	signal_out => ps2m_clk_db
+--);
+--
 
 	mymouse : entity work.io_ps2_com
 		generic map (

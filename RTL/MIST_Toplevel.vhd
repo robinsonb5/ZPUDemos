@@ -102,6 +102,14 @@ signal sd_sck:	std_logic;
 signal sd_sdi:	std_logic;
 signal sd_sdo:	std_logic;
 
+-- PS/2 Keyboard
+signal ps2_keyboard_clk_in : std_logic;
+signal ps2_keyboard_dat_in : std_logic;
+signal ps2_keyboard_clk_out : std_logic;
+signal ps2_keyboard_dat_out : std_logic;
+signal ps2_clk : std_logic;
+signal ps2counter : unsigned(10 downto 0);
+
 -- Sigma Delta audio
 COMPONENT hybrid_pwm_sd
 	PORT
@@ -232,6 +240,18 @@ port map
 	locked => pll_locked
 );
 
+
+process(CLOCK_27(0))
+begin
+	if rising_edge(CLOCK_27(0)) then
+		ps2counter<=ps2counter+1;
+		if ps2counter=1800 then
+			ps2_clk<=not ps2_clk;
+			ps2counter<=(others => '0');
+		end if;
+	end if;
+end process;
+
 -- reset from IO controller
 -- status bit 0 is always triggered by the i ocontroller on its own reset
 -- status bit 2 is driven by the "T2,Reset" entry in the config string
@@ -281,6 +301,12 @@ port map
 	spi_mosi => sd_sdi,
 	spi_clk => sd_sck,
  
+	-- Keyboard
+	ps2k_clk_in => ps2_keyboard_clk_in,
+	ps2k_dat_in => ps2_keyboard_dat_in,
+	ps2k_clk_out => ps2_keyboard_clk_out,
+	ps2k_dat_out => ps2_keyboard_dat_out,
+
 	-- Audio
 	audio_l => audiol,
 	audio_r => audior
@@ -380,9 +406,9 @@ user_io_d : user_io
       joystick_analog_1 => joy_ana_1,
 --      switches => switches,
       BUTTONS => buttons,
-		ps2_clk => '1',
---      ps2_kbd_clk => open,
---      ps2_kbd_data => open
+		ps2_clk => ps2_clk,
+      ps2_kbd_clk => ps2_keyboard_clk_in,
+      ps2_kbd_data => ps2_keyboard_dat_in,
 		serial_data => par_out_data,
 		serial_strobe => par_out_strobe
 );

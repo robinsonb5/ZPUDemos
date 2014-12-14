@@ -165,6 +165,7 @@ myuart : entity work.simple_uart
 		IMPL_EQBRANCH => true,
 		IMPL_STOREBH => false,
 		IMPL_LOADBH => false,
+		IMPL_EMULATION => minimal,
 		IMPL_CALL => true,
 		IMPL_SHIFT => true,
 		IMPL_XOR => true,

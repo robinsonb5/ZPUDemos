@@ -7,7 +7,6 @@ an alternating "Tick..." / "Tock..." message to the serial port.
 
 The makefile is similar to that used for the Hello World demo.  We use
 the ZPUFlex in its smallest form and use the regular crt0.s startup code.
-(The Minimal startup code doesn't support interrupts at the time of writing.)
 
 Quartus projects are provided for the DE1 board only at the time of writing
 - more will follow.
