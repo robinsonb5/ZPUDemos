@@ -11,7 +11,7 @@
 #define BIT_PS2_CTS 10
 
 // Private
-#define PS2_RINGBUFFER_SIZE 8  // 32 bytes 
+#define PS2_RINGBUFFER_SIZE 16  // 32 bytes 
 struct ps2_ringbuffer
 {
 	volatile int in_hw;
