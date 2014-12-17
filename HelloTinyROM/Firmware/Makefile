@@ -29,7 +29,7 @@ LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
 # Commandline options for each tool.
 
-ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-neg # No-neg requires bugfixed toolchain
+ZPUOPTS= -mno-poppcrel -mno-pushspadd -mno-callpcrel -mno-byteop -mno-shortop -mno-neg # No-neg requires bugfixed toolchain
 CFLAGS  = -I. -c -Os $(ZPUOPTS) -DDISABLE_UART_RX
 
 LFLAGS  = -nostartfiles -nostdlib -Wl,--relax -Os

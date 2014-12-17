@@ -168,7 +168,7 @@ myuart : entity work.simple_uart
 		IMPL_CALL => true,
 		IMPL_SHIFT => true,
 		IMPL_XOR => true,
-		IMPL_EMULATION => minimal,
+--		IMPL_EMULATION => minimal,
 		REMAP_STACK => false,
 		EXECUTE_RAM => false,
 		maxAddrBitBRAM => 8
