@@ -365,6 +365,7 @@ begin
 			-- LEDs
 		);
 
+LEDS<=power_button&"111";
 
 video: if Toplevel_UseVGA = true generate
 	mydither : component video_vga_dither
@@ -415,5 +416,21 @@ audio3: if Toplevel_UseAudio = false generate
 	aud_r<='Z';
 end generate;
 
-end RTL;
 
+myreconf : entity work.Reconfigure
+PORT map
+	(
+		clock => clk_50,
+		data_in => (others =>'X'),
+		param => "000",
+		read_param => '0',
+		read_source => (others=>'0'),
+		reconfig	=> not power_button,
+		reset => '0',
+		reset_timer => '0',
+		write_param	=> '0',
+		busy => open,
+		data_out => open
+	);
+
+end RTL;

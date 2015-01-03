@@ -185,6 +185,7 @@ myuart : entity work.simple_uart
 		IMPL_CALL => false,
 		IMPL_SHIFT => false,
 		IMPL_XOR => false,
+		CACHE => false,
 		REMAP_STACK => false,
 		EXECUTE_RAM => false,
 		maxAddrBitBRAM => 13
