@@ -1,7 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
-use work.zpu_config.all;
 use work.zpupkg.ALL;
 use work.DMACache_pkg.ALL;
 use work.DMACache_config.ALL;
@@ -51,6 +50,13 @@ entity VirtualToplevel is
 		tft_led : out std_logic;
 		tft_reset : out std_logic;
 
+		-- Touchscreen signals
+		ts_miso : in std_logic;
+		ts_mosi : out std_logic;
+		ts_cs : out std_logic;
+		ts_sck : out std_logic;
+		ts_irq : in std_logic;
+		
 		-- UART
 		rxd	: in std_logic;
 		txd	: out std_logic;
@@ -101,6 +107,16 @@ signal tft_dma_data : std_logic_vector(15 downto 0);
 signal tft_even : std_logic;
 signal tft_pending : std_logic;
 
+
+-- Touchscreen SPI signals
+signal ts_host_to_spi : std_logic_vector(7 downto 0);
+signal ts_spi_to_host : std_logic_vector(31 downto 0);
+signal ts_spi_trigger : std_logic;
+signal ts_spi_busy : std_logic;
+signal ts_spi_active : std_logic;
+signal ts_spiclk_in : std_logic;
+
+
 -- UART signals
 
 signal ser_txdata : std_logic_vector(7 downto 0);
@@ -115,7 +131,7 @@ signal ser_rxint : std_logic;
 signal mem_busy           : std_logic;
 signal mem_read             : std_logic_vector(wordSize-1 downto 0);
 signal mem_write            : std_logic_vector(wordSize-1 downto 0);
-signal mem_addr             : std_logic_vector(maxAddrBitIncIO downto 0);
+signal mem_addr             : std_logic_vector(31 downto 0);
 signal mem_writeEnable      : std_logic; 
 signal mem_writeEnableh      : std_logic; 
 signal mem_writeEnableb      : std_logic; 
@@ -318,6 +334,26 @@ tft_spi : entity work.spi_interface
 		mosi => tft_mosi,
 		spiclk_out => tft_sck
 	);
+	
+
+-- Tertiary SPI host for Touchscreen ( FIXME - merge these!)
+ts_spi : entity work.spi_interface
+	port map(
+		sysclk => clk,
+		reset => reset,
+
+		-- Host interface
+		spiclk_in => spiclk_in,
+		host_to_spi => ts_host_to_spi,
+		spi_to_host => ts_spi_to_host,
+		trigger => ts_spi_trigger,
+		busy => ts_spi_busy,
+
+		-- Hardware interface
+		miso => ts_miso,
+		mosi => ts_mosi,
+		spiclk_out => ts_sck
+	);
 
 
 -- DMA controller
@@ -449,6 +485,8 @@ begin
 		tft_cs<='1';
 		tft_spi_active<='0';
 		tft_dma<='0';
+		ts_spi_active<='0';
+		ts_dma<='0';
 		int_enabled<='0';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
@@ -456,6 +494,7 @@ begin
 		vga_reg_req<='0';
 		spi_trigger<='0';
 		tft_spi_trigger<='0';
+		ts_spi_trigger<='0';
 		vgachannel_fromhost.setaddr<='0';
 		vgachannel_fromhost.setreqlen<='0';
 		vgachannel_fromhost.req<='0';
@@ -554,6 +593,15 @@ begin
 							tft_pending<='1';
 							mem_busy<='0';
 
+						when X"F0" => -- Touchscreen control
+							tf_cs <= mem_write(0);
+							mem_busy<='0';
+						
+						when X"F4" => -- Touchscreen SPI
+							ts_spi_active<='1';
+							ts_spi_trigger<='1';
+							ts_host_to_spi<=mem_write(7 downto 0);
+
 						when others =>
 							mem_busy<='0';
 							null;
@@ -605,6 +653,15 @@ begin
 							spi_active<='1';
 							host_to_spi<=X"FF";
 
+						when X"F0" => -- Touchscreen SPI control
+							mem_read<=(others=>'X');
+							mem_read(0)<=ts_spi_busy;
+							mem_read(1)<=ts_irq;
+							mem_busy<='0';
+							
+						when X"F4" => -- Touschreen SPI read (blocking)
+							ts_spi_active<='1';
+
 						when others =>
 							mem_busy<='0';
 							null;
@@ -626,6 +683,12 @@ begin
 	if tft_spi_active='1' and tft_spi_busy='0' then
 		mem_read<=tft_spi_to_host;
 		tft_spi_active<='0';
+		mem_busy<='0';
+	end if;
+
+	if ts_spi_active='1' and ts_spi_busy='0' then
+		mem_read<=ts_spi_to_host;
+		ts_spi_active<='0';
 		mem_busy<='0';
 	end if;
 	

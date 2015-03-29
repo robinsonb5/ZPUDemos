@@ -54,6 +54,12 @@ signal tft_d_c : std_logic;
 signal tft_led : std_logic;
 signal tft_reset : std_logic;
 
+signal ts_miso : std_logic;
+signal ts_mosi : std_logic;
+signal ts_cs : std_logic;
+signal ts_sck : std_logic;
+signal ts_irq : std_logic;
+
 -- Sigma Delta audio
 COMPONENT hybrid_pwm_sd
 	PORT
@@ -89,6 +95,13 @@ begin
 	IO_D(23) <= tft_sck;
 	IO_D(25) <= tft_led;
 	tft_miso <= IO_D(27);
+
+	-- Touchscreen mapping
+	IO_D(30) <= ts_cs;
+	IO_D(32) <= ts_mosi;
+	IO_D(28) <= ts_sck;
+	ts_miso <= IO_D(34);
+	ts_irq <= IO_D(36);
 	
 	-- Sound mapping
 	IO_D(37) <= sd_left; -- J1 pin 37
@@ -157,6 +170,13 @@ myproject : entity work.VirtualToplevel
 			tft_d_c => tft_d_c,
 			tft_led => tft_led,
 			tft_reset => tft_reset,
+			
+			-- Touchscreen
+			ts_miso => ts_miso,
+			ts_mosi => ts_mosi,
+			ts_cs => ts_cs,
+			ts_sck => ts_sck,
+			ts_irq => ts_irq,
 
 			-- audio
 			audio_l => audio_l,
