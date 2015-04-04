@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 			printf("%d, %d\n",Touch_X,Touch_Y);
 
 			if(prevy)
-				frameoffset+=(Touch_Y-prevy)>>4;
+				frameoffset-=(Touch_Y-prevy);
 			if(frameoffset>239)
 				frameoffset=239;
 			if(frameoffset<0)
