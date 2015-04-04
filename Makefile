@@ -10,7 +10,6 @@ all:
 	make -C SDBootstrap/Firmware
 	make -C SDRAM/Firmware
 	make -C VGA/Firmware
-	make -C TFT/Firmware
 	make -C TFT/Software
 	make -C Apps
 
@@ -25,7 +24,6 @@ clean:
 	make -C SDBootstrap/Firmware clean
 	make -C SDRAM/Firmware clean
 	make -C VGA/Firmware clean
-	make -C TFT/Firmware clean
 	make -C TFT/Software clean
 	make -C Apps clean
 
