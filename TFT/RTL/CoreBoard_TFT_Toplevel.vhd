@@ -6,7 +6,7 @@ library work;
 use work.Toplevel_Config.ALL;
 
 
-entity CoreBoard_Toplevel is
+entity CoreBoard_TFT_Toplevel is
 port(
 	CLK50M : in std_logic;
 	KEY0 : in std_logic;
@@ -29,7 +29,7 @@ port(
 );
 end entity;
 
-architecture rtl of CoreBoard_Toplevel is
+architecture rtl of CoreBoard_TFT_Toplevel is
 
 signal sysclk : std_logic;
 signal reset : std_logic;
@@ -161,6 +161,22 @@ myproject : entity work.VirtualToplevel
 			spi_mosi => spi_mosi,
 			spi_clk => spi_clk,
 			spi_cs => spi_cs,
+
+			-- TFT
+			tft_miso	=> tft_miso,
+			tft_mosi => tft_mosi,
+			tft_cs => tft_cs,
+			tft_sck => tft_sck,
+			tft_d_c => tft_d_c,
+			tft_led => tft_led,
+			tft_reset => tft_reset,
+			
+			-- Touchscreen
+			ts_miso => ts_miso,
+			ts_mosi => ts_mosi,
+			ts_cs => ts_cs,
+			ts_sck => ts_sck,
+			ts_irq => ts_irq,
 
 			-- audio
 			audio_l => audio_l,
