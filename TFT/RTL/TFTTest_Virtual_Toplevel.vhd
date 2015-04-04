@@ -211,8 +211,8 @@ audio_r <= X"0000";
 
 -- ROM
 
---	myrom : entity work.RS232Bootstrap_ROM
-	myrom : entity work.SDBootstrap_ROM
+	myrom : entity work.RS232Bootstrap_ROM
+--	myrom : entity work.SDBootstrap_ROM
 	generic map
 	(
 		maxAddrBitBRAM => 13
@@ -446,7 +446,7 @@ mysdram : entity work.sdram_simple
 	
 -- Main CPU
 
-	zpu: zpu_core 
+	zpu: zpu_core_flex
 	generic map (
 		IMPL_MULTIPLY => true,
 		IMPL_COMPARISON_SUB => true,
@@ -486,7 +486,7 @@ begin
 		tft_spi_active<='0';
 		tft_dma<='0';
 		ts_spi_active<='0';
-		ts_dma<='0';
+		ts_cs<='1';
 		int_enabled<='0';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
@@ -594,7 +594,7 @@ begin
 							mem_busy<='0';
 
 						when X"F0" => -- Touchscreen control
-							tf_cs <= mem_write(0);
+							ts_cs <= mem_write(0);
 							mem_busy<='0';
 						
 						when X"F4" => -- Touchscreen SPI

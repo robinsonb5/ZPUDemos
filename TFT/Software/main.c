@@ -11,17 +11,17 @@
 #include "spi.h"
 #include "interrupts.h"
 #include "timer.h"
+#include "touchscreen.h"
 
 unsigned short *framebuffer;
 
 static int framecounter=0;
+static int frameoffset=0;
 static int prevtime;
 
 void frame_interrupt()
 {
 	static int c=0;
-	static int offset=0;
-	int fbo;
 	DisableInterrupts();
 	int ints=GetInterrupts();
 
@@ -32,15 +32,17 @@ void frame_interrupt()
 		prevtime=HW_TIMER(REG_MILLISECONDS);
 	}
 
-	++offset;
-	if(offset>239)
-		fbo=480-offset;
+#if 0
+	++frameoffset;
+	if(frameoffset>239)
+		fbo=480-frameoffset;
 	else
-		fbo=offset;
-	if(offset>479)
-		offset=0;
+		fbo=frameoffset;
+	if(frameoffset>479)
+		frameoffset=0;
+#endif
 
-	TFT_FillBitmap(0,319,0,239,framebuffer+320*fbo);
+	TFT_FillBitmap(0,319,0,239,framebuffer+320*frameoffset);
 	EnableInterrupts();
 }
 
@@ -87,34 +89,33 @@ int main(int argc, char **argv)
 	TFT_CS_Write(0);
 	TFT_Init(1); // 0 - vert  1 - horizontal	
 
-//	TFT_DrawString("Hello, world!",   20, 20,   1,  WHITE);
-//	while(1)
-//		TFT_FillRectangle(32, 64, 64, 64,c++);		// X, Y, length, width, colour
-
 	SetIntHandler(frame_interrupt);
 	EnableInterrupts();
 
 	prevtime=HW_TIMER(REG_MILLISECONDS);
 	frame_interrupt();
 
+	Touch_Init(320,240);
+
 	while(1)
 	{
-#if 0
-		int x,y;
-		unsigned short *p=framebuffer;
-		int t=c++;
-
-		for(y=0;y<240;++y)
+		int prevy, prevx;
+		if(Touch_Pressed())
 		{
-			for(x=0;x<320;++x)
-			{
-				*p++=x+y+c;
-			}
+			Touch_Update();
+			printf("%d, %d\n",Touch_X,Touch_Y);
+
+			if(prevy)
+				frameoffset+=(Touch_Y-prevy)>>4;
+			if(frameoffset>239)
+				frameoffset=239;
+			if(frameoffset<0)
+				frameoffset=0;
+			prevy=Touch_Y;
+			prevx=Touch_X;
 		}
-#endif
-		printf("Screen updating at %d frames per second\n",32000/framecounter);
-		CyDelay(1000);
-//		while(1) ;
+		else
+			prevx=prevy=0;
 	}
 	return(0);
 }
