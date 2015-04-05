@@ -492,6 +492,7 @@ int_triggers<=(0=>'0',
 		IMPL_SHIFT => true,
 		IMPL_XOR => true,
 --		IMPL_EMULATION => minimal,
+		CACHE => true,
 		REMAP_STACK => true, -- We need to remap the Boot ROM / Stack RAM so we can access SDRAM
 		EXECUTE_RAM => true, -- We might need to execute code from SDRAM, too.
 		maxAddrBitBRAM => 13
