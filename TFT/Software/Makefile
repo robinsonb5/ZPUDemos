@@ -26,7 +26,7 @@ COMMON_SRC = syscalls.c small_printf.c uart.c malloc.c spi.c fat.c swap.c rafile
 COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
 MAIN_PRJ = TFTTest
-MAIN_SRC = main.c driver.c tft.c touchscreen.c
+MAIN_SRC = main.c driver.c tft.c touchscreen.c filter.c
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld

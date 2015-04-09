@@ -14,6 +14,8 @@
 #include "touchscreen.h"
 
 unsigned short *framebuffer;
+#define FB_WIDTH 320
+#define FB_HEIGHT 240
 
 static int framecounter=0;
 static int frameoffset=0;
@@ -42,7 +44,7 @@ void frame_interrupt()
 		frameoffset=0;
 #endif
 
-	TFT_FillBitmap(0,319,0,239,framebuffer+320*frameoffset);
+	TFT_FillBitmap(0,FB_WIDTH-1,0,FB_HEIGHT-1,framebuffer+FB_WIDTH*frameoffset);
 	EnableInterrupts();
 }
 
@@ -72,13 +74,38 @@ char *LoadFile(const char *filename)
 }
 
 
+__inline void fb_clear()
+{
+	int x,y;
+	int *fb=(int *)framebuffer;
+	for(y=0;y<FB_HEIGHT;++y)
+	{
+		for(x=0;x<FB_WIDTH;x+=2)
+		{
+			*fb++=0;
+		}
+	}
+}
+
+
+__inline void fb_pset(int x, int y, int col)
+{
+	if(x<0) x=0;
+	if(x>FB_WIDTH-1) x=FB_WIDTH-1;
+	if(y<0) y=0;
+	if(y>FB_HEIGHT-1) y=FB_HEIGHT-1;
+	framebuffer[FB_WIDTH*y+x]=col;
+}
+
+
 int main(int argc, char **argv)
 {
 	int c=0;
 	
 	printf("Hello, world!\n");
 
-	framebuffer=(unsigned short *)LoadFile("A320X480RAW");
+	framebuffer=malloc(FB_WIDTH*FB_HEIGHT*sizeof(short));
+//	framebuffer=(unsigned short *)LoadFile("A320X480RAW");
 //	printf("Framebuffer allocated at %d\n",framebuffer);
 
 	HW_SPI(HW_SPI_CS)=(1<<HW_SPI_FAST);
@@ -95,27 +122,30 @@ int main(int argc, char **argv)
 	prevtime=HW_TIMER(REG_MILLISECONDS);
 	frame_interrupt();
 
-	Touch_Init(320,240);
+	Touch_Init(FB_WIDTH,FB_HEIGHT);
+
+	frameoffset=0;
+	fb_clear();
 
 	while(1)
 	{
 		int prevy, prevx;
-		if(Touch_Pressed())
+		if(Touch_Update())
 		{
-			Touch_Update();
 			printf("%d, %d\n",Touch_X,Touch_Y);
+			fb_pset(Touch_X,Touch_Y,0xffff);
 
-			if(prevy)
-				frameoffset-=(Touch_Y-prevy);
-			if(frameoffset>239)
-				frameoffset=239;
-			if(frameoffset<0)
-				frameoffset=0;
-			prevy=Touch_Y;
-			prevx=Touch_X;
+//			if(prevy)
+//				frameoffset-=(Touch_Y-prevy);
+//			if(frameoffset>239)
+//				frameoffset=239;
+//			if(frameoffset<0)
+//				frameoffset=0;
+//			prevy=Touch_Y;
+//			prevx=Touch_X;
 		}
-		else
-			prevx=prevy=0;
+//		else
+//			prevx=prevy=0;
 	}
 	return(0);
 }

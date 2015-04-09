@@ -28,7 +28,7 @@
 extern int Touch_X,Touch_Y,Touch_Z,Touch_Status;
 #define Touch_Pressed() ((HW_TOUCH(REG_TOUCH_CONTROL)&(1<<TOUCH_CONTROL_PENIRQ))==0)
 void Touch_Init(int width,int height);
-void Touch_Update();
+int Touch_Update();
 
 #endif
 

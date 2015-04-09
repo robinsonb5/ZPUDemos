@@ -1,4 +1,11 @@
+#include "small_printf.h"
 #include "touchscreen.h"
+#include "filter.h"
+
+struct touchbox
+{
+	int tlx,tly,brx,bry;
+};
 
 int Touch_Status,Touch_X,Touch_Y,Touch_Z;
 
@@ -6,47 +13,108 @@ static int xmin,ymin;
 static int xmax,ymax;
 static int xres,yres;
 
+static struct touchbox box;
+
+static struct Filter XFilter,YFilter;
+static struct Filter XFilter2,YFilter2;
+
+
 void Touch_Init(int width,int height)
 {
 	xres=width;
 	yres=height;
-	xmin=0x120;
-	ymin=0x110;
+	xmin=0xe0;
+	ymin=0x100;
 	xmax=0x720;
-	ymax=0x6c0;
+	ymax=0x6e0;
+	Filter_Init(&XFilter);
+	Filter_Init(&YFilter);
+	Filter_Init(&XFilter2);
+	Filter_Init(&YFilter2);
 }
 
 #define TOUCH_DESCRAMBLE(x1,x2) (((x1)<<4)|((x2>>4)))
 #define TOUCH_CONFIG (TOUCH_START|TOUCH_PENIRQ|TOUCH_12BIT|TOUCH_DIFFERENTIAL)
 
-void Touch_Update()
+
+int Touch_Update()
 {
+	int result=0;
 	int t1,t2;
 	HW_TOUCH(REG_TOUCH_CONTROL)=0; // Enable CS
 	Touch_Status=HW_TOUCH(REG_TOUCH_CONTROL);
 
-	HW_TOUCH(REG_TOUCH_SPI)=TOUCH_CONFIG|TOUCH_XPOS;
-	HW_TOUCH(REG_TOUCH_SPI)=0;
-	t1=HW_TOUCH(REG_TOUCH_SPI);
-	HW_TOUCH(REG_TOUCH_SPI)=0;
-	t2=HW_TOUCH(REG_TOUCH_SPI);
-	t1=TOUCH_DESCRAMBLE(t1,t2);
-	Touch_X=(xres*(t1-xmin))/(xmax-xmin);
+	if(Touch_Pressed())
+	{
+		HW_TOUCH(REG_TOUCH_SPI)=TOUCH_CONFIG|TOUCH_XPOS;
+		HW_TOUCH(REG_TOUCH_SPI)=0;
+		t1=HW_TOUCH(REG_TOUCH_SPI);
+		HW_TOUCH(REG_TOUCH_SPI)=0;
+		t2=HW_TOUCH(REG_TOUCH_SPI);
+		t1=TOUCH_DESCRAMBLE(t1,t2);
+		if(t1)
+		{
+			t1=(xres*(t1-xmin))/(xmax-xmin);
 
-	HW_TOUCH(REG_TOUCH_SPI)=TOUCH_CONFIG|TOUCH_YPOS;
-	HW_TOUCH(REG_TOUCH_SPI)=0;
-	t1=HW_TOUCH(REG_TOUCH_SPI);
-	HW_TOUCH(REG_TOUCH_SPI)=0;
-	t2=HW_TOUCH(REG_TOUCH_SPI);
-	t1=TOUCH_DESCRAMBLE(t1,t2);
-	Touch_Y=(yres*(t1-ymin))/(ymax-ymin);
+			Filter_Add(&XFilter,t1);
 
-	HW_TOUCH(REG_TOUCH_SPI)=TOUCH_CONFIG|TOUCH_ZPOS1;
-	HW_TOUCH(REG_TOUCH_SPI)=0;
-	t1=HW_TOUCH(REG_TOUCH_SPI);
-	HW_TOUCH(REG_TOUCH_SPI)=0;
-	t2=HW_TOUCH(REG_TOUCH_SPI);
-	Touch_Z=TOUCH_DESCRAMBLE(t1,t2);
+			if(t1<box.tlx)
+				box.tlx=t1;
+			if(t1>box.brx)
+				box.brx=t1;
+		}
 
+		HW_TOUCH(REG_TOUCH_SPI)=TOUCH_CONFIG|TOUCH_YPOS;
+		HW_TOUCH(REG_TOUCH_SPI)=0;
+		t1=HW_TOUCH(REG_TOUCH_SPI);
+		HW_TOUCH(REG_TOUCH_SPI)=0;
+		t2=HW_TOUCH(REG_TOUCH_SPI);
+		t1=TOUCH_DESCRAMBLE(t1,t2);
+		if(t1)
+		{
+			t1=(yres*(t1-ymin))/(ymax-ymin);
+
+			Filter_Add(&YFilter,t1);
+
+			if(t1<box.tly)
+				box.tly=t1;
+			if(t1>box.bry)
+				box.bry=t1;
+		}
+
+		HW_TOUCH(REG_TOUCH_SPI)=TOUCH_CONFIG|TOUCH_ZPOS1;
+		HW_TOUCH(REG_TOUCH_SPI)=0;
+		t1=HW_TOUCH(REG_TOUCH_SPI);
+		HW_TOUCH(REG_TOUCH_SPI)=0;
+		t2=HW_TOUCH(REG_TOUCH_SPI);
+		Touch_Z=TOUCH_DESCRAMBLE(t1,t2);
+
+		Touch_X=Filter_GetMedian(&XFilter);
+		Touch_Y=Filter_GetMedian(&YFilter);
+
+		if(Touch_X!=FILTER_BADVALUE)
+			Filter_Add(&XFilter2,Touch_X);
+
+		if(Touch_Y!=FILTER_BADVALUE)
+			Filter_Add(&YFilter2,Touch_Y);
+
+		Touch_X=Filter_GetMedian(&XFilter2);
+		Touch_Y=Filter_GetMedian(&YFilter2);
+
+		if(Touch_X!=FILTER_BADVALUE)
+			result=1;
+	}
+	else
+	{
+		Filter_Init(&XFilter);
+		Filter_Init(&YFilter);
+		Filter_Init(&XFilter2);
+		Filter_Init(&YFilter2);
+		box.tlx=xres;
+		box.tly=yres;
+		box.brx=0;
+		box.bry=0;
+	}
 	HW_TOUCH(REG_TOUCH_CONTROL)=1;	// Disable CS
+	return(result);
 }

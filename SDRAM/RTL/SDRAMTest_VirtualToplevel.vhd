@@ -244,6 +244,7 @@ mysdram : entity work.sdram_simple
 		IMPL_CALL => true,
 		IMPL_SHIFT => true,
 		IMPL_XOR => true,
+		CACHE => true,
 		REMAP_STACK => true, -- We need to remap the Boot ROM / Stack RAM so we can access SDRAM
 		EXECUTE_RAM => false, -- We don't need to execute code from SDRAM, however.
 		maxAddrBitBRAM => 13
