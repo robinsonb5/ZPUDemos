@@ -23,17 +23,17 @@ void Touch_Init(int width,int height)
 {
 	xres=width;
 	yres=height;
-	xmin=0xe0;
-	ymin=0x100;
-	xmax=0x720;
-	ymax=0x6e0;
+	xmin=0x1c0;
+	ymin=0x200;
+	xmax=0xe40;
+	ymax=0xdc0;
 	Filter_Init(&XFilter);
 	Filter_Init(&YFilter);
 	Filter_Init(&XFilter2);
 	Filter_Init(&YFilter2);
 }
 
-#define TOUCH_DESCRAMBLE(x1,x2) (((x1)<<4)|((x2>>4)))
+#define TOUCH_DESCRAMBLE(x1,x2) (((x1)<<5)|((x2>>3)))
 #define TOUCH_CONFIG (TOUCH_START|TOUCH_PENIRQ|TOUCH_12BIT|TOUCH_DIFFERENTIAL)
 
 
@@ -51,6 +51,7 @@ int Touch_Update()
 		t1=HW_TOUCH(REG_TOUCH_SPI);
 		HW_TOUCH(REG_TOUCH_SPI)=0;
 		t2=HW_TOUCH(REG_TOUCH_SPI);
+		printf("%x, %x\n",t1,t2);
 		t1=TOUCH_DESCRAMBLE(t1,t2);
 		if(t1)
 		{

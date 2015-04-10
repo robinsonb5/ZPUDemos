@@ -17,8 +17,8 @@
 #define TOUCH_POWERED 3
 #define TOUCH_SINGLEENDED 4
 #define TOUCH_DIFFERENTIAL 0
-#define TOUCH_8BIT 0
-#define TOUCH_12BIT 8
+#define TOUCH_8BIT 8
+#define TOUCH_12BIT 0
 #define TOUCH_START 0x80
 #define TOUCH_YPOS 0x50
 #define TOUCH_XPOS 0x10
