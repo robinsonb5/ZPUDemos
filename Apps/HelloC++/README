@@ -1,0 +1,12 @@
+HelloC++
+
+The HelloC++ app demonstrates basic usage of C++ classes, testing
+inheritance, subclassing and exceptions.
+
+The makefile specifies the full startup code, crt0.s since we need the
+emulation table for unimplemented instructions.  We also supply the syscalls
+and malloc code from Common_Firmware.  Please note: while it's possible to
+use C++ language features in your own code, the stdc++ library is not tested
+and it's highly likely that large chunks of it won't work with ZPUFlex without
+some debugging and at the very least, adjustment of linkscripts.
+

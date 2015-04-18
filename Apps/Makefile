@@ -5,6 +5,7 @@ all:
 	make -C JPEGTest
 	make -C Malloc
 	make -C VGA
+	make -C HelloC++
 
 clean:
 	make -C Dhrystone clean
@@ -13,4 +14,5 @@ clean:
 	make -C JPEGTest clean
 	make -C Malloc clean
 	make -C VGA clean
+	make -C HelloC++ clean
 
