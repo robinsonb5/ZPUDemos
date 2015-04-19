@@ -27,8 +27,17 @@
 
 extern int Touch_X,Touch_Y,Touch_Z,Touch_Status;
 #define Touch_Pressed() ((HW_TOUCH(REG_TOUCH_CONTROL)&(1<<TOUCH_CONTROL_PENIRQ))==0)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void Touch_Init(int width,int height);
 int Touch_Update();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

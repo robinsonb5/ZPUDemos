@@ -1,5 +1,6 @@
 BASE	= zpu-elf
 CC      = $(BASE)-gcc
+CXX     = $(BASE)-g++
 LD      = $(BASE)-gcc
 AS      = $(BASE)-as
 CP      = $(BASE)-objcopy
@@ -26,8 +27,10 @@ COMMON_SRC = syscalls.c small_printf.c uart.c malloc.c spi.c fat.c swap.c rafile
 COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
 MAIN_PRJ = TFTTest
-MAIN_SRC = main.c driver.c tft.c touchscreen.c filter.c
-MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
+MAIN_C_SRC = driver.c tft.c touchscreen.c filter.c
+MAIN_CPP_SRC = main.cpp framebuffer.cpp uibox.cpp
+MAIN_HEADERS = tft.h touchscreen.h filter.h uibox.h
+MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(MAIN_CPP_SRC)) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_C_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
@@ -37,7 +40,7 @@ ZPUFLAGS = -DDEBUG
 CFLAGS  = -I. -I$(COMMON_DIR) $(ZPUFLAGS) -c -Os -ffunction-sections -fdata-sections -DRAMTOP=0x7fffff # -DPRINTF_HEX_ONLY -DDISABLE_UART_RX
 
 LFLAGS  = -nostartfiles -Wl,--relax -Wl,--gc-sections -Os
-LIBS = -lgcc
+LIBS = -lgcc -lstdc++
 
 # Our target.
 all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ).srec
@@ -60,6 +63,9 @@ $(MAIN_PRJ).elf: $(STARTUP_OBJ) $(MAIN_OBJ)
 
 $(BUILD_DIR)/%.o: %.c Makefile
 	$(CC) $(CFLAGS)  -o $@ -c $<
+
+$(BUILD_DIR)/%.o: %.cpp Makefile
+	$(CXX) $(CFLAGS)  -o $@ -c $<
 
 $(BUILD_DIR)/%.o: $(COMMON_DIR)/%.c Makefile
 	$(CC) $(CFLAGS)  -o $@ -c $<

@@ -6,7 +6,15 @@
 #define printf(x,...)
 #define puts(x)
 #else
+#ifdef __cplusplus
+extern "C" {
+#endif
 int small_printf(const char *fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
+
 #define printf small_printf
 #endif
 

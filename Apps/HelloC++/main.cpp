@@ -1,4 +1,3 @@
-
 extern "C" {
 
 #include "uart.h"

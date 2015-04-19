@@ -53,6 +53,9 @@
 #define TFT_CSX_LO	{TFT_CTRL_PORT &=~(1 << TFT_CSX);}
 #define TFT_CSX_HIGH	{TFT_CTRL_PORT |=(1 << TFT_CSX);}
 //****************************************************************************************
+#ifdef __cplusplus
+extern "C" {
+#endif
 void TFT_SendCMD(int cmd);
 void TFT_WriteData(int data);
 void TFT_SendData(int data);
@@ -74,6 +77,9 @@ void TFT_SetPixel(int poX, int poY,int color);
 
 void TFT_FillBitmap(int poX, int poY, int length, int width, unsigned short *Bitmap);
 void TFT_Graf(int XL, int YU, int YD, char  Ydata , char last);
-void Read_SD_Pictute(int XL, int XR, int YU, int YD, unsigned short *FileName);
+void Read_SD_Picture(int XL, int XR, int YU, int YD, unsigned short *FileName);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TFT_H_ */

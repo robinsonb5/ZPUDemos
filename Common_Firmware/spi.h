@@ -13,9 +13,16 @@
 #define HW_SPI_FAST 8
 #define HW_SPI_BUSY 15
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int spi_init();
 int sd_read_sector(unsigned long lba,unsigned char *buf);
 int sd_write_sector(unsigned long lba,unsigned char *buf); // FIXME - stub
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

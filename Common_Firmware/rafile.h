@@ -21,6 +21,10 @@
 
 #include "fat.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
 	fileTYPE file;
@@ -32,4 +36,9 @@ typedef struct
 int RARead(RAFile *file,unsigned char *pBuffer, unsigned long bytes);
 int RASeek(RAFile *file,unsigned long offset,unsigned long origin);
 int RAOpen(RAFile *file,const char *filename);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

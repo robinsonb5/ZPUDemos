@@ -9,6 +9,10 @@
 // #include <klibc/sysconfig.h>
 #define _KLIBC_MALLOC_CHUNK_SIZE 65536
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * This structure should be a power of two.  This becomes the
  * alignment unit.
@@ -51,6 +55,10 @@ void malloc_add(void *p,size_t size);
 
 void *malloc(size_t);
 void free(void *m);
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * Internal variable used by brk/sbrk

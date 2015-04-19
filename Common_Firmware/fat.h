@@ -1,6 +1,10 @@
 #ifndef _FAT16_H_INCLUDED
 #define _FAT16_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAXDIRENTRIES 8
 
 // FIXME - derive CHS address from FAT boot sector for card and partition mount modes.
@@ -123,6 +127,10 @@ unsigned int UpdateEntry(fileTYPE *file);
 
 int ScanDirectory(unsigned long mode, char *extension, unsigned char options);
 void ChangeDirectory(unsigned long iStartCluster);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

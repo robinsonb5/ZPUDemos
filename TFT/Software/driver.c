@@ -160,16 +160,6 @@ CyDelay(120);
 //Display On
 TFT_SendCMD(0x29);
 
-// Adaptive brightness off
-TFT_SendCMD(0x55);
-TFT_WriteData(0x0);
-
-//TFT_SendCMD(0x53);
-//TFT_WriteData(0x2c);
-
-//TFT_SendCMD(0x51);
-//TFT_WriteData(0x20);
-
 }
 //*************************************************************************************
 void TFT_SetCol(int StartCol,int EndCol)

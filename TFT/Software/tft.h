@@ -16,12 +16,21 @@
 
 #define REG_TFT_FRAMEBUFFER 0x8 // Not yet implemented
 #define REG_TFT_FRAMESIZE 0xc // Not yet implemented
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void D_C_Write(int d);
 void SPIM_WriteTxData(int d);
 void TFT_CS_Write(int d);
 void TFT_Reset_Write(int d);
 void TFT_LED_Write(int d);
+
+void CyDelayUs(int c);
+void CyDelay(int c);
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

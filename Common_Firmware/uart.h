@@ -3,6 +3,10 @@
 
 /* Hardware registers for a supporting UART to the ZPUFlex project. */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define UARTBASE 0xFFFFFFC0
 #define HW_UART(x) *(volatile unsigned int *)(UARTBASE+x)
 
@@ -13,6 +17,7 @@
 #ifndef DISABLE_UART_TX
 int putchar(int c);
 int puts(const char *msg);
+
 #else
 #define putchar(x) (x)
 #define puts(x)
@@ -22,6 +27,10 @@ int puts(const char *msg);
 char getserial();
 #else
 #define getserial 0
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

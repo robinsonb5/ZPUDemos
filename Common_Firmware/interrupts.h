@@ -11,10 +11,18 @@
 
 #define REG_INTERRUPT_CTRL 0x0
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void SetIntHandler(void(*handler)());
 void EnableInterrupts();
 void DisableInterrupts();
 int GetInterrupts();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

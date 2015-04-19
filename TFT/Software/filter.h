@@ -13,8 +13,14 @@ struct Filter
 	enum FilterState state;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void Filter_Init(struct Filter *filter);
 void Filter_Add(struct Filter *filter,int sample);
 int Filter_GetMedian(struct Filter *filter);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

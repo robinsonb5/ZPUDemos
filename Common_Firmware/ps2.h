@@ -21,6 +21,11 @@ struct ps2_ringbuffer
 	unsigned int inbuf[PS2_RINGBUFFER_SIZE]; // Int is much easier than char for ZPU to deal with
 	unsigned int outbuf[PS2_RINGBUFFER_SIZE];
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ps2_ringbuffer_init(struct ps2_ringbuffer *r);
 void ps2_ringbuffer_write(struct ps2_ringbuffer *r,int in);
 int ps2_ringbuffer_read(struct ps2_ringbuffer *r);
@@ -32,6 +37,10 @@ void PS2Handler();
 // Public interface
 
 void PS2Init();
+
+#ifdef __cplusplus
+}
+#endif
 
 #define PS2KeyboardRead(x) ps2_ringbuffer_read(&kbbuffer)
 #define PS2KeyboardBytesReady(x) ps2_ringbuffer_count(&kbbuffer)

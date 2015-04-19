@@ -30,6 +30,10 @@
 #define KEY_SPACE 0x29
 #define KEY_ESC 0x76
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int HandlePS2RawCodes();
 void ClearKeyboard();
 
@@ -37,6 +41,10 @@ int TestKey(int rawcode);
 
 // Each keytable entry has two bits: bit 0 - currently pressed, bit 1 - pressed since last test
 extern unsigned int keytable[16];
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
