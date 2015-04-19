@@ -101,7 +101,7 @@ __inline void fb_pset(int x, int y, int col)
 int main(int argc, char **argv)
 {
 	int c=0;
-	
+	int timestamp;
 	printf("Hello, world!\n");
 
 	framebuffer=malloc(FB_WIDTH*FB_HEIGHT*sizeof(short));
@@ -130,11 +130,17 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		int prevy, prevx;
+		if(HW_TIMER(REG_MILLISECONDS)>(timestamp+2000))
+		{
+			printf("Timeout %d\n",HW_TIMER(REG_MILLISECONDS));
+			timestamp=0x7ffffff;
+		}
 		if(Touch_Update())
 		{
-			printf("%d, %d\n",Touch_X,Touch_Y);
-			fb_pset(Touch_X,Touch_Y,0xffff);
-
+//			printf("%d, %d, %d\n",Touch_X,Touch_Y,Touch_Z);
+			if(Touch_Z<75)
+				fb_pset(Touch_X,Touch_Y,0xffff);
+			timestamp=HW_TIMER(REG_MILLISECONDS);
 //			if(prevy)
 //				frameoffset-=(Touch_Y-prevy);
 //			if(frameoffset>239)
