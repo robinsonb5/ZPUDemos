@@ -81,6 +81,11 @@ int _stack;
 
 extern int __bss_start__;
 extern int __bss_end__;
+extern int __ctors_start__;
+extern int __ctors_end__;
+extern int __dtors_start__;
+extern int __dtors_end__;
+
 
 
 // Identify RAM size by searching for aliases - up to a maximum of 64 megabytes
@@ -131,6 +136,7 @@ static unsigned int addresscheck(volatile int *base,int cachesize)
 void __attribute__ ((weak)) _premain()  
 {
 	int t;
+	int *ctors;
 	char *ramtop;
 // Clear BSS data
 	int *bss=&__bss_start__;
@@ -146,7 +152,26 @@ void __attribute__ ((weak)) _premain()
 	ramtop=(char *)addresscheck((volatile int *)&_end,0);
 	malloc_add(&_end,ramtop-&_end);	// Add the entire RAM to the free memory pool
 //	_init();
+
+//  Run global constructors...
+	ctors=&__ctors_start__;
+	while(ctors<&__ctors_end__)
+	{
+		void (*fp)();
+		fp=(void (*)())(*ctors);
+		fp();
+		++ctors;
+	}
 	t=main(1, args);
+//  Run global destructors...
+	ctors=&__dtors_start__;
+	while(ctors<&__dtors_end__)
+	{
+		void (*fp)();
+		fp=(void (*)())(*ctors);
+		fp();
+		++ctors;
+	}
 	_exit(t);
 	for (;;);
 }

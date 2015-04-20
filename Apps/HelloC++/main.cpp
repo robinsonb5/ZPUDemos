@@ -1,9 +1,23 @@
-extern "C" {
-
 #include "uart.h"
 
 #include "small_printf.h"
+
+
+class globaltest
+{
+	public:
+	globaltest()
+	{
+		printf("In GlobalTest constructor\n");
+	}
+	~globaltest()
+	{
+		printf("In GlobalTest destructor\n");
+	}
 };
+
+globaltest gt;
+
 
 class test
 {
