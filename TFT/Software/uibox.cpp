@@ -33,12 +33,12 @@ class RGBGradient
 	RGBTriple shadow;
 };
 
-void UIBox::Draw(FrameBuffer &fb, bool pressed)
+void UIBox::Draw(bool pressed)
 {
 	RGBGradient gradient(colour);
 	for(int t=0;t<height-4;++t)
 	{
-		int p=(32+(64*t))/(height-4);
+		int p=32+((64*t)/(height-4));
 		if(!pressed)
 			p=127-p;
 		RGBTriple c=gradient[p];
@@ -56,4 +56,44 @@ void UIBox::Draw(FrameBuffer &fb, bool pressed)
 	fb.VLine(xpos+width-1,ypos,height,gradient[127-h1].To16Bit());
 	fb.VLine(xpos+width-2,ypos+1,height-2,gradient[127-h2].To16Bit());
 }
+
+bool UIBox::Event(UIEvent &ev)
+{
+	int x,y;
+	x=ev.GetXPos();
+	y=ev.GetYPos();
+	bool status=active;
+	bool triggered=false;
+	bool refresh=false;
+	switch(ev.GetType())
+	{
+		case EVENT_PRESS:
+			if(Hit(x,y))
+				status=true;
+			break;
+
+		case EVENT_RELEASE:
+			if(Hit(x,y))
+			{
+				status=false;
+				triggered=true;
+			}
+			break;
+
+		case EVENT_DRAG:
+			status=Hit(x,y);
+			break;
+
+		default:
+			break;
+	}
+	if(status!=active)
+	{
+		Draw(status);
+		refresh=true;
+	}
+	active=status;
+	return(refresh);
+}
+
 

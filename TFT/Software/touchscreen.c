@@ -2,18 +2,11 @@
 #include "touchscreen.h"
 #include "filter.h"
 
-struct touchbox
-{
-	int tlx,tly,brx,bry;
-};
-
 int Touch_Status,Touch_X,Touch_Y,Touch_Z;
 
 static int xmin,ymin;
 static int xmax,ymax;
 static int xres,yres;
-
-static struct touchbox box;
 
 static struct Filter XFilter,YFilter;
 static struct Filter XFilter2,YFilter2;
@@ -68,11 +61,6 @@ int Touch_Update()
 			Touch_X=t1;
 
 			Filter_Add(&XFilter,t1);
-
-			if(t1<box.tlx)
-				box.tlx=t1;
-			if(t1>box.brx)
-				box.brx=t1;
 		}
 
 		HW_TOUCH(REG_TOUCH_SPI)=TOUCH_CONFIG|TOUCH_YPOS;
@@ -96,11 +84,6 @@ int Touch_Update()
 			Touch_Y=t1;
 
 			Filter_Add(&YFilter,t1);
-
-			if(t1<box.tly)
-				box.tly=t1;
-			if(t1>box.bry)
-				box.bry=t1;
 		}
 
 		HW_TOUCH(REG_TOUCH_SPI)=TOUCH_CONFIG|TOUCH_ZPOS1;
@@ -159,11 +142,8 @@ int Touch_Update()
 		Filter_Init(&YFilter);
 		Filter_Init(&XFilter2);
 		Filter_Init(&YFilter2);
-		box.tlx=xres;
-		box.tly=yres;
-		box.brx=0;
-		box.bry=0;
 	}
 	HW_TOUCH(REG_TOUCH_CONTROL)=1;	// Disable CS
 	return(result);
 }
+

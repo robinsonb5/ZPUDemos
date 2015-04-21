@@ -33,17 +33,9 @@ class RGBTriple
 	{
 		r/=other.r; g/=other.g; b/=other.b; return(*this);
 	}
-	RGBTriple &operator/(const RGBTriple &other)
-	{
-		*this/=other; return(*this);
-	}
 	RGBTriple &operator/=(int c)
 	{
 		r/=c; g/=c; b/=c; return(*this);
-	}
-	RGBTriple &operator/(int c)
-	{
-		*this/=c; return(*this);
 	}
 	RGBTriple &operator+=(const RGBTriple &other)
 	{
@@ -62,6 +54,14 @@ inline RGBTriple operator*(RGBTriple lhs,int c)
 inline RGBTriple operator*(int c,RGBTriple lhs)
 {
 	lhs*=c; return(lhs);
+}
+inline RGBTriple operator/(RGBTriple lhs,int c)
+{
+	lhs/=c; return(lhs);
+}
+inline RGBTriple &operator/(RGBTriple lhs,RGBTriple rhs)
+{
+	lhs/=rhs; return(lhs);
 }
 inline RGBTriple operator+(RGBTriple lhs,RGBTriple &rhs)
 {
