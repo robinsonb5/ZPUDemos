@@ -46,6 +46,7 @@ class UIBox : public Box
 	FrameBuffer &fb;
 	RGBTriple colour;
 	bool active;
+	int filter;
 };
 
 #endif

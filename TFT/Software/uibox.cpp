@@ -69,19 +69,35 @@ bool UIBox::Event(UIEvent &ev)
 	{
 		case EVENT_PRESS:
 			if(Hit(x,y))
+			{
 				status=true;
+				filter=5;
+			}
+			else
+				filter=0;
 			break;
 
 		case EVENT_RELEASE:
+			status=false;
+			filter=-5;
 			if(Hit(x,y))
-			{
-				status=false;
 				triggered=true;
-			}
-			break;
 
 		case EVENT_DRAG:
-			status=Hit(x,y);
+			if(Hit(x,y))
+			{
+				if(filter<5)
+					++filter;
+				else
+					status=true;
+			}
+			else
+			{
+				if(filter>-5)
+					--filter;
+				else
+					status=false;
+			}
 			break;
 
 		default:

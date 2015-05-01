@@ -251,8 +251,8 @@ begin
 		end if;
 		-- Generate refresh pulse
 		vga_refresh<='0';
-		vga_newframe<=millisecond_counter(4); -- Save current value for edge detection
-		if millisecond_counter(4)='1' and vga_newframe='0' then
+		vga_newframe<=millisecond_tick(10); -- Save current value for edge detection
+		if millisecond_tick(10)='1' and vga_newframe='0' then
 			vga_refresh<='1';
 		end if;
 	end if;
