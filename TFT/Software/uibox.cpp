@@ -2,40 +2,9 @@
 #include "framebuffer.h"
 #include "small_printf.h"
 
-class RGBGradient
-{
-	public:
-	RGBGradient(RGBTriple &centre) : centre(centre)
-	{
-		highlight=(3*RGBTriple(255,255,255)+centre)/4;
-		shadow=centre/4;
-	}
-	RGBTriple operator[](int idx)
-	{
-		RGBTriple result=centre;
-		if(idx<64)
-		{
-			result*=idx;
-			result+=((64-idx))*highlight;
-			result/=64;
-		}
-		else if(idx<128)
-		{
-			result*=128-idx;
-			result+=(idx-64)*shadow;
-			result/=64;
-		}
-		return(result);
-	}
-	protected:
-	RGBTriple centre;
-	RGBTriple highlight;
-	RGBTriple shadow;
-};
 
-void UIBox::Draw(bool pressed)
+void UIGradientButton::Draw(bool pressed)
 {
-	RGBGradient gradient(colour);
 	for(int t=0;t<height-4;++t)
 	{
 		int p=32+((64*t)/(height-4));
@@ -81,7 +50,7 @@ bool UIBox::Event(UIEvent &ev)
 			status=false;
 			filter=-5;
 			if(Hit(x,y))
-				triggered=true;
+				Trigger();
 
 		case EVENT_DRAG:
 			if(Hit(x,y))
@@ -112,4 +81,8 @@ bool UIBox::Event(UIEvent &ev)
 	return(refresh);
 }
 
+void UIBox::Trigger()
+{
+	printf("Triggered\n");
+}
 

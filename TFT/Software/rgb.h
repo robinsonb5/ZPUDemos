@@ -77,5 +77,38 @@ inline RGBTriple operator+(int c,RGBTriple lhs)
 }
 
 
+class RGBGradient
+{
+	public:
+	RGBGradient(RGBTriple &centre) : centre(centre)
+	{
+		highlight=(3*RGBTriple(255,255,255)+centre)/4;
+		shadow=centre/4;
+	}
+	RGBTriple operator[](int idx)
+	{
+		RGBTriple result=centre;
+		if(idx<64)
+		{
+			result*=idx;
+			result+=((64-idx))*highlight;
+			result/=64;
+		}
+		else if(idx<128)
+		{
+			result*=128-idx;
+			result+=(idx-64)*shadow;
+			result/=64;
+		}
+		return(result);
+	}
+	protected:
+	RGBTriple centre;
+	RGBTriple highlight;
+	RGBTriple shadow;
+};
+
+
+
 #endif
 

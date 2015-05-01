@@ -34,20 +34,36 @@ class Box
 class UIBox : public Box
 {
 	public:
-	UIBox(FrameBuffer &fb,int x,int y, int w, int h,RGBTriple &colour) : fb(fb), Box(x,y,w,h), colour(colour)
+	UIBox(int x,int y, int w, int h) : Box(x,y,w,h)
 	{
 	}
 	virtual ~UIBox()
 	{
 	}
-	virtual void Draw(bool pressed);
+	virtual void Draw(bool pressed)=0;
 	virtual bool Event(UIEvent &ev);
+	virtual void Trigger();
 	protected:
-	FrameBuffer &fb;
-	RGBTriple colour;
 	bool active;
 	int filter;
 };
+
+
+class UIGradientButton : public UIBox
+{
+	public:
+	UIGradientButton(FrameBuffer &fb,int x,int y, int w, int h,RGBTriple colour) : UIBox(x,y,w,h), fb(fb), gradient(colour)
+	{
+	}
+	~UIGradientButton()
+	{
+	}
+	virtual void Draw(bool pressed);
+	protected:
+	FrameBuffer &fb;
+	RGBGradient gradient;
+};
+
 
 #endif
 
