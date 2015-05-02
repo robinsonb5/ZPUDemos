@@ -47,6 +47,7 @@ static void Filter_Sort(struct Filter *f)
 		}
 		f->sorted[p]=s;
 	}
+	f->state=FILTER_SORTED;
 }
 
 

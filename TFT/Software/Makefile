@@ -30,7 +30,7 @@ MAIN_PRJ = TFTTest
 MAIN_C_SRC = driver.c tft.c touchscreen.c filter.c
 MAIN_CPP_SRC = main.cpp framebuffer.cpp uibox.cpp
 MAIN_HEADERS = tft.h touchscreen.h filter.h uibox.h
-MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(MAIN_CPP_SRC)) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_C_SRC))
+MAIN_OBJ = $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(MAIN_CPP_SRC)) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_C_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
 
@@ -48,6 +48,8 @@ all: $(BUILD_DIR) $(MAIN_PRJ).bin $(MAIN_PRJ).srec
 clean:
 	rm -f $(BUILD_DIR)/*.o *.hex *.elf *.map *.lst *.srec $(MAIN_PRJ).rom *~ */*.o *.bin
 
+halfclean:
+	rm -f $(MAIN_OBJ)
 
 # Convert ELF binary to bin file.
 %.bin: %.elf
@@ -58,7 +60,7 @@ clean:
 
 # Link - this produces an ELF binary.
 
-$(MAIN_PRJ).elf: $(STARTUP_OBJ) $(MAIN_OBJ)
+$(MAIN_PRJ).elf: $(STARTUP_OBJ) $(COMMON_OBJ) $(MAIN_OBJ)
 	$(LD) $(LFLAGS) -T $(LINKMAP) -o $@ $+ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c Makefile
