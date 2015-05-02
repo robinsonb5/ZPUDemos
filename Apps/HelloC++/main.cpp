@@ -1,5 +1,6 @@
 #include "uart.h"
 
+#include <map>
 #include "small_printf.h"
 
 
@@ -17,6 +18,21 @@ class globaltest
 };
 
 globaltest gt;
+
+
+template <class T> class templatetest
+{
+	public:
+	templatetest(T *p) : ptr(p)
+	{
+		printf("Received pointer to object at %x\n",ptr);
+	}
+	~templatetest()
+	{
+	}
+	protected:
+	T *ptr;
+};
 
 
 class test
@@ -59,8 +75,15 @@ class subtest : public test
 int main(int argc, char **argv)
 {
 	subtest test;
+	templatetest<subtest> templ(&test);
+	std::map<int,char *> mymap;
 	try
 	{
+		mymap[0]="Hello world!\n";
+		mymap[1]="Another line of text\n";
+		mymap[2]="And another one!\n";
+		for(int i=0;i<3;++i)
+			printf(mymap[i]);
 		test.Go();
 	}
 	catch(const char *err)
