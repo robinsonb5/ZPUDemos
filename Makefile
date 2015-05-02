@@ -1,5 +1,6 @@
 
 all:
+	make -C ZPUSim
 	make -C Dhrystone_fast/Firmware
 	make -C Dhrystone_min/Firmware
 	make -C HelloTinyROM/Firmware
@@ -14,6 +15,7 @@ all:
 	make -C Apps
 
 clean:
+	make -C ZPUSim clean
 	make -C Dhrystone_fast/Firmware clean
 	make -C Dhrystone_min/Firmware clean
 	make -C HelloTinyROM/Firmware clean

@@ -132,7 +132,7 @@ static unsigned int addresscheck(volatile int *base,int cachesize)
 	return(size*(1<<20));
 }
 
-
+void _break();
 void __attribute__ ((weak)) _premain()  
 {
 	int t;
@@ -173,7 +173,6 @@ void __attribute__ ((weak)) _premain()
 		++ctors;
 	}
 	_exit(t);
-	for (;;);
 }
 
 // Re-implement sbrk, since the libgloss version doesn't know about our memory map.
@@ -209,8 +208,9 @@ char *_sbrk(int nbytes)
 void __attribute__ ((weak)) _exit (int status)  
 {
 	/* end of the universe, cause memory fault */
-//	__asm("breakpoint");
-	for (;;);
+	__asm("breakpoint");
+	for(;;);
+//	_break();
 }
 
 void __attribute__ ((weak)) _zpu_interrupt(void)  

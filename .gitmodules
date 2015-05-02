@@ -1,3 +1,6 @@
 [submodule "ZPUFlex"]
 	path = ZPUFlex
 	url = https://github.com/robinsonb5/ZPUFlex.git
+[submodule "ZPUSim"]
+	path = ZPUSim
+	url = https://github.com/robinsonb5/ZPUSim.git
