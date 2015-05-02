@@ -32,6 +32,10 @@ class IntRange
 	void SetValueScaled(int m,int srcmin,int srcmax)
 	{
 		value=min+((max-min)*(m-srcmin))/(srcmax-srcmin);
+		if(value>max)
+			value=max;
+		if(value<min)
+			value=min;
 	}
 	int GetValue()
 	{

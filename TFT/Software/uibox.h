@@ -91,6 +91,7 @@ class UISlider : public UIBox, public IntRange
 	{
 	}
 	virtual void Draw(bool pressed);
+	virtual void Trigger();
 	protected:
 	virtual bool Press(UIEvent &ev);
 	virtual bool Release(UIEvent &ev);
