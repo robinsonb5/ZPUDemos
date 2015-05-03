@@ -13,6 +13,12 @@ class IntRange
 	~IntRange()
 	{
 	}
+	void SetRange(int mn,int mx,int stp)
+	{
+		min=mn;
+		max=mx;
+		step=stp;
+	}
 	void SetMin(int m)
 	{
 		min=m;
