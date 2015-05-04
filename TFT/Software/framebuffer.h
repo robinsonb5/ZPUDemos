@@ -11,6 +11,7 @@ class FrameBuffer
 	FrameBufferPixel *GetBuffer();
 	void Clear();
 	void Fill(int x,int y,int w, int h, FrameBufferPixel pix);
+	void DrawString(int x, int y,const char *msg,FrameBufferPixel pix);
 	inline void Plot(int x,int y,FrameBufferPixel pix)
 	{
 		buffer[width*y+x]=pix;

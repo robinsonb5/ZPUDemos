@@ -51,11 +51,16 @@ class TFTFrameBuffer : public FrameBuffer
 		}
 		return(result);
 	}
+	bool WaitUpdate()
+	{
+		while(drawing)
+			;
+	}
 	static void Interrupt();
-	static int drawing;
+	static volatile int drawing;
 };
 
-int TFTFrameBuffer::drawing;
+volatile int TFTFrameBuffer::drawing;
 void TFTFrameBuffer::Interrupt()
 {
 	static int c=0;
@@ -128,6 +133,63 @@ UIEvent &GetEvent()
 	return(event);
 }
 
+
+class RGBSlider : public UIBox, public RGBTriple
+{
+	public:
+	RGBSlider(FrameBuffer &fb,int x,int y, int w, int h) : UIBox(x,y,w,h), RGBTriple(), redslider(0), greenslider(0),blueslider(0)
+	{
+		int wh=(h-20)/3;
+		redslider = new UISlider(fb,x,y,w,wh,RGBTriple(100,0,0));
+		redslider->SetRange(0,255,8);
+		redslider->SetValue(7);
+
+		greenslider = new UISlider(fb,x,y+10+wh,w,wh,RGBTriple(0,100,0));
+		greenslider->SetRange(0,255,8);
+		greenslider->SetValue(7);
+
+		blueslider = new UISlider(fb,x,y+20+2*wh,w,wh,RGBTriple(0,0,100));
+		blueslider->SetRange(0,255,8);
+		blueslider->SetValue(7);
+	}
+	virtual ~RGBSlider()
+	{
+		if(redslider)
+			delete redslider;
+		if(greenslider)
+			delete greenslider;
+		if(blueslider)
+			delete blueslider;		
+	}
+	virtual void Draw(bool pressed)
+	{
+		redslider->Draw(pressed);
+		greenslider->Draw(pressed);
+		blueslider->Draw(pressed);
+	}
+	virtual bool Event(UIEvent &ev)
+	{
+		bool refresh;
+		refresh=redslider->Event(ev);
+		refresh|=greenslider->Event(ev);
+		refresh|=blueslider->Event(ev);
+		if(refresh)
+			Trigger();
+		return(refresh);
+	}
+	virtual void Trigger()
+	{
+		r=redslider->GetValue();
+		g=greenslider->GetValue();
+		b=blueslider->GetValue();
+	}
+	protected:
+	UISlider *redslider;
+	UISlider *greenslider;
+	UISlider *blueslider;
+};
+
+
 int main(int argc, char **argv)
 {
 	int c=0;
@@ -142,39 +204,30 @@ int main(int argc, char **argv)
 	framebuffer->Fill(0,0,320,240,RGBTriple(127,127,127).To16Bit());
 
 
-	UIGradientButton box(*framebuffer,20,20,100,40,RGBTriple(255,64,64));
+	UIGradientButton box(*framebuffer,20,20,120,48,RGBTriple(255,64,64));
 	box.Draw(false);
 
-	UIGradientButton box2(*framebuffer,160,30,130,50,RGBTriple(60,100,200));
+	UIGradientButton box2(*framebuffer,180,20,120,48,RGBTriple(60,100,200));
 	box2.Draw(false);
 
-	UISlider box3(*framebuffer,20,90,200,40,RGBTriple(100,0,0));
-	box3.SetRange(0,15,1);
-	box3.SetValue(7);
+	RGBSlider box3(*framebuffer,20,90,200,140);
 	box3.Draw(false);
-
-	UISlider box4(*framebuffer,20,140,200,40,RGBTriple(0,100,0));
-	box4.SetRange(0,15,1);
-	box4.SetValue(7);
-	box4.Draw(false);
-
-	UISlider box5(*framebuffer,20,190,200,40,RGBTriple(0,0,100));
-	box5.SetRange(0,15,1);
-	box5.SetValue(7);
-	box5.Draw(false);
 
 	pressed=false;
 	refresh=true;
 
 	while(1)
 	{
-		refresh=!framebuffer->Update();
+		if(refresh)
+		{
+			framebuffer->Fill(290,210,20,20,box3.To16Bit());
+			refresh=!framebuffer->Update();
+		}
 		UIEvent &ev=GetEvent();
+//		framebuffer->WaitUpdate();
 		refresh|=box.Event(ev);
 		refresh|=box2.Event(ev);
 		refresh|=box3.Event(ev);
-		refresh|=box4.Event(ev);
-		refresh|=box5.Event(ev);
 	}
 	return(0);
 }

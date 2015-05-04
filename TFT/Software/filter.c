@@ -31,11 +31,12 @@ void Filter_Add(struct Filter *f,int sample)
 static void Filter_Sort(struct Filter *f)
 {
 	int i,j,k;
-	for(i=0;i<FILTER_SAMPLES;++i)
+	f->sorted[0]=f->samples[0];
+	for(i=1;i<FILTER_SAMPLES;++i)
 	{
-		int p=0;
+		int p=i;
 		int s=f->samples[i];
-		for(j=0;j<i;++j)
+		for(j=0;j<=i;++j)
 		{
 			if(f->sorted[j]>s)
 			{
@@ -61,3 +62,4 @@ int Filter_GetMedian(struct Filter *f)
 
 	return(f->sorted[FILTER_SAMPLES/2]);
 }
+

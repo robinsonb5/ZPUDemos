@@ -110,8 +110,7 @@ void UIBox::Trigger()
 
 void UISlider::Draw(bool pressed)
 {
-	fb.Fill(xpos,ypos,width,height,RGBTriple(72,72,72).To16Bit());
-
+	// Container outline...
 	fb.HLine(xpos,ypos,width,RGBTriple(16,16,16).To16Bit());
 	fb.HLine(xpos+1,ypos+1,width-2,RGBTriple(48,48,48).To16Bit());
 	fb.HLine(xpos,ypos+height-1,width,RGBTriple(224,224,224).To16Bit());
@@ -125,6 +124,12 @@ void UISlider::Draw(bool pressed)
 	handle.xpos=xpos+2+((value-min)*((width-4)-handle.width))/(max-min);
 	handle.ypos=ypos+2;
 	handle.height=height-4;
+
+	// Left half of container background
+	if(value-min)
+		fb.Fill(xpos+2,ypos+2,handle.xpos-xpos+2,height-4,RGBTriple(72,72,72).To16Bit());
+
+	// Handle
 
 	for(int t=0;t<handle.height-4;++t)
 	{
@@ -145,6 +150,10 @@ void UISlider::Draw(bool pressed)
 	fb.VLine(handle.xpos+1,handle.ypos+1,handle.height-2,gradient[h2].To16Bit());
 	fb.VLine(handle.xpos+handle.width-1,handle.ypos,handle.height,gradient[127-h1].To16Bit());
 	fb.VLine(handle.xpos+handle.width-2,handle.ypos+1,handle.height-2,gradient[127-h2].To16Bit());
+
+	// Right half of container background
+	if(max-value)
+		fb.Fill(handle.xpos+handle.width,ypos+2,(width-4)-((handle.xpos-(xpos+2))+handle.width),height-4,RGBTriple(72,72,72).To16Bit());
 }
 
 bool UISlider::Press(UIEvent &ev)

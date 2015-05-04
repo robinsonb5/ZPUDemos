@@ -1,5 +1,7 @@
 #include "small_printf.h"
 #include "framebuffer.h"
+#include "fonts.h"
+#include <string.h>
 
 FrameBuffer::FrameBuffer(int width, int height) : width(width), height(height), buffer(0)
 {
@@ -31,3 +33,11 @@ void FrameBuffer::Clear()
 	Fill(0,0,width,height,0);
 }
 
+void FrameBuffer::DrawString(int x,int y,const char *msg,FrameBufferPixel pix)
+{
+	unsigned int c;
+	while((c=*msg++))
+	{
+		
+	}
+}

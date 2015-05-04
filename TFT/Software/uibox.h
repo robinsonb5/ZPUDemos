@@ -79,13 +79,14 @@ class UIGradientButton : public UIBox
 	RGBGradient gradient;
 };
 
+#define UISLIDER_HANDLEWIDTH 48
 
 class UISlider : public UIBox, public IntRange
 {
 	public:
 	UISlider(FrameBuffer &fb,int x,int y, int w, int h,RGBTriple colour) : UIBox(x,y,w,h), IntRange(), fb(fb), gradient(colour)
 	{
-		handle.width=32;
+		handle.width=UISLIDER_HANDLEWIDTH;
 	}
 	~UISlider()
 	{
