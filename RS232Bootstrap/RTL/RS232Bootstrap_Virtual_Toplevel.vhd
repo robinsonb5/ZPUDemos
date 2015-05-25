@@ -586,6 +586,10 @@ begin
 					sdram_wrL<=mem_writeEnableb and not mem_addr(0);
 					sdram_wrU<=mem_writeEnableb and mem_addr(0);
 					sdram_wrU2<=mem_writeEnableh or mem_writeEnableb; -- Halfword access
+					sdram_addr<=mem_Addr;
+					sdram_wr<='0';
+					sdram_req<='1';
+					sdram_write<=mem_write; -- 32-bits now
 					if mem_writeEnableb='1' then
 						sdram_state<=writeb;
 					else
@@ -647,6 +651,9 @@ begin
 					end case;
 
 				when others => -- SDRAM
+					sdram_addr<=mem_Addr;
+					sdram_wr<='1';
+					sdram_req<='1';
 					sdram_state<=read1;
 			end case;
 		end if;
@@ -663,9 +670,6 @@ begin
 	
 		case sdram_state is
 			when read1 => -- read first word from RAM
-				sdram_addr<=mem_Addr;
-				sdram_wr<='1';
-				sdram_req<='1';
 				if sdram_ack='0' then
 					if mem_WriteEnableh='1' then -- halfword read						
 						mem_read(31 downto 16) <= (others=>'0');
@@ -685,20 +689,12 @@ begin
 					mem_busy<='0';
 				end if;
 			when write1 => -- write 32-bit word to SDRAM
-				sdram_addr<=mem_Addr;
-				sdram_wr<='0';
-				sdram_req<='1';
-				sdram_write<=mem_write; -- 32-bits now
 				if sdram_ack='0' then -- done?
 					sdram_req<='0';
 					sdram_state<=idle;
 					mem_busy<='0';
 				end if;
 			when writeb => -- write 8-bit value to SDRAM
-				sdram_addr<=mem_Addr;
-				sdram_wr<='0';
-				sdram_req<='1';
-				sdram_write<=mem_write; -- 32-bits now
 				sdram_write(15 downto 8)<=mem_write(7 downto 0); -- 32-bits now
 				if sdram_ack='0' then -- done?
 					sdram_req<='0';
