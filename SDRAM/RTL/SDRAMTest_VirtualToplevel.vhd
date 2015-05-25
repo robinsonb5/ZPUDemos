@@ -291,6 +291,10 @@ begin
 					sdram_wrL<=mem_writeEnableb and not mem_addr(0);
 					sdram_wrU<=mem_writeEnableb and mem_addr(0);
 					sdram_wrU2<=mem_writeEnableh or mem_writeEnableb; -- Halfword access
+					sdram_addr<=mem_Addr;
+					sdram_wr<='0';
+					sdram_req<='1';
+					sdram_write<=mem_write; -- 32-bits now
 					if mem_writeEnableb='1' then
 						sdram_state<=writeb;
 					else
@@ -319,6 +323,9 @@ begin
 					end case;
 
 				when others => -- SDRAM
+					sdram_addr<=mem_Addr;
+					sdram_wr<='1';
+					sdram_req<='1';
 					sdram_state<=read1;
 			end case;
 		end if;
