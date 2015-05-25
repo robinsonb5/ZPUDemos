@@ -87,6 +87,71 @@ int bytecheck(volatile int *base,int cachesize)
 }
 
 
+int aligncheck(volatile int *base,unsigned int cachesize)
+{
+	int result=1;
+	int t;
+	volatile char *b=(volatile char *)base;
+	base[0]=0x00112233;
+	base[1]=0x44556677;
+	base[2]=0x8899aabb;
+	base[3]=0xccddeeff;
+	base[4]=0x5555aaaa;
+
+	t=*(volatile int *)(b+2);
+	if(t!=0x22334455)
+	{
+		printf("Align check failed (before cache refresh) at 2 (got 0x%d)\n",t);
+		result=0;
+	}
+	t=*(volatile int *)(b+6);
+	if(t!=0x66778899)
+	{
+		printf("Align check failed (before cache refresh) at 6 (got 0x%d)\n",t);
+		result=0;
+	}
+	t=*(volatile int *)(b+10);
+	if(t!=0xaabbccdd)
+	{
+		printf("Align check failed (before cache refresh) at 10 (got 0x%d)\n",t);
+		result=0;
+	}
+	t=*(volatile int *)(b+14);
+	if(t!=0xeeff5555)
+	{
+		printf("Align check failed (before cache refresh) at 14 (got 0x%d)\n",t);
+		result=0;
+	}
+
+	refreshcache(base,cachesize);
+
+	t=*(volatile int *)(b+2);
+	if(t!=0x22334455)
+	{
+		printf("Align check failed (after cache refresh) at 2 (got 0x%d)\n",t);
+		result=0;
+	}
+	t=*(volatile int *)(b+6);
+	if(t!=0x66778899)
+	{
+		printf("Align check failed (after cache refresh) at 6 (got 0x%d)\n",t);
+		result=0;
+	}
+	t=*(volatile int *)(b+10);
+	if(t!=0xaabbccdd)
+	{
+		printf("Align check failed (after cache refresh) at 10 (got 0x%d)\n",t);
+		result=0;
+	}
+	t=*(volatile int *)(b+14);
+	if(t!=0xeeff5555)
+	{
+		printf("Align check failed (after cache refresh) at 14 (got 0x%d)\n",t);
+		result=0;
+	}
+}
+
+
 #define LFSRSEED 12467
 
 int lfsrcheck(volatile int *base,unsigned int size)
@@ -104,17 +169,15 @@ int lfsrcheck(volatile int *base,unsigned int size)
 	{
 		int i;
 		unsigned int lfsrtemp;
-		unsigned int addrmask;
+		unsigned int addrmask=0;
 		putchar('.');
-		CYCLE_LFSR;
-		addrmask|=lfsr;
-		addrmask&=mask;
 		lfsrtemp=lfsr;
 		for(i=0;i<262144;++i)
 		{
 			unsigned int w=lfsr&0xfffff;
 			unsigned int j=lfsr&0xfffff;
 			base[j^addrmask]=w;
+
 			CYCLE_LFSR;
 		}
 		lfsr=lfsrtemp;
@@ -128,13 +191,57 @@ int lfsrcheck(volatile int *base,unsigned int size)
 			{
 				result=0;
 				printf("0x%d good reads, ",goodreads);
-				printf("Error at 0x%d, expected 0x%d, got 0x%d\n",j, w,jr);
+				printf("Error at 0x%d, expected 0x%d, got 0x%d\n",j^addrmask, w,jr);
 				goodreads=0;
 			}
 			else
 				++goodreads;
 			CYCLE_LFSR;
 		}
+		CYCLE_LFSR;
+		addrmask|=lfsr;
+		addrmask&=mask;
+	}
+	putchar('\n');
+	return(result);
+}
+
+
+int linearcheck(volatile int *base,unsigned int size)
+{
+	int result;
+	int cycles=127;
+	int goodreads=0;
+	// Shift left 20 bits to convert to megabytes, then 2 bits right since we're dealing with longwords
+	unsigned int mask=(size<<18)-1;
+	unsigned int lfsr=LFSRSEED;
+	int i,j;
+	unsigned int lfsrtemp;
+	unsigned int addrmask=0;
+	printf("Linear memory check");
+	lfsrtemp=lfsr;
+	for(i=0;i<mask;++i)
+	{
+		unsigned int w=lfsr;
+		base[i]=w;
+		CYCLE_LFSR;
+	}
+	lfsr=lfsrtemp;
+	for(i=0;i<mask;++i)
+	{
+		unsigned int w=lfsr;
+		unsigned int jr;
+		jr=base[i];
+		if(jr!=w)
+		{
+			result=0;
+			printf("0x%d good reads, ",goodreads);
+			printf("Error at 0x%d, expected 0x%d, got 0x%d on round %d\n",i, w,jr,j);
+			goodreads=0;
+		}
+		else
+			++goodreads;
+		CYCLE_LFSR;
 	}
 	putchar('\n');
 	return(result);
@@ -216,13 +323,17 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
-		int size;
+		int size=8;
 		if(sanitycheck(base,CACHESIZE))
 			printf("First stage sanity check passed.\n");
 		if(bytecheck(base,CACHESIZE))
 			printf("Byte (dqm) check passed\n");
+//		if(aligncheck(base,CACHESIZE))
+//			printf("Alignment check passed\n");
 		if(size=addresscheck(base,CACHESIZE))
 			printf("Address check passed.\n");
+		if(linearcheck(base,size))
+			printf("Linear check passed.\n\n");
 		if(lfsrcheck(base,size))
 			printf("LFSR check passed.\n\n");
 	}

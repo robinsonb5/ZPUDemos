@@ -197,7 +197,7 @@ myuart : entity work.simple_uart
 
 	
 -- SDRAM
-mysdram : entity work.sdram_simple
+mysdram : entity work.sdram_cached
 	generic map
 	(
 		rows => sdram_rows,
