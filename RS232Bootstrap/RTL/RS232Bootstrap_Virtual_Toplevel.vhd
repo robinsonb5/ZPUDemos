@@ -379,7 +379,7 @@ spi : entity work.spi_interface
 
 	
 -- SDRAM
-mysdram : entity work.sdram_simple
+mysdram : entity work.sdram_cached
 	generic map
 	(
 		rows => sdram_rows,
