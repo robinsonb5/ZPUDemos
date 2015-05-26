@@ -591,6 +591,7 @@ begin
 					sdram_req<='1';
 					sdram_write<=mem_write; -- 32-bits now
 					if mem_writeEnableb='1' then
+						sdram_write(15 downto 8)<=mem_write(7 downto 0); -- 32-bits now
 						sdram_state<=writeb;
 					else
 						sdram_state<=write1;
@@ -671,16 +672,25 @@ begin
 		case sdram_state is
 			when read1 => -- read first word from RAM
 				if sdram_ack='0' then
-					if mem_WriteEnableh='1' then -- halfword read						
+					if mem_WriteEnableh='1' then  -- halfword read
 						mem_read(31 downto 16) <= (others=>'0');
-						mem_read(15 downto 0)<=sdram_read(31 downto 16);
+						if mem_Addr(1)='0' then
+							mem_read(15 downto 0)<=sdram_read(31 downto 16);
+						else
+							mem_read(15 downto 0)<=sdram_read(15 downto 0);
+						end if;
 					elsif mem_WriteEnableb='1' then -- Byte read
 						mem_read(31 downto 8) <= (others=>'0');
-						if mem_Addr(0)='0' then -- even address
-							mem_read(7 downto 0)<=sdram_read(31 downto 24);
-						else
-							mem_read(7 downto 0)<=sdram_read(23 downto 16);
-						end if;
+						case mem_Addr(1 downto 0) is
+							when "00" =>
+								mem_read(7 downto 0)<=sdram_read(31 downto 24);
+							when "01" =>
+								mem_read(7 downto 0)<=sdram_read(23 downto 16);
+							when "10" =>
+								mem_read(7 downto 0)<=sdram_read(15 downto 8);
+							when "11" =>
+								mem_read(7 downto 0)<=sdram_read(7 downto 0);
+						end case;
 					else
 						mem_read<=sdram_read;
 					end if;
@@ -695,7 +705,6 @@ begin
 					mem_busy<='0';
 				end if;
 			when writeb => -- write 8-bit value to SDRAM
-				sdram_write(15 downto 8)<=mem_write(7 downto 0); -- 32-bits now
 				if sdram_ack='0' then -- done?
 					sdram_req<='0';
 					sdram_state<=idle;

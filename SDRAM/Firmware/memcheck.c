@@ -2,6 +2,7 @@
 #include "uart.h"
 #include "small_printf.h"
 
+
 // FIXME - use a smaller LFSR - this one will fail for RAMs smaller than 8 meg.
 #define CYCLE_LFSR {lfsr<<=1; if(lfsr&0x400000) lfsr|=1; if(lfsr&0x200000) lfsr^=1;}
 
@@ -50,6 +51,13 @@ int bytecheck(volatile int *base,int cachesize)
 {
 	int result=1;
 	volatile char *b2=(volatile char *)base;
+	volatile unsigned short *b3=(volatile unsigned short *)base;
+	int t;
+
+	t=base[0];	// Preload the cache
+	t=base[1];
+	t=base[2];
+	t=base[3];
 
 	base[0]=0x55555555;
 	base[3]=0xaaaaaaaa;
@@ -69,17 +77,88 @@ int bytecheck(volatile int *base,int cachesize)
 		result=0;
 	}
 
+	// Try again now the values are in cache.
+	b2[1]=0x12;
+	b3[7]=0xfedc;
+
+	if(base[0]!=0xcc125555)
+	{
+		printf("Byte check 2 failed (before cache refresh) at 0 (got 0x%d)\n",base[0]);
+		result=0;
+	}
+
+	if(base[3]!=0xaaaafedc)
+	{
+		printf("Byte check 2 failed (before cache refresh) at 3 (got 0x%d)\n",base[3]);
+		result=0;
+	}
+
 	refreshcache(base,cachesize);
 
-	if(base[0]!=0xcc555555)
+	if(base[0]!=0xcc125555)
 	{
 		printf("Byte check failed (after cache refresh) at 0 (got 0x%d)\n",base[0]);
 		result=0;
 	}
 
-	if(base[3]!=0xaaaaaa33)
+	if(base[3]!=0xaaaafedc)
 	{
 		printf("Byte check failed (after cache refresh) at 3 (got 0x%d)\n",base[3]);
+		result=0;
+	}
+
+	b2[2]=0x0f;
+	b2[13]=0xf0;
+	// Check byte reads from various alignments
+	if(b2[0]!=0xcc)
+	{
+		printf("Byte read check failed at 0 (got 0x%d)\n",b2[0]);
+		result=0;
+	}
+	if(b2[1]!=0x12)
+	{
+		printf("Byte read check failed at 1 (got 0x%d)\n",b2[1]);
+		result=0;
+	}
+	if(b2[2]!=0x0f)
+	{
+		printf("Byte read check failed at 2 (got 0x%d)\n",b2[2]);
+		result=0;
+	}
+	if(b2[3]!=0x55)
+	{
+		printf("Byte read check failed at 3 (got 0x%d)\n",b2[3]);
+		result=0;
+	}
+	if(b2[12]!=0xaa)
+	{
+		printf("Byte read check failed at 12 (got 0x%d)\n",b2[12]);
+		result=0;
+	}
+	if(b2[13]!=0xf0)
+	{
+		printf("Byte read check failed at 13 (got 0x%d)\n",b2[13]);
+		result=0;
+	}
+	if(b2[14]!=0xfe)
+	{
+		printf("Byte read check failed at 14 (got 0x%d)\n",b2[14]);
+		result=0;
+	}
+	if(b2[15]!=0xdc)
+	{
+		printf("Byte read check failed at 15 (got 0x%d)\n",b2[15]);
+		result=0;
+	}
+
+	if(b3[0]!=0xcc12)
+	{
+		printf("Word read check failed at 0 (got 0x%d)\n",b3[0]);
+		result=0;
+	}
+	if(b3[7]!=0xfedc)
+	{
+		printf("Word read check failed at 7 (got 0x%d)\n",b3[7]);
 		result=0;
 	}
 

@@ -14,11 +14,11 @@ _cvt(int val, char *buf, int radix)
 	int c;
 	int i;
 	int nz=0;
-	if(val<0)
-	{
-		putchar('-');
-		val=-val;
-	}
+//	if(val<0)
+//	{
+//		putchar('-');
+//		val=-val;
+//	}
 	if(val)
 	{
 		for(i=0;i<8;++i)

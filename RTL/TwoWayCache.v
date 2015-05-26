@@ -262,8 +262,12 @@ begin
 				// If this is a byte write, the byte not being written
 				// will be marked as invalid, triggering a re-read if
 				// the other byte or whole word is read.
+				
+				// FIXME - this gets more complicated for a 32-bit cache.
+				// For now, we simply invalidate the cacheline if the write
+				// is anything other than 32 bit.
 				data_ports_w_hi<={~cpu_rwu2,~cpu_rwu2,data_from_cpu[31:16]};
-				data_ports_w<={~cpu_rwu,~cpu_rwl,data_from_cpu[15:0]};
+				data_ports_w<={~cpu_rwu2,~cpu_rwu2,data_from_cpu[15:0]};
 
  				if(tag_hit1)
 				begin
