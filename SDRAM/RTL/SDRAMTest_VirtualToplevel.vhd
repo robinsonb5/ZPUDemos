@@ -201,7 +201,8 @@ mysdram : entity work.sdram_cached
 	generic map
 	(
 		rows => sdram_rows,
-		cols => sdram_cols
+		cols => sdram_cols,
+		cache => false
 	)
 	port map
 	(

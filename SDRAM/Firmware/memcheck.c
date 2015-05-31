@@ -235,7 +235,7 @@ int aligncheck(volatile int *base,unsigned int cachesize)
 
 int lfsrcheck(volatile int *base,unsigned int size)
 {
-	int result;
+	int result=1;
 	int cycles=127;
 	int goodreads=0;
 	// Shift left 20 bits to convert to megabytes, then 2 bits right since we're dealing with longwords
@@ -288,7 +288,7 @@ int lfsrcheck(volatile int *base,unsigned int size)
 
 int linearcheck(volatile int *base,unsigned int size)
 {
-	int result;
+	int result=1;
 	int cycles=127;
 	int goodreads=0;
 	// Shift left 20 bits to convert to megabytes, then 2 bits right since we're dealing with longwords
@@ -394,6 +394,36 @@ unsigned int addresscheck(volatile int *base,int cachesize)
 }
 
 
+int simplecheck(volatile int *base, int cachesize)
+{
+	int result=1;
+	base[0]=0x11223344;
+	base[1]=0x55667788;
+	base[2]=0x99aabbcc;
+	base[3]=0xddeeff00;
+	if(base[0]!=0x11223344)
+	{
+		printf("Simple check failed at 0 (got %d, expected 0x11223344))\n",base[0]);
+		result=0;
+	}
+	if(base[1]!=0x55667788)
+	{
+		printf("Simple check failed at 1 (got %d, expected 0x55667788))\n",base[1]);
+		result=0;
+	}
+	if(base[2]!=0x99aabbcc)
+	{
+		printf("Simple check failed at 2 (got %d, expected 0x99aabbcc))\n",base[2]);
+		result=0;
+	}
+	if(base[3]!=0xddeeff00)
+	{
+		printf("Simple check failed at 3 (got %d, expected 0xddeeff00))\n",base[3]);
+		result=0;
+	}
+	return(1);
+}
+
 #define CACHESIZE 4096
 
 int main(int argc, char **argv)
@@ -403,6 +433,8 @@ int main(int argc, char **argv)
 	while(1)
 	{
 		int size=8;
+		if(simplecheck(base,CACHESIZE))
+			printf("Simple check passed.\n");
 		if(sanitycheck(base,CACHESIZE))
 			printf("First stage sanity check passed.\n");
 		if(bytecheck(base,CACHESIZE))
