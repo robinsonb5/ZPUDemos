@@ -114,6 +114,7 @@ signal slot2_bank : std_logic_vector(1 downto 0) := "11";
 
 signal slot1_fill : std_logic;
 signal slot2_fill : std_logic;
+
 signal slot1_ack : std_logic;
 signal slot2_ack : std_logic;
 
@@ -138,10 +139,11 @@ signal writecache_dtack : std_logic;
 type readcache_states is (waitread,req,fill1,fill2,fill3,fill4,fill2_1,fill2_2,fill2_3,fill2_4,finish);
 signal readcache_state : readcache_states;
 
-signal readcache_dirty : std_logic;
 signal readcache_req : std_logic;
+signal readcache_req_e : std_logic;
 signal readcache_dtack : std_logic;
 signal readcache_fill : std_logic;
+
 signal longword : std_logic_vector(31 downto 0);
 
 signal cache_ready : std_logic;
@@ -162,7 +164,6 @@ COMPONENT TwoWayCache
 		cpu_rwu2 : in std_logic;
 		data_from_cpu		:	 IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		data_to_cpu		:	 OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
---		sdram_addr		:	 OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		data_from_sdram		:	 IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 		data_to_sdram		:	 OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 		sdram_req		:	 OUT STD_LOGIC;
@@ -255,25 +256,34 @@ if cache=false generate
 	begin
 		if rising_edge(sysclk) then
 			if reset='0' then
-				readcache_req<='0';
+				readcache_req_e<='1';
 			else
-				if req1='1' and wr1='1' then
-					readcache_req<='1';
+--				if req1='1' and wr1='1' then
+--					readcache_req<='1';
+--				end if;
+--				if readcache_dtack='1' then
+--					readcache_req<='0';
+--				end if;
+				if req1='0' then
+					readcache_req_e<='1';
 				end if;
 				if readcache_dtack='1' then
-					readcache_req<='0';
+					readcache_req_e<='0';
 				end if;
 			end if;
 		end if;
 	end process;
 
+	readcache_req<=req1 and wr1 and readcache_req_e;
+	
 --	readcache_req<=req1 and wr1; -- Pass CPU req directly to SDRAM controller	
 	readcache_dtack <= '1' when (slot1_ack='1' and sdram_slot1=port1)
 			or (slot2_ack='1' and sdram_slot2=port1)
 				else '0';
 	dataout1<=longword;
 	cache_ready<='1';
-end generate;	
+end generate;
+
 -------------------------------------------------------------------------
 -- SDRAM Basic
 -------------------------------------------------------------------------
@@ -308,6 +318,8 @@ end generate;
 			case sdram_state is	--LATENCY=3
 				when ph0 =>	sdram_state <= ph1;
 				when ph1 =>	sdram_state <= ph2;
+					slot1_fill<='0';
+					slot2_fill<='1';
 				when ph2 => sdram_state <= ph3;
 					slot2_ack<='1';
 				when ph3 =>	sdram_state <= ph4;
@@ -316,10 +328,10 @@ end generate;
 				when ph5 => sdram_state <= ph6;
 				when ph6 =>	sdram_state <= ph7;
 				when ph7 =>	sdram_state <= ph8;
-					slot2_fill<='0';
-					slot1_fill<='1';
 				when ph8 =>	sdram_state <= ph9;
 				when ph9 =>	sdram_state <= ph10;
+					slot2_fill<='0';
+					slot1_fill<='1';
 				when ph10 => sdram_state <= ph11;
 					slot1_ack<='1';
 				when ph11 => sdram_state <= ph12;
@@ -337,8 +349,6 @@ end generate;
 							sdram_state <= ph0;
 						end if;
 				when ph15 => sdram_state <= ph0;
-					slot1_fill<='0';
-					slot2_fill<='1';
 				when others => sdram_state <= ph0;
 			end case;	
 		END IF;	
@@ -418,29 +428,6 @@ end generate;
 				vga_ack<='0';
 				case sdram_state is
 
-					when ph0 =>
-
-					when ph1 =>
-						if sdram_slot2=writecache then
-							sdaddr <= (others=>'0');
-							sdaddr((cols-1) downto 0) <= casaddr((cols+2) downto 6) & casaddr(3 downto 1) ;--auto precharge
-							sdaddr(10) <= '0';  -- Don't use auto-precharge for writes.
-							ba <= slot2_bank;
-							sd_cs <= '0';
-
-							sd_ras <= '1';
-							sd_cas <= '0'; -- CAS
-							sd_we  <= '0'; -- Write
-							
-							sdwrite<='1';
-							datain <= writecache_word0;
-							dqm <= writecache_dqm(1 downto 0);
-						end if;
-						-- First word of reads if bypassing the cache
-						if sdram_slot2=port1 then
-							longword(31 downto 16)<=sdata;
-						end if;
-
 					when ph2 => -- ACTIVE for first access slot
 						cas_sd_cs <= '0';  -- Only the lowest bit has any significance...
 						cas_sd_ras <= '1';
@@ -499,7 +486,7 @@ end generate;
 							sd_ras <= '0';
 							vga_nak<='1'; -- Inform the VGA controller that it didn't get this cycle
 						end if;
-												
+						
 						-- SLOT 2
 						 -- Second word of burst write
 						if sdram_slot2=writecache then
@@ -508,17 +495,17 @@ end generate;
 							dqm <= writecache_dqm(3 downto 2);
 							writecache_ack<='1'; -- End write burst after 32 bits.
 						end if;
-						
-						-- Second word of reads if bypassing the cache					
-						if sdram_slot2=port1 then
+
+						-- Second word of reads if bypassing the cache
+						if sdram_slot2=port1 and cache=false then
 							longword(15 downto 0)<=sdata;
 						end if;
 
 
 					when ph3 =>
-						-- Third word of burst write - masked off
+						-- Third word of burst write
 						if sdram_slot2=writecache then
-							dqm <= "11";
+							dqm <= "11"; -- Mask off end of write burst
 						end if;
 
 
@@ -574,8 +561,8 @@ end generate;
 							dqm <= writecache_dqm(1 downto 0);
 						end if;
 
-						-- read port if bypassing the cache
-						if sdram_slot1=port1 then
+						-- First word of reads if bypassing the cache
+						if sdram_slot1=port1 and cache=false then
 							longword(31 downto 16)<=sdata;
 						end if;
 
@@ -632,15 +619,17 @@ end generate;
 							sd_cs <= '0'; --ACTIVE
 							sd_ras <= '0';
 						end if;
-						-- Second word of reads if bypassing the cache					
-						if sdram_slot1=port1 then
+						
+						-- Second word of reads if bypassing the cache
+						if sdram_slot1=port1 and cache=false then
 							longword(15 downto 0)<=sdata;
 						end if;
+
 				
 					when ph11 =>
-						-- third word of burst write - masked off
+						-- third word of burst write
 						if sdram_slot1=writecache then
-							dqm<="11";
+							dqm<="11"; -- Mask off end of burst
 						end if;
 
 
@@ -676,6 +665,30 @@ end generate;
 					when ph14 =>
 
 					when ph15 =>
+
+					when ph0 =>
+
+					when ph1 =>
+						if sdram_slot2=writecache then
+							sdaddr <= (others=>'0');
+							sdaddr((cols-1) downto 0) <= casaddr((cols+2) downto 6) & casaddr(3 downto 1) ;--auto precharge
+							sdaddr(10) <= '0';  -- Don't use auto-precharge for writes.
+							ba <= slot2_bank;
+							sd_cs <= '0';
+
+							sd_ras <= '1';
+							sd_cas <= '0'; -- CAS
+							sd_we  <= '0'; -- Write
+							
+							sdwrite<='1';
+							datain <= writecache_word0;
+							dqm <= writecache_dqm(1 downto 0);
+						end if;
+						
+						-- First word of reads if bypassing the cache
+						if sdram_slot2=port1 and cache=false then
+							longword(31 downto 16)<=sdata;
+						end if;
 
 					when others =>
 						null;
