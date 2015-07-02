@@ -27,7 +27,7 @@ COMMON_SRC = small_printf.c uart.c syscalls.c malloc.c
 COMMON_OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(COMMON_SRC))
  
 MAIN_PRJ = HelloC++
-MAIN_SRC = main.cpp
+MAIN_SRC = main.cpp globaltest.cpp
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
 LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld

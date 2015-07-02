@@ -202,7 +202,7 @@ mysdram : entity work.sdram_cached
 	(
 		rows => sdram_rows,
 		cols => sdram_cols,
-		cache => false
+		cache => true
 	)
 	port map
 	(

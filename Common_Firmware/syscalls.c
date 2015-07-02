@@ -155,13 +155,16 @@ void __attribute__ ((weak)) _premain()
 
 //  Run global constructors...
 	ctors=&__ctors_start__;
+	printf("Running global constructors");
 	while(ctors<&__ctors_end__)
 	{
+		printf(".");
 		void (*fp)();
 		fp=(void (*)())(*ctors);
 		fp();
 		++ctors;
 	}
+	printf("\n");
 	t=main(1, args);
 //  Run global destructors...
 	ctors=&__dtors_start__;

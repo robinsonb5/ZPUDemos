@@ -72,7 +72,8 @@ port
 	wrU1		: in std_logic;	-- Minimig write upper byte
 	wrU2		: in std_logic;	-- Minimig write upper word
 	dataout1		: out std_logic_vector(31 downto 0); -- Data destined for Minimig
-	dtack1	: buffer std_logic
+	dtack1	: buffer std_logic;
+	debug : out std_logic_vector(2 downto 0)
 	);
 end;
 
@@ -143,6 +144,7 @@ signal readcache_req : std_logic;
 signal readcache_req_e : std_logic;
 signal readcache_dtack : std_logic;
 signal readcache_fill : std_logic;
+signal readcache_busy : std_logic;
 
 signal longword : std_logic_vector(31 downto 0);
 
@@ -168,7 +170,9 @@ COMPONENT TwoWayCache
 		data_to_sdram		:	 OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 		sdram_req		:	 OUT STD_LOGIC;
 		sdram_fill		:	 IN STD_LOGIC;
-		sdram_rw		:	 OUT STD_LOGIC
+		sdram_rw		:	 OUT STD_LOGIC;
+		busy : out std_logic;
+		debug : out std_logic_vector(2 downto 0)
 	);
 END COMPONENT;
 
@@ -199,7 +203,7 @@ begin
 		writecache_dqm(7 downto 4)<="1111";
 
 		-- 32-bit variant of writecache for ZPU...
-		if req1='1' and wr1='0' and writecache_req='0' then
+		if req1='1' and wr1='0' and writecache_req='0' and readcache_busy='0' then
 			writecache_addr(31 downto 4)<=addr1(31 downto 4);
 			if wrU2='1' then -- is this a halfword write?	
 				-- 000 -> 111, 001 -> 000, 010 -> 001, 011 -> 010
@@ -246,7 +250,9 @@ mytwc : component TwoWayCache
 		data_to_sdram => open,
 		sdram_req => readcache_req,
 		sdram_fill => readcache_fill,
-		sdram_rw => open
+		sdram_rw => open,
+		busy => readcache_busy,
+		debug => debug
 	);
 end generate;
 

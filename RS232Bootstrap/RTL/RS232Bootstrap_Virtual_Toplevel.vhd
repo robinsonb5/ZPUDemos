@@ -201,7 +201,7 @@ signal int_trigger : std_logic;
 begin
 
 sdr_cke <='1';
-audio_l <= X"0000";
+--audio_l <= X"0000";
 audio_r <= X"0000";
 
 
@@ -384,7 +384,7 @@ mysdram : entity work.sdram_cached
 	(
 		rows => sdram_rows,
 		cols => sdram_cols,
-		cache => false
+		cache => true
 	)
 	port map
 	(
@@ -421,7 +421,8 @@ mysdram : entity work.sdram_cached
 		wrU1 => sdram_wrU, -- upper byte
 		wrU2 => sdram_wrU2, -- upper halfword, only written on longword accesses
 		dataout1 => sdram_read,
-		dtack1 => sdram_ack
+		dtack1 => sdram_ack,
+		unsigned(debug) => audio_l(2 downto 0)
 	);
 
 	
@@ -654,6 +655,10 @@ begin
 
 				when others => -- SDRAM
 					sdram_addr<=mem_Addr;
+					sdram_addr(1 downto 0)<="00";
+--					sdram_wrL<=mem_writeEnableb and not mem_addr(0);
+--					sdram_wrU<=mem_writeEnableb and mem_addr(0);
+--					sdram_wrU2<=mem_writeEnableh or mem_writeEnableb; -- Halfword access
 					sdram_wr<='1';
 					sdram_req<='1';
 					sdram_state<=read1;

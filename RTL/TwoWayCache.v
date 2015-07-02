@@ -47,8 +47,19 @@ module TwoWayCache
 	output reg [15:0] data_to_sdram,
 	output reg sdram_req,
 	input sdram_fill,
-	output reg sdram_rw	// 1 for read cycles, 0 for write cycles
+	output reg sdram_rw,	// 1 for read cycles, 0 for write cycles
+	output reg busy,
+	output [2:0] debug
 );
+
+// Debugging
+reg cache_error;
+assign debug[0]=cache_error;
+assign debug[1]=tag_hit1;
+assign debug[2]=tag_hit2;
+reg debug_hit1;
+reg debug_hit2;
+
 
 // States for state machine
 localparam	INIT1=0, INIT2=1, WAITING=2, WAITRD=3, PAUSE1=4;
@@ -213,7 +224,10 @@ begin
 	cpu_ack<=1'b0;
 	init<=1'b0;
 	readword_burst<=1'b0;
+	cache_error<=1'b0;
 
+	busy <=1'b1;
+	
 	case(state)
 
 		// We use an init state here to loop through the data, clearing
@@ -243,6 +257,7 @@ begin
 		WAITING:
 		begin
 			state<=WAITING;
+			busy <= 1'b0;
 			if(cpu_req==1'b1)
 			begin
 				if(cpu_rw==1'b1)	// Read cycle
@@ -253,6 +268,7 @@ begin
 		end
 		WRITE1:
 			begin
+				busy <= 1'b0;
 				// If the current address is in cache,
 				// we must update the appropriate cacheline
 
@@ -300,6 +316,7 @@ begin
 
 		WRITE2:
 			begin
+				busy <= 1'b0;
 				if(cpu_req==1'b0)	// Wait for the write cycle to finish
 					state<=WAITING;
 			end
@@ -311,7 +328,6 @@ begin
 				if(tag_hit1 && data_valid1)
 				begin
 					// Copy data to output
-//					data_to_cpu<=data_port1_r;
 					cpu_ack<=1'b1;
 
 					// Mark tag1 as most recently used.
@@ -321,7 +337,6 @@ begin
 				else if(tag_hit2 && data_valid2)
 				begin
 					// Copy data to output
-//					data_to_cpu<=data_port2_r;
 					cpu_ack<=1'b1;
 					
 					// Mark tag2 as most recently used.
@@ -338,6 +353,9 @@ begin
 
 					latched_cpuaddr[10:4]<=cpu_addr[10:4];
 
+					debug_hit1=tag_hit1;			
+					debug_hit2=tag_hit2;
+
 					if(tag_hit1)
 						tag_mru1<=1'b1;	// Way 1 contains stale data
 					else if(tag_hit2)
@@ -349,7 +367,6 @@ begin
 					tag_wren2<=1'b1;
 					// If r[17] is 1, tag_mru1 is 0, so we need to write to the second tag.
 					// FIXME - might be simpler to just write every cycle and switch between new and old data.
-//					tag_wren2<=tag_port1_r[17];
 
 					sdram_req<=1'b1;
 					sdram_rw<=1'b1;	// Read cycle
@@ -374,14 +391,10 @@ begin
 			begin
 				sdram_req<=1'b0;
 				// Forward data to CPU
-//				data_to_cpu<=data_from_sdram;
 				firstword[31:16] <= data_from_sdram;
-//				cpu_ack<=1'b1; // Too soon?
 
 				// write first word to Cache...
 				data_ports_w_hi<={2'b11,data_from_sdram};
-//				data_wren1<=tag_mru1;
-//				data_wren2<=!tag_mru1;
 				state<=FILL2;
 			end
 		end
@@ -393,11 +406,28 @@ begin
 			firstword[15:0] <= data_from_sdram;
 			// write second word to Cache...
 			readword_burst<=1'b1;
-//			readword<=readword+1;
 			data_ports_w<={2'b11,data_from_sdram};
 			data_wren1<=tag_mru1;
 			data_wren2<=!tag_mru1;
 			state<=FILL3;
+
+			if(debug_hit1 && data_valid1)
+			begin
+				if (data_port1_r_hi[15:0]!=data_ports_w_hi[15:0])
+					cache_error<=1'b1;
+				if (data_port1_r[15:0]!=data_from_sdram)
+					cache_error<=1'b1;
+			end
+			
+			if(debug_hit2 && data_valid2)
+			begin
+				if (data_port2_r_hi[15:0]!=data_ports_w_hi[15:0])
+					cache_error<=1'b1;
+				if (data_port2_r[15:0]!=data_from_sdram)
+					cache_error<=1'b1;
+			end
+
+//			end
 		end
 
 		FILL3:
@@ -405,10 +435,7 @@ begin
 			cpu_ack<=cpu_req; // Maintain ack signal if necessary
 			// write third word to Cache...
 			readword_burst<=1'b1;
-//			readword<=readword+1;
 			data_ports_w_hi<={2'b11,data_from_sdram};
-//			data_wren1<=tag_mru1;
-//			data_wren2<=!tag_mru1;
 			state<=FILL4;
 		end
 
@@ -459,7 +486,7 @@ begin
 		
 		FILL9:
 		begin
-			readword_burst<=1'b1;
+//			readword_burst<=1'b1;
 			readword<=cpu_addr[3:2];
 			state<=WAITING;
 		end

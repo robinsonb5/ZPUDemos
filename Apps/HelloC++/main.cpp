@@ -2,22 +2,9 @@
 
 #include <map>
 #include "small_printf.h"
+#include "globaltest.h"
 
-
-class globaltest
-{
-	public:
-	globaltest()
-	{
-		printf("In GlobalTest constructor\n");
-	}
-	~globaltest()
-	{
-		printf("In GlobalTest destructor\n");
-	}
-};
-
-globaltest gt;
+globaltest gt(10);
 
 
 template <class T> class templatetest
@@ -75,6 +62,7 @@ class subtest : public test
 int main(int argc, char **argv)
 {
 	subtest test;
+	globalstatictest gst;
 	templatetest<subtest> templ(&test);
 	std::map<int,char *> mymap;
 	try
