@@ -1,0 +1,12 @@
+../ZPUFlex/RTL/zpupkg.vhd
+../ZPUFlex/RTL/zpu_core_flex.vhd
+../RTL/Peripherals/simple_uart.vhd
+../RTL/Peripherals/interrupt_controller.vhd
+../RTL/Peripherals/timer_controller.vhd
+../RTL/RAM/sdram_cached.vhd
+../RTL/RAM/DualPortRAM.vhd
+../RTL/RAM/TwoWayCache.v
+../Firmware/SDRAMTest_ROM.vhd
+RTL/SDRAMTest_VirtualToplevel.vhd
+RTL/Toplevel_Config.vhd
+
