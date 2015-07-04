@@ -48,7 +48,7 @@ set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 484
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
 set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
-set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name ENABLE_SIGNALTAP OFF
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 set_location_assignment PIN_A13 -to GPIO_0[0]
 set_location_assignment PIN_B13 -to GPIO_0[1]
@@ -531,339 +531,30 @@ set_location_assignment PIN_W20 -to SD_DAT
 set_location_assignment PIN_U20 -to SD_DAT3
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
 set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE BALANCED
+set_global_assignment -name CYCLONEII_OPTIMIZATION_TECHNIQUE AREA
 set_global_assignment -name SYNTH_TIMING_DRIVEN_SYNTHESIS OFF
 set_global_assignment -name REMOVE_REDUNDANT_LOGIC_CELLS ON
 set_global_assignment -name MUX_RESTRUCTURE ON
 set_global_assignment -name ALLOW_SHIFT_REGISTER_MERGING_ACROSS_HIERARCHIES ALWAYS
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC_FOR_AREA ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_MAP_LOGIC_TO_MEMORY_FOR_AREA ON
+set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
+set_global_assignment -name SDC_FILE ../../../Board/de1/constraints.sdc
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
-set_global_assignment -name SDC_FILE ../../../TimingConstraints/de1.sdc
-set_global_assignment -name VHDL_FILE ../../Firmware/SDRAMTest_ROM.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/simple_uart.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/DE1_Toplevel.vhd
-set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneII/PLL.qip
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name VHDL_FILE ../../../Board/de1/DE1_Toplevel.vhd
+set_global_assignment -name QIP_FILE ../../../Board/de1/Clock_50to100.qip
+
+
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/interrupt_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/timer_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/RAM/sdram_cached.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/RAM/DualPortRAM.vhd
+set_global_assignment -name VERILOG_FILE ../../../RTL/RAM/TwoWayCache.v
+set_global_assignment -name VHDL_FILE ../../../Firmware/SDRAMTest_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/SDRAMTest_VirtualToplevel.vhd
-set_global_assignment -name SIGNALTAP_FILE stp1.stp
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "VirtualToplevel:myVirtualToplevel|clk" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id auto_signaltap_0
-set_global_assignment -name VHDL_FILE ../../Firmware/sanitycheck_ROM.vhd
-set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPCS4
-set_global_assignment -name VHDL_FILE ../../../RTL/sdram_cached.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/DualPortRAM.vhd
-set_global_assignment -name VERILOG_FILE ../../../RTL/TwoWayCache.v
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=128" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=128" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to DRAM_CAS_N -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to DRAM_CS_N -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to DRAM_DQ[0] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to DRAM_DQ[10] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to DRAM_DQ[11] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to DRAM_DQ[12] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to DRAM_DQ[13] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to DRAM_DQ[14] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to DRAM_DQ[15] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to DRAM_DQ[1] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to DRAM_DQ[2] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to DRAM_DQ[3] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to DRAM_DQ[4] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to DRAM_DQ[5] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to DRAM_DQ[6] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to DRAM_DQ[7] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to DRAM_DQ[8] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to DRAM_DQ[9] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to DRAM_WE_N -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "VirtualToplevel:myVirtualToplevel|reset" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[22] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[23] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[24] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[16]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[17]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[18]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[19]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[20]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[21]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[22]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[23]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[24]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[25]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[26]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[27]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[28]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[29]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[30]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[31]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|cachesel" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|cachevalid" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|dtack1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[58] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[59] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[60] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[61] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[62] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[16]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[63] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[17]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[64] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[18]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[65] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[19]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[66] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[67] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[20]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[68] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[21]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[69] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[22]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[70] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[23]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[71] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[24]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[72] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[25]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[73] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[26]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[74] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[27]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[75] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[28]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[76] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[29]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[77] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[78] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[30]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[79] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[31]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[80] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[81] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[82] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[83] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[84] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[85] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[86] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[87] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|port1_dtack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to DRAM_CAS_N -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to DRAM_CS_N -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to DRAM_DQ[0] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to DRAM_DQ[10] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to DRAM_DQ[11] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to DRAM_DQ[12] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to DRAM_DQ[13] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to DRAM_DQ[14] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to DRAM_DQ[15] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to DRAM_DQ[1] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to DRAM_DQ[2] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to DRAM_DQ[3] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to DRAM_DQ[4] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to DRAM_DQ[5] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to DRAM_DQ[6] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to DRAM_DQ[7] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to DRAM_DQ[8] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to DRAM_DQ[9] -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to DRAM_WE_N -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "VirtualToplevel:myVirtualToplevel|reset" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[22] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[23] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[16]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[17]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[18]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[19]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[20]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[21]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[22]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[23]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[24]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[25]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[26]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[27]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[28]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[29]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[30]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[31]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|Addr1[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|cachesel" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|cachevalid" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|dtack1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[58] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[59] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[60] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[61] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[62] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[16]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[63] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[17]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[64] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[18]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[65] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[19]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[66] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[67] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[20]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[68] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[21]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[69] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[22]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[70] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[23]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[71] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[24]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[72] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[25]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[73] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[26]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[74] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[27]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[75] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[28]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[76] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[29]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[77] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[78] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[30]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[79] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[31]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[80] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[81] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[82] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[83] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[84] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[85] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[86] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|longword[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[87] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|port1_dtack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[88] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|readcache_req" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[89] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|req1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[90] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|reset" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[91] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.idle" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[92] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.port0" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[93] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.port1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[94] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.refresh" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[95] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.writecache" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[96] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.idle" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[97] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.port0" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[98] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.port1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[99] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.refresh" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[100] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.writecache" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[101] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|slot1_ack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[102] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|slot2_ack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[103] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|wr1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[104] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|writecache_ack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[105] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|writecache_dtack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[106] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|writecache_req" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[107] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[108] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[109] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[110] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[111] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[112] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[113] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[114] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[16]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[115] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[17]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[116] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[18]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[117] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[19]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[118] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[119] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[20]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[120] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[21]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[121] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[22]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[122] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[23]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[123] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[24]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[124] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[25]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[125] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[26]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[126] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[27]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[127] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[28]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[128] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[29]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[129] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[130] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[30]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[131] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[31]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[132] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[133] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[134] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[135] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[136] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[137] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[138] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[139] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_bEnable" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[140] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_hEnable" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[141] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_readEnable" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[142] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_writeEnable" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[88] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|readcache_req" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[89] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|req1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[90] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|reset" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[91] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.idle" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[92] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.port0" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[93] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.port1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[94] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.refresh" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[95] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot1.writecache" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[96] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.idle" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[97] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.port0" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[98] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.port1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[99] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.refresh" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[100] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|sdram_slot2.writecache" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[101] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|slot1_ack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[102] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|slot2_ack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[103] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|wr1" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[104] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|writecache_ack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[105] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|writecache_dtack" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[106] -to "VirtualToplevel:myVirtualToplevel|sdram_cached:mysdram|writecache_req" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[107] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[0]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[108] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[10]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[109] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[11]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[110] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[12]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[111] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[13]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[112] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[14]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[113] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[15]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[114] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[16]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[115] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[17]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[116] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[18]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[117] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[19]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[118] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[1]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[119] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[20]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[120] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[21]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[121] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[22]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[122] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[23]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[123] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[24]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[124] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[25]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[125] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[26]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[126] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[27]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[127] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[28]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[128] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[29]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[129] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[2]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[130] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[30]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[131] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[31]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[132] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[3]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[133] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[4]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[134] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[5]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[135] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[6]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[136] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[7]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[137] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[8]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[138] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_addr[9]" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[139] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_bEnable" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[140] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_hEnable" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[141] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_readEnable" -section_id auto_signaltap_0
-set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[142] -to "VirtualToplevel:myVirtualToplevel|zpu_core_flex:zpu|out_mem_writeEnable" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=143" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=143" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=450" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_LOWORD=16960" -section_id auto_signaltap_0
-set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_CRC_HIWORD=24613" -section_id auto_signaltap_0
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/SDRAM/fpga/de1/stp1_auto_stripped.stp

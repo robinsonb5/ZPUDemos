@@ -1,8 +1,0 @@
-INTSTYLE=ise
-INFILE=/home/amr/FPGA/Projects/ZPUDemos/Dhrystone_fast/fpga/minimig/MinimigToplevel.ncd
-OUTFILE=/home/amr/FPGA/Projects/ZPUDemos/Dhrystone_fast/fpga/minimig/MinimigToplevel.bit
-FAMILY=Spartan3
-PART=xc3s400-5pq208
-WORKINGDIR=/home/amr/FPGA/Projects/ZPUDemos/Dhrystone_fast/fpga/minimig
-LICENSE=WebPack
-USER_INFO=210652080_0_0_350

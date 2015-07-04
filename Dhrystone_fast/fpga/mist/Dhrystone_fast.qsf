@@ -46,7 +46,7 @@ set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 144
 set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
-set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE stp1.stp
 set_location_assignment PIN_54 -to CLOCK_27[0]
 set_location_assignment PIN_55 -to CLOCK_27[1]
@@ -70,6 +70,16 @@ set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 set_global_assignment -name AUTO_SHIFT_REGISTER_RECOGNITION ALWAYS
 set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_BA_0 -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_BA_1 -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_CAS_N -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_CKE -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_CLK -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_CS_N -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_LDQM -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_RAS_N -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_UDQM -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_WE_N -section_id DRAM_Other
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "NO HEAT SINK WITH STILL AIR"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name USE_CONFIGURATION_DEVICE ON
@@ -254,15 +264,18 @@ set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[0]
 
 set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
-set_global_assignment -name SLD_FILE /home/amr/FPGA/Projects/ZPUDemos/Dhrystone_fast/fpga/mist/stp1_auto_stripped.stp
-set_global_assignment -name VHDL_FILE ../../Firmware/Dhrystone_fast_ROM.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/Dhrystone_fast_VirtualToplevel.vhd
+set_global_assignment -name SLD_FILE stp1_auto_stripped.stp
+set_global_assignment -name SDC_FILE ../../../Board/mist/constraints.sdc
+set_global_assignment -name VHDL_FILE ../../../Board/mist/MIST_Toplevel.vhd
+set_global_assignment -name VERILOG_FILE ../../../Board/mist/user_io.v
+set_global_assignment -name VERILOG_FILE ../../../Board/mist/sd_card.v
+set_global_assignment -name VERILOG_FILE ../../../Board/mist/osd.v
+set_global_assignment -name VERILOG_FILE ../../../Board/mist/mist_console.v
+set_global_assignment -name QIP_FILE ../../../Board/mist/PLL.qip
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
-set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_config.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/simple_uart.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/MIST_Toplevel.vhd
-set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneIII/PLL.qip
-set_global_assignment -name CDF_FILE Chain1.cdf
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
+set_global_assignment -name VHDL_FILE ../../../Firmware/Dhrystone_fast_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/Dhrystone_fast_VirtualToplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

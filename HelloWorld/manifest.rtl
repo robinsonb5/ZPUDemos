@@ -1,0 +1,7 @@
+../ZPUFlex/RTL/zpupkg.vhd
+../ZPUFlex/RTL/zpu_core_flex.vhd
+../RTL/Peripherals/simple_uart.vhd
+Firmware/HelloWorld_ROM.vhd
+RTL/HelloWorld_VirtualToplevel.vhd
+RTL/Toplevel_Config.vhd
+

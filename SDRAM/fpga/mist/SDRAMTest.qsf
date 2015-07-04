@@ -38,7 +38,7 @@
 
 set_global_assignment -name FAMILY "Cyclone III"
 set_global_assignment -name DEVICE EP3C25E144C7
-set_global_assignment -name TOP_LEVEL_ENTITY MIST_Toplevel
+set_global_assignment -name TOP_LEVEL_ENTITY MIST_TopLevel
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION "12.0 SP1"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "00:29:53  MAY 10, 2013"
 set_global_assignment -name LAST_QUARTUS_VERSION "13.0 SP1"
@@ -70,6 +70,16 @@ set_global_assignment -name ADV_NETLIST_OPT_SYNTH_WYSIWYG_REMAP ON
 set_global_assignment -name AUTO_SHIFT_REGISTER_RECOGNITION ALWAYS
 set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_BA_0 -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_BA_1 -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_CAS_N -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_CKE -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_CLK -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_CS_N -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_LDQM -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_RAS_N -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_UDQM -section_id DRAM_Other
+set_global_assignment -name ASSIGNMENT_GROUP_MEMBER DRAM_WE_N -section_id DRAM_Other
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "NO HEAT SINK WITH STILL AIR"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name USE_CONFIGURATION_DEVICE ON
@@ -151,10 +161,6 @@ set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -rise
 set_global_assignment -name OUTPUT_IO_TIMING_NEAR_END_VMEAS "HALF VCCIO" -fall
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -rise
 set_global_assignment -name OUTPUT_IO_TIMING_FAR_END_VMEAS "HALF SIGNAL SWING" -fall
-
-
-set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
-set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
@@ -254,15 +260,27 @@ set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[3]
 set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[2]
 set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[1]
 set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[0]
+
+
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 set_global_assignment -name SLD_FILE stp1_auto_stripped.stp
-set_global_assignment -name SDC_FILE ../../../TimingConstraints/mist.sdc
+set_global_assignment -name SDC_FILE ../../../Board/mist/constraints.sdc
+set_global_assignment -name VHDL_FILE ../../../Board/mist/MIST_Toplevel.vhd
+set_global_assignment -name VERILOG_FILE ../../../Board/mist/user_io.v
+set_global_assignment -name VERILOG_FILE ../../../Board/mist/sd_card.v
+set_global_assignment -name VERILOG_FILE ../../../Board/mist/osd.v
+set_global_assignment -name VERILOG_FILE ../../../Board/mist/mist_console.v
+set_global_assignment -name QIP_FILE ../../../Board/mist/PLL.qip
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
-set_global_assignment -name QIP_FILE ../../../RTL/Generated_CycloneIII/PLL.qip
-set_global_assignment -name VHDL_FILE ../../../RTL/sdram_simple.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/simple_uart.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/MIST_Toplevel.vhd
-set_global_assignment -name VHDL_FILE ../../Firmware/SDRAMTest_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/interrupt_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/timer_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/RAM/sdram_cached.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/RAM/DualPortRAM.vhd
+set_global_assignment -name VERILOG_FILE ../../../RTL/RAM/TwoWayCache.v
+set_global_assignment -name VHDL_FILE ../../../Firmware/SDRAMTest_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/SDRAMTest_VirtualToplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

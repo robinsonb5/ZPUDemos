@@ -262,39 +262,34 @@ set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[1]
 set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[0]
 
 
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 set_global_assignment -name SLD_FILE stp1_auto_stripped.stp
-
-set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
-
-
-set_global_assignment -name VHDL_FILE ../../../RTL/sdram_cached.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/DualPortRAM.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/FIFO_Counter.vhd
-set_global_assignment -name VERILOG_FILE ../../../RTL/TwoWayCache.v
+set_global_assignment -name SDC_FILE ../../../Board/mist/constraints.sdc
+set_global_assignment -name VHDL_FILE ../../../Board/mist/MIST_Toplevel.vhd
 set_global_assignment -name VERILOG_FILE ../../../Board/mist/user_io.v
 set_global_assignment -name VERILOG_FILE ../../../Board/mist/sd_card.v
 set_global_assignment -name VERILOG_FILE ../../../Board/mist/osd.v
 set_global_assignment -name VERILOG_FILE ../../../Board/mist/mist_console.v
-set_global_assignment -name SDC_FILE ../../../TimingConstraints/mist.sdc
-set_global_assignment -name VHDL_FILE ../../../RTL/sdram_simple.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/simple_uart.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/video_vga_master.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/video_vga_dither.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/vga_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/DMACache.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/SDBootstrap_Virtual_Toplevel.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/DMACache_config.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/DMACache_pkg.vhd
-set_global_assignment -name VHDL_FILE ../../Firmware/SDBootstrap_ROM.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/spi.vhd
+set_global_assignment -name QIP_FILE ../../../Board/mist/PLL.qip
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name VHDL_FILE ../../../RTL/RAM/DualPortRAM.vhd
+set_global_assignment -name VERILOG_FILE ../../../RTL/RAM/TwoWayCache.v
+set_global_assignment -name VHDL_FILE ../../../RTL/RAM/sdram_cached.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
-set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_config.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/Generic/DMACacheRAM.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/MIST_Toplevel.vhd
-set_global_assignment -name QIP_FILE ../../../Board/mist/PLL.qip
-set_global_assignment -name VHDL_FILE ../../../RTL/io_ps2_com.vhd
-set_global_assignment -name VHDL_FILE ../../../RTL/interrupt_controller.vhd
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name VHDL_FILE ../../../RTL/Video/video_vga_master.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Video/video_vga_dither.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Video/vga_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/DMA/DMACache.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/DMA/DMACache_pkg.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/DMA/FIFO_Counter.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/DMA/DMACacheRAM.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/spi.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/io_ps2_com.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/interrupt_controller.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/Virtual_Toplevel.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/DMACache_config.vhd
+set_global_assignment -name VHDL_FILE ../../Firmware/SDBootstrap_ROM.vhd

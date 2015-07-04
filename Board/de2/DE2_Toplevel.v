@@ -303,7 +303,7 @@ wire sysclk;
 wire clk_slow;
 wire pll_locked;
 
-PLL mypll
+Clock_50to100 mypll
 (
 	.inclk0(CLOCK_50),
 	.c0(DRAM_CLK),

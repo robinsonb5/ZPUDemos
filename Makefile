@@ -1,32 +1,30 @@
 
 all:
 	make -C ZPUSim
-	make -C Dhrystone_fast/Firmware
-	make -C Dhrystone_min/Firmware
-	make -C HelloTinyROM/Firmware
-	make -C HelloWorld/Firmware
-	make -C HelloTinyZPU/Firmware
-	make -C Interrupt/Firmware
-	make -C RS232Bootstrap/Firmware
-	make -C SDBootstrap/Firmware
-	make -C SDRAM/Firmware
-	make -C VGA/Firmware
-	make -C TFT/Software
+	make -C Dhrystone_fast
+	make -C Dhrystone_min
+	make -C HelloTinyROM
+	make -C HelloWorld
+	make -C HelloTinyZPU
+	make -C Interrupt
+	make -C RS232Bootstrap
+	make -C SDBootstrap
+	make -C SDRAM
+	make -C VGA
 	make -C Apps
 
 clean:
 	make -C ZPUSim clean
-	make -C Dhrystone_fast/Firmware clean
-	make -C Dhrystone_min/Firmware clean
-	make -C HelloTinyROM/Firmware clean
-	make -C HelloWorld/Firmware clean
-	make -C HelloTinyZPU/Firmware clean
-	make -C Interrupt/Firmware clean
-	make -C RS232Bootstrap/Firmware clean
-	make -C SDBootstrap/Firmware clean
-	make -C SDRAM/Firmware clean
-	make -C VGA/Firmware clean
-	make -C TFT/Software clean
+	make -C Dhrystone_fast clean
+	make -C Dhrystone_min clean
+	make -C HelloTinyROM clean
+	make -C HelloWorld clean
+	make -C HelloTinyZPU clean
+	make -C Interrupt clean
+	make -C RS232Bootstrap clean
+	make -C SDBootstrap clean
+	make -C SDRAM clean
+	make -C VGA clean
 	make -C Apps clean
 
 
