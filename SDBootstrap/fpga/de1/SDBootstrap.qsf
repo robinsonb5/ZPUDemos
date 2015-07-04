@@ -564,6 +564,6 @@ set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/spi.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/io_ps2_com.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/interrupt_controller.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/RS232Bootstrap_Virtual_Toplevel.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/Virtual_Toplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/DMACache_config.vhd
 set_global_assignment -name VHDL_FILE ../../Firmware/SDBootstrap_ROM.vhd
