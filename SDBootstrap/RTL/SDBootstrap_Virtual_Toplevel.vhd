@@ -1,8 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.ALL;
-
-library work;
 use work.zpupkg.ALL;
 use work.DMACache_pkg.ALL;
 use work.DMACache_config.ALL;
@@ -22,7 +20,7 @@ entity VirtualToplevel is
 		vga_green 	: out unsigned(7 downto 0);
 		vga_blue 	: out unsigned(7 downto 0);
 		vga_hsync 	: out std_logic;
-		vga_vsync 	: out std_logic;
+		vga_vsync 	: buffer std_logic;
 		vga_window	: out std_logic;
 
 		-- SDRAM
@@ -46,7 +44,7 @@ entity VirtualToplevel is
 		-- UART
 		rxd	: in std_logic;
 		txd	: out std_logic;
-
+		
 		-- PS/2 signals
 		ps2k_clk_in : in std_logic := '1';
 		ps2k_dat_in : in std_logic := '1';
@@ -57,7 +55,7 @@ entity VirtualToplevel is
 		ps2m_clk_out : out std_logic;
 		ps2m_dat_out : out std_logic;
 
-		-- Sound
+		-- AUDIO
 		audio_l : out signed(15 downto 0);
 		audio_r : out signed(15 downto 0)
 );
@@ -100,6 +98,29 @@ signal ser_rxrecv : std_logic;
 signal ser_txgo : std_logic;
 signal ser_rxint : std_logic;
 
+
+-- PS2 signals
+signal ps2_int : std_logic;
+
+signal kbdidle : std_logic;
+signal kbdrecv : std_logic;
+signal kbdrecvreg : std_logic;
+signal kbdsendbusy : std_logic;
+signal kbdsendtrigger : std_logic;
+signal kbdsenddone : std_logic;
+signal kbdsendbyte : std_logic_vector(7 downto 0);
+signal kbdrecvbyte : std_logic_vector(10 downto 0);
+
+signal mouseidle : std_logic;
+signal mouserecv : std_logic;
+signal mouserecvreg : std_logic;
+signal mousesendbusy : std_logic;
+signal mousesenddone : std_logic;
+signal mousesendtrigger : std_logic;
+signal mousesendbyte : std_logic_vector(7 downto 0);
+signal mouserecvbyte : std_logic_vector(10 downto 0);
+
+
 -- ZPU signals
 
 signal mem_busy           : std_logic;
@@ -127,7 +148,6 @@ signal vga_reservebank : std_logic; -- Keep bank clear for instant access.
 signal vga_reserveaddr : std_logic_vector(31 downto 0); -- to SDRAM
 
 signal dma_data : std_logic_vector(15 downto 0);
-
 
 -- Plumbing between VGA controller and DMA controller
 
@@ -167,11 +187,22 @@ type sdram_states is (read1, read2, read3, write1, writeb, write2, write3, idle)
 signal sdram_state : sdram_states;
 
 
+-- Interrupt signals
+
+constant int_max : integer := 1;
+signal int_triggers : std_logic_vector(int_max downto 0);
+signal int_status : std_logic_vector(int_max downto 0);
+signal int_ack : std_logic;
+signal int_req : std_logic;
+signal int_enabled : std_logic :='0'; -- Disabled by default
+signal int_trigger : std_logic;
+
+
 begin
 
-audio_l <= (others => '0');
-audio_r <= (others => '0');
 sdr_cke <='1';
+--audio_l <= X"0000";
+audio_r <= X"0000";
 
 
 -- ROM
@@ -222,7 +253,7 @@ end process;
 myuart : entity work.simple_uart
 	generic map(
 		enable_tx=>true,
-		enable_rx=>false
+		enable_rx=>true
 	)
 	port map(
 		clk => clk,
@@ -239,13 +270,61 @@ myuart : entity work.simple_uart
 	);
 
 
+-- PS2 devices
+
+	mykeyboard : entity work.io_ps2_com
+		generic map (
+			clockFilter => 15,
+			ticksPerUsec => sysclk_frequency/10
+		)
+		port map (
+			clk => clk,
+			reset => not reset, -- active high!
+			ps2_clk_in => ps2k_clk_in,
+			ps2_dat_in => ps2k_dat_in,
+			ps2_clk_out => ps2k_clk_out,
+			ps2_dat_out => ps2k_dat_out,
+			
+			inIdle => open,	-- Probably don't need this
+			sendTrigger => kbdsendtrigger,
+			sendByte => kbdsendbyte,
+			sendBusy => kbdsendbusy,
+			sendDone => kbdsenddone,
+			recvTrigger => kbdrecv,
+			recvByte => kbdrecvbyte
+		);
+
+
+	mymouse : entity work.io_ps2_com
+		generic map (
+			clockFilter => 15,
+			ticksPerUsec => sysclk_frequency/10
+		)
+		port map (
+			clk => clk,
+			reset => not reset, -- active high!
+			ps2_clk_in => ps2m_clk_in,
+			ps2_dat_in => ps2m_dat_in,
+			ps2_clk_out => ps2m_clk_out,
+			ps2_dat_out => ps2m_dat_out,
+			
+			inIdle => open,	-- Probably don't need this
+			sendTrigger => mousesendtrigger,
+			sendByte => mousesendbyte,
+			sendBusy => mousesendbusy,
+			sendDone => mousesenddone,
+			recvTrigger => mouserecv,
+			recvByte => mouserecvbyte
+		);
+
+
 -- SPI Timer
 process(clk)
 begin
 	if rising_edge(clk) then
 		spiclk_in<='0';
 		spi_tick<=spi_tick+1;
-		if (spi_fast='1' and spi_tick(4)='1') or spi_tick(8)='1' then
+		if (spi_fast='1' and spi_tick(5)='1') or spi_tick(8)='1' then
 			spiclk_in<='1'; -- Momentary pulse for SPI host.
 			spi_tick<='0'&X"00";
 		end if;
@@ -263,7 +342,6 @@ spi : entity work.spi_interface
 		spiclk_in => spiclk_in,
 		host_to_spi => host_to_spi,
 		spi_to_host => spi_to_host,
---		wide => spi_wide,
 		trigger => spi_trigger,
 		busy => spi_busy,
 
@@ -283,7 +361,8 @@ spi : entity work.spi_interface
 
 			channels_from_host(0) => vgachannel_fromhost,
 			channels_from_host(1) => spr0channel_fromhost,
-			channels_to_host(0) => vgachannel_tohost,	
+			
+			channels_to_host(0) => vgachannel_tohost,
 			channels_to_host(1) => spr0channel_tohost,
 
 			data_out => dma_data,
@@ -296,15 +375,16 @@ spi : entity work.spi_interface
 			sdram_ack => vga_ack,
 			sdram_fill => vga_fill,
 			sdram_data => vga_data
-		);	
+		);
 
 	
 -- SDRAM
-mysdram : entity work.sdram_simple
+mysdram : entity work.sdram_cached
 	generic map
 	(
 		rows => sdram_rows,
-		cols => sdram_cols
+		cols => sdram_cols,
+		cache => true
 	)
 	port map
 	(
@@ -341,7 +421,8 @@ mysdram : entity work.sdram_simple
 		wrU1 => sdram_wrU, -- upper byte
 		wrU2 => sdram_wrU2, -- upper halfword, only written on longword accesses
 		dataout1 => sdram_read,
-		dtack1 => sdram_ack
+		dtack1 => sdram_ack,
+		unsigned(debug) => audio_l(2 downto 0)
 	);
 
 	
@@ -379,7 +460,27 @@ mysdram : entity work.sdram_simple
 		vga_window => vga_window
 	);
 
-	
+
+-- Interrupt controller
+
+intcontroller: entity work.interrupt_controller
+generic map (
+	max_int => int_max
+)
+port map (
+	clk => clk,
+	reset_n => reset,
+	trigger => int_triggers, -- Again, thanks ISE.
+	ack => int_ack,
+	int => int_req,
+	status => int_status
+);
+
+int_triggers<=(0=>'0',
+					1=>ps2_int,
+					others => '0');
+
+
 -- Main CPU
 
 	zpu: zpu_core_flex
@@ -392,6 +493,8 @@ mysdram : entity work.sdram_simple
 		IMPL_CALL => true,
 		IMPL_SHIFT => true,
 		IMPL_XOR => true,
+		CACHE => false,
+--		IMPL_EMULATION => minimal,
 		REMAP_STACK => true, -- We need to remap the Boot ROM / Stack RAM so we can access SDRAM
 		EXECUTE_RAM => true, -- We might need to execute code from SDRAM, too.
 		maxAddrBitBRAM => 13
@@ -399,6 +502,7 @@ mysdram : entity work.sdram_simple
 	port map (
 		clk                 => clk,
 		reset               => not reset,
+		interrupt			  => int_trigger,
 		in_mem_busy         => mem_busy,
 		mem_read            => mem_read,
 		mem_write           => mem_write,
@@ -411,17 +515,24 @@ mysdram : entity work.sdram_simple
 		to_rom => zpu_to_rom
 	);
 
-
+int_trigger<=int_req and int_enabled;	
+	
 process(clk)
 begin
 	if reset='0' then
 		spi_cs<='1';
 		spi_active<='0';
+		int_enabled<='0';
+		kbdrecvreg <='0';
+		mouserecvreg <='0';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';
 		vga_reg_req<='0';
 		spi_trigger<='0';
+		int_ack<='0';
+		kbdsendtrigger<='0';
+		mousesendtrigger<='0';
 
 		-- Write from CPU?
 		if mem_writeEnable='1' then
@@ -430,8 +541,12 @@ begin
 					vga_reg_rw<='0';
 					vga_reg_req<='1';
 					mem_busy<='0';
-				when X"F" =>	-- Peripherals at 0xFFFFFF00
+				when X"F" =>	-- Peripherals at 0xFFFFFFF00
 					case mem_addr(7 downto 0) is
+						when X"B0" => -- Interrupts
+							int_enabled<=mem_write(0);
+							mem_busy<='0';
+
 						when X"C0" => -- UART
 							ser_txdata<=mem_write(7 downto 0);
 							ser_txgo<='1';
@@ -448,11 +563,22 @@ begin
 							host_to_spi<=mem_write(7 downto 0);
 							spi_active<='1';
 						
---						when X"D8" => -- SPI Pump (32-bit read)
---							spi_wide<='1';
---							spi_trigger<='1';
---							host_to_spi<=mem_write(7 downto 0);
---							spi_active<='1';
+						when X"D8" => -- SPI Pump (32-bit read)
+							spi_wide<='1';
+							spi_trigger<='1';
+							host_to_spi<=mem_write(7 downto 0);
+							spi_active<='1';
+
+						-- Write to PS/2 registers
+						when X"e0" =>
+							kbdsendbyte<=mem_write(7 downto 0);
+							kbdsendtrigger<='1';
+							mem_busy<='0';
+
+						when X"e4" =>
+							mousesendbyte<=mem_write(7 downto 0);
+							mousesendtrigger<='1';
+							mem_busy<='0';
 
 						when others =>
 							mem_busy<='0';
@@ -462,7 +588,12 @@ begin
 					sdram_wrL<=mem_writeEnableb and not mem_addr(0);
 					sdram_wrU<=mem_writeEnableb and mem_addr(0);
 					sdram_wrU2<=mem_writeEnableh or mem_writeEnableb; -- Halfword access
+					sdram_addr<=mem_Addr;
+					sdram_wr<='0';
+					sdram_req<='1';
+					sdram_write<=mem_write; -- 32-bits now
 					if mem_writeEnableb='1' then
+						sdram_write(15 downto 8)<=mem_write(7 downto 0); -- 32-bits now
 						sdram_state<=writeb;
 					else
 						sdram_state<=write1;
@@ -474,6 +605,12 @@ begin
 
 				when X"F" =>	-- Peripherals
 					case mem_addr(7 downto 0) is
+						when X"B0" => -- Interrupt
+							mem_read<=(others=>'X');
+							mem_read(int_max downto 0)<=int_status;
+							int_ack<='1';
+							mem_busy<='0';
+
 						when X"C0" => -- UART
 							mem_read<=(others=>'X');
 							mem_read(9 downto 0)<=ser_rxrecv&ser_txready&ser_rxdata;
@@ -492,18 +629,38 @@ begin
 						when X"D4" => -- SPI read (blocking)
 							spi_active<='1';
 
---						when X"D8" => -- SPI wide read (blocking)
---							spi_wide<='1';
---							spi_trigger<='1';
---							spi_active<='1';
---							host_to_spi<=X"FF";
---
+						when X"D8" => -- SPI wide read (blocking)
+							spi_wide<='1';
+							spi_trigger<='1';
+							spi_active<='1';
+							host_to_spi<=X"FF";
+
+						-- Read from PS/2 regs
+						when X"E0" =>
+							mem_read<=(others =>'0');
+							mem_read(11 downto 0)<=kbdrecvreg & not kbdsendbusy & kbdrecvbyte(10 downto 1);
+							kbdrecvreg<='0';
+							mem_busy<='0';
+							
+						when X"E4" =>
+							mem_read<=(others =>'0');
+							mem_read(11 downto 0)<=mouserecvreg & not mousesendbusy & mouserecvbyte(10 downto 1);
+							mouserecvreg<='0';
+							mem_busy<='0';
+
 						when others =>
 							mem_busy<='0';
 							null;
 					end case;
 
 				when others => -- SDRAM
+					sdram_addr<=mem_Addr;
+					sdram_addr(1 downto 0)<="00";
+--					sdram_wrL<=mem_writeEnableb and not mem_addr(0);
+--					sdram_wrU<=mem_writeEnableb and mem_addr(0);
+--					sdram_wrU2<=mem_writeEnableh or mem_writeEnableb; -- Halfword access
+					sdram_wr<='1';
+					sdram_req<='1';
 					sdram_state<=read1;
 			end case;
 		end if;
@@ -520,20 +677,26 @@ begin
 	
 		case sdram_state is
 			when read1 => -- read first word from RAM
-				sdram_addr<=mem_Addr;
-				sdram_wr<='1';
-				sdram_req<='1';
 				if sdram_ack='0' then
-					if mem_WriteEnableh='1' then -- halfword read						
+					if mem_WriteEnableh='1' then  -- halfword read
 						mem_read(31 downto 16) <= (others=>'0');
-						mem_read(15 downto 0)<=sdram_read(31 downto 16);
+						if mem_Addr(1)='0' then
+							mem_read(15 downto 0)<=sdram_read(31 downto 16);
+						else
+							mem_read(15 downto 0)<=sdram_read(15 downto 0);
+						end if;
 					elsif mem_WriteEnableb='1' then -- Byte read
 						mem_read(31 downto 8) <= (others=>'0');
-						if mem_Addr(0)='0' then -- even address
-							mem_read(7 downto 0)<=sdram_read(31 downto 24);
-						else
-							mem_read(7 downto 0)<=sdram_read(23 downto 16);
-						end if;
+						case mem_Addr(1 downto 0) is
+							when "00" =>
+								mem_read(7 downto 0)<=sdram_read(31 downto 24);
+							when "01" =>
+								mem_read(7 downto 0)<=sdram_read(23 downto 16);
+							when "10" =>
+								mem_read(7 downto 0)<=sdram_read(15 downto 8);
+							when "11" =>
+								mem_read(7 downto 0)<=sdram_read(7 downto 0);
+						end case;
 					else
 						mem_read<=sdram_read;
 					end if;
@@ -542,21 +705,12 @@ begin
 					mem_busy<='0';
 				end if;
 			when write1 => -- write 32-bit word to SDRAM
-				sdram_addr<=mem_Addr;
-				sdram_wr<='0';
-				sdram_req<='1';
-				sdram_write<=mem_write; -- 32-bits now
 				if sdram_ack='0' then -- done?
 					sdram_req<='0';
 					sdram_state<=idle;
 					mem_busy<='0';
 				end if;
 			when writeb => -- write 8-bit value to SDRAM
-				sdram_addr<=mem_Addr;
-				sdram_wr<='0';
-				sdram_req<='1';
-				sdram_write<=mem_write; -- 32-bits now
-				sdram_write(15 downto 8)<=mem_write(7 downto 0); -- 32-bits now
 				if sdram_ack='0' then -- done?
 					sdram_req<='0';
 					sdram_state<=idle;
@@ -571,6 +725,17 @@ begin
 		if ser_rxint='1' then
 			ser_rxrecv<='1';
 		end if;
+
+		-- PS2 interrupt
+		ps2_int <= kbdrecv or kbdsenddone
+			or mouserecv or mousesenddone;
+			-- mouserecv or kbdsenddone or mousesenddone ; -- Momentary high pulses to indicate retrieved data.
+		if kbdrecv='1' then
+			kbdrecvreg <= '1'; -- remains high until cleared by a read
+		end if;
+		if mouserecv='1' then
+			mouserecvreg <= '1'; -- remains high until cleared by a read
+		end if;	
 
 	end if; -- rising-edge(clk)
 
