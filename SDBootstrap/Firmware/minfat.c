@@ -227,7 +227,7 @@ int GetCluster(int cluster)
 	// (Minimal FAT implementation doesn't have a separate buffer for FAT blocks, so always read.)
 //    if (sb != buffered_fat_index)
 //    {
-		printf("GetCluster reading sector %d\n",fat_start+sb);
+//		printf("GetCluster reading sector %d\n",fat_start+sb);
         if (!sd_read_sector(fat_start + sb, (unsigned char*)&fat_buffer))
             return(0);
 //		hexdump(sector_buffer,512);
@@ -291,7 +291,7 @@ unsigned int FileOpen(fileTYPE *file, const char *name)
         if (fat32) // subdirectory is a linked cluster chain
         {
             iDirectoryCluster = GetCluster(iDirectoryCluster); // get next cluster in chain
-			printf("GetFATLink returned %d\n",iDirectoryCluster);
+//			printf("GetFATLink returned %d\n",iDirectoryCluster);
 
 //            if (fat32 ? (iDirectoryCluster & 0x0FFFFFF8) == 0x0FFFFFF8 : (iDirectoryCluster & 0xFFF8) == 0xFFF8) // check if end of cluster chain
             if ((iDirectoryCluster & 0x0FFFFFF8) == 0x0FFFFFF8) // check if end of cluster chain

@@ -28,6 +28,93 @@
 void _boot();
 void _break();
 
+// RS232 boot code - falls back to this is SD boot fails.
+
+int SREC_COLUMN;
+int SREC_ADDR;
+int SREC_ADDRSIZE;
+int SREC_BYTECOUNT;
+int SREC_TYPE;
+int SREC_COUNTER;
+int SREC_TEMP;
+
+__inline int DoDecode(int a0,int d0)
+{
+	d0&=0xdf;	// To upper case, if necessary - numbers are now 16-25
+	d0-=55;		// Map 'A' onto decimal 10.
+	if(d0<0)	// If negative, then digit was a number.
+		d0+=39; // map '0' onto 0.
+	a0<<=4;
+	a0|=d0;
+	return(a0);
+};
+
+void HandleByte(char d0)
+{
+	++SREC_COLUMN;
+
+	if(d0=='S')
+	{
+		SREC_COLUMN=0;
+		SREC_ADDR=0;
+		SREC_BYTECOUNT=0;
+		SREC_TYPE=0;
+	}
+	else
+	{
+		if(SREC_COLUMN==1)
+		{
+			int t;
+			t=SREC_TYPE=DoDecode(SREC_TYPE,d0);	// Called once, should result in type being in the lowest nybble bye of SREC_TYPE
+
+			if(t>3)
+				t=10-t;	// Just to be awkward, S7 has 32-bit addr, S8 has 24 and S9 has 16!
+
+			SREC_ADDRSIZE=(t+1)<<1;
+		}
+		else if((SREC_TYPE<=9)||(SREC_TYPE>0))
+		{
+			if(SREC_COLUMN<=3)	// Columns 2 and 3 contain byte count.
+			{
+				SREC_BYTECOUNT=DoDecode(SREC_BYTECOUNT,d0);
+			}
+			else if(SREC_COLUMN<=(SREC_ADDRSIZE+3)) // Columns 4 to ... contain the address.
+			{
+				SREC_ADDR=DoDecode(SREC_ADDR,d0); // Called 2, 3 or 4 times, depending on the number of address bits.
+				SREC_COUNTER=1;
+			}
+			else if(SREC_TYPE>0 && SREC_TYPE<=3) // Only types 1, 2 and 3 have data
+			{
+				if(SREC_COLUMN<=((SREC_BYTECOUNT<<1)+1))	// Two characters for each output byte
+				{
+					SREC_TEMP=DoDecode(SREC_TEMP,d0);
+					--SREC_COUNTER;
+					if(SREC_COUNTER<0)
+					{
+						*(unsigned char *)SREC_ADDR=SREC_TEMP;
+						++SREC_ADDR;
+						SREC_COUNTER=1;
+					}
+				}
+				else
+				{
+					if(SREC_COUNTER==0)
+					{
+						SREC_TEMP<<=4;
+						*(unsigned char *)SREC_ADDR=SREC_TEMP;
+					}
+				}
+			}
+			else if(SREC_TYPE>=7)
+			{
+//				((void (*)())SREC_ADDR)();	// Cast SREC_ADDR to a function pointer and call to boot loaded firmware.
+				_boot();	// Reset stack and jump to address 0
+			}
+		}
+	}
+}
+
+
 /* Load files named in a manifest file */
 
 static unsigned char Manifest[2048];
@@ -97,7 +184,24 @@ int main(int argc,char **argv)
 			puts("Loading manifest failed\n");
 		}
 	}
-	puts("Returning\n");
+	puts("Booting from RS232.");
+
+	while(1)
+	{
+		int c;
+		int timeout=1000000;
+		putchar('.');
+		while(timeout--)
+		{
+			int r=HW_UART(REG_UART);
+			if(r&(1<<REG_UART_RXINT))
+			{
+				c=r&255;
+				HandleByte(c);
+				timeout=1000000;
+			}
+		}
+	}
 
 	return(0);
 }
