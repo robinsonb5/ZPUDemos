@@ -28,7 +28,7 @@
 void _boot();
 void _break();
 
-// RS232 boot code - falls back to this is SD boot fails.
+// RS232 boot code - falls back to this if SD boot fails.
 
 int SREC_COLUMN;
 int SREC_ADDR;
