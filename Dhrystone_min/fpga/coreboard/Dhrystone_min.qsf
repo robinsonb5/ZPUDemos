@@ -315,6 +315,6 @@ set_global_assignment -name QIP_FILE ../../../Board/coreboard/PLL.qip
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
-set_global_assignment -name VHDL_FILE ../../../Firmware/Dhrystone_min_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../Firmware/Dhrystone_min_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Dhrystone_min_VirtualToplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd

@@ -1,4 +1,4 @@
-PROJECT=Dhrystone_fast
+PROJECT=PS2
 BOARDS_ALTERA = "de1 de2 coreboard chameleon64 mist"
 BOARDS_XILINX = "minimig"
 

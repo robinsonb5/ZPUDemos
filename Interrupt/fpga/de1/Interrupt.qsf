@@ -552,6 +552,6 @@ set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/interrupt_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/timer_controller.vhd
-set_global_assignment -name VHDL_FILE ../../../Firmware/Interrupt_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../Firmware/Interrupt_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Interrupt_VirtualToplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd

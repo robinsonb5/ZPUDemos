@@ -3,7 +3,7 @@
 ../RTL/Peripherals/simple_uart.vhd
 ../RTL/Peripherals/interrupt_controller.vhd
 ../RTL/Peripherals/timer_controller.vhd
-../Firmware/Interrupt_ROM.vhd
+Firmware/Interrupt_ROM.vhd
 RTL/Interrupt_VirtualToplevel.vhd
 RTL/Toplevel_Config.vhd
 

@@ -1,7 +1,7 @@
 ../ZPUFlex/RTL/zpupkg.vhd
 ../ZPUFlex/RTL/zpu_core_flex.vhd
 ../RTL/Peripherals/simple_uart.vhd
-../Firmware/Dhrystone_min_ROM.vhd
+Firmware/Dhrystone_min_ROM.vhd
 RTL/Dhrystone_min_VirtualToplevel.vhd
 RTL/Toplevel_Config.vhd
 

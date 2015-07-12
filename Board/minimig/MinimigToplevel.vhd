@@ -108,6 +108,15 @@ COMPONENT hybrid_pwm_sd
 	);
 END COMPONENT;
 
+signal ps2m_clk_in : std_logic;
+signal ps2m_clk_out : std_logic;
+signal ps2m_dat_in : std_logic;
+signal ps2m_dat_out : std_logic;
+
+signal ps2k_clk_in : std_logic;
+signal ps2k_clk_out : std_logic;
+signal ps2k_dat_in : std_logic;
+signal ps2k_dat_out : std_logic;
 
 begin
 
@@ -139,6 +148,18 @@ left<='0';
 right<='0';
 drv_snd<='0';
 init_b<='0';
+
+
+-- PS2 keyboard & mouse
+ps2m_dat_in<=msdat;
+msdat <= '0' when ps2m_dat_out='0' else 'Z';
+ps2m_clk_in<=msclk;
+msclk <= '0' when ps2m_clk_out='0' else 'Z';
+
+ps2k_dat_in<=kbddat;
+kbddat <= '0' when ps2k_dat_out='0' else 'Z';
+ps2k_clk_in<=kbdclk;
+kbdclk <= '0' when ps2k_clk_out='0' else 'Z';
 
 
 myclock : entity work.minimig_sysclock
@@ -190,7 +211,17 @@ project: entity work.VirtualToplevel
 		-- UART
 		rxd => rxd,
 		txd => txd,
-		
+			
+		-- PS/2
+		ps2k_clk_in => ps2k_clk_in,
+		ps2k_dat_in => ps2k_dat_in,
+		ps2k_clk_out => ps2k_clk_out,
+		ps2k_dat_out => ps2k_dat_out,
+		ps2m_clk_in => ps2m_clk_in,
+		ps2m_dat_in => ps2m_dat_in,
+		ps2m_clk_out => ps2m_clk_out,
+		ps2m_dat_out => ps2m_dat_out,
+
 		-- Audio
 		audio_l => audiol,
 		audio_r => audior

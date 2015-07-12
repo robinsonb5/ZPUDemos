@@ -550,6 +550,6 @@ set_global_assignment -name QIP_FILE ../../../Board/de1/Clock_50to100.qip
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
-set_global_assignment -name VHDL_FILE ../../../Firmware/Dhrystone_fast_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../Firmware/Dhrystone_fast_ROM.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Dhrystone_fast_VirtualToplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
