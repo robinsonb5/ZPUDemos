@@ -104,6 +104,22 @@ signal vga_tgreen : unsigned(7 downto 0);
 signal vga_tblue : unsigned(7 downto 0);
 signal vga_window : std_logic;
 
+COMPONENT audio_top
+	PORT
+	(
+		clk		:	 IN STD_LOGIC;
+		rst_n		:	 IN STD_LOGIC;
+		rdata		:	 IN SIGNED(15 DOWNTO 0);
+		ldata		:	 IN SIGNED(15 DOWNTO 0);
+		aud_bclk		:	 OUT STD_LOGIC;
+		aud_daclrck		:	 OUT STD_LOGIC;
+		aud_dacdat		:	 OUT STD_LOGIC;
+		aud_xck		:	 OUT STD_LOGIC;
+		i2c_sclk		:	 OUT STD_LOGIC;
+		i2c_sdat		:	 INOUT STD_LOGIC
+	);
+END COMPONENT;
+
 COMPONENT video_vga_dither
 	GENERIC ( outbits : INTEGER := 4 );
 	PORT
@@ -236,11 +252,31 @@ mydither : component video_vga_dither
 end generate;
 
 sound1: if Toplevel_UseAudio=true generate
+
+myaudio: component audio_top
+port map(
+  clk=>sysclk,
+  rst_n=>reset,
+  -- audio shifter,
+  rdata=>audio_r,
+  ldata=>audio_l,
+  aud_bclk=>AUD_BCLK, -- CODEC data clock
+  aud_daclrck=>AUD_DACLRCK, -- CODEC data clock
+  aud_dacdat=>AUD_DACDAT, -- CODEC data
+  aud_xck=>AUD_XCK, -- CODEC data clock
+  -- I2C audio config
+  i2c_sclk=>I2C_SCLK, -- CODEC config clock
+  i2c_sdat=>I2C_SDAT -- CODEC config data
+);
+
 -- FIXME - make use of the DE1 board's codec
 end generate;
 
 sound2: if Toplevel_UseAudio=false generate
 -- FIXME - set safe defaults for the audio codec
+	aud_xck <= '0';
+	aud_daclrck <= '0';
+	i2c_sclk <='0';
 end generate;
 
 end architecture;

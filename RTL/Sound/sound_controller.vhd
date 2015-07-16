@@ -52,6 +52,7 @@ architecture rtl of sound_controller is
 	signal sample : signed(7 downto 0);
 	signal sampleout : signed(14 downto 0);
 	signal sampletick : std_logic; 	-- single pulse on underflow of period counter
+	signal trigger : std_logic;
 
 begin
 
@@ -60,7 +61,6 @@ begin
 
 	-- Multiplexer, selects between high and low byte of the sampleword.
 	sample <= signed(sampleword(15 downto 8)) when hibyte='1' else signed(sampleword(7 downto 0));
-	sampleout <= sample * volume;
 	audio_out<=sampleout(13 downto 0);
 
 	-- Handle CPU access to hardware registers
@@ -68,13 +68,19 @@ begin
 	process(clk,reset)
 	begin
 		if reset='0' then
-
+			channel_fromhost.reqlen <= (others => '0');
+			channel_fromhost.setreqlen <='1';
+			volume(5 downto 0) <= (others => '0');
 		elsif rising_edge(clk) then
+
+			-- Register sampleout to reduce combinational length and pipeline the multiplication
+			sampleout <= sample * volume;
 
 			channel_fromhost.setaddr <='0';
 			channel_fromhost.setreqlen <='0';
 			channel_fromhost.req <='0';
 			reg_data_out<=(others => '0');
+			trigger<='0';
 
 			if sampletick='1' then
 				if hibyte='0' and datalen/=X"0000" then
@@ -111,6 +117,8 @@ begin
 						channel_fromhost.reqlen <= repeatlen;
 						datalen <= repeatlen;
 						channel_fromhost.setreqlen <='1';
+						trigger<='1';
+						hibyte<='1';
 					when X"0c" => -- Period
 						period <= reg_data_in(15 downto 0);
 					when X"10" => -- Volume
@@ -129,7 +137,7 @@ begin
 		sampletick<='0';
 		if audiotick='1' then
 			periodcounter<=periodcounter-1;
-			if periodcounter=X"0000" then
+			if periodcounter=X"0000" or trigger='1' then
 				periodcounter<=unsigned(period);
 				sampletick<='1';
 			end if;

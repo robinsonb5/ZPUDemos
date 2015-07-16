@@ -446,7 +446,7 @@ leftsd: component hybrid_pwm_sd
 	(
 		clk => sysclk,
 		n_reset => reset,
-		din => std_logic_vector(audiol),
+		din => std_logic_vector(not audiol(15) & audiol(14 downto 0)),
 		dout => AUDIO_L
 	);
 	
@@ -455,7 +455,7 @@ rightsd: component hybrid_pwm_sd
 	(
 		clk => sysclk,
 		n_reset => reset,
-		din => std_logic_vector(audior),
+		din => std_logic_vector(not audior(15) & audior(14 downto 0)),
 		dout => AUDIO_R
 	);
 end generate;

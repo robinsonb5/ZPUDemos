@@ -670,10 +670,14 @@ set_global_assignment -name VHDL_FILE ../../../RTL/DMA/DMACache.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/DMA/DMACache_pkg.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/DMA/FIFO_Counter.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/DMA/DMACacheRAM.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Sound/sound_wrapper.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Sound/sound_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/spi.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/io_ps2_com.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/interrupt_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/timer_controller.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Util/risingedge_divider.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Virtual_Toplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/DMACache_config.vhd

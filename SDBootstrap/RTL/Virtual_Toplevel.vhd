@@ -157,6 +157,25 @@ signal spr0channel_fromhost : DMAChannel_FromHost;
 signal spr0channel_tohost : DMAChannel_ToHost;
 
 
+-- Audio channel plumbing
+
+signal aud0_fromhost : DMAChannel_FromHost;
+signal aud0_tohost : DMAChannel_ToHost;
+signal aud1_fromhost : DMAChannel_FromHost;
+signal aud1_tohost : DMAChannel_ToHost;
+signal aud2_fromhost : DMAChannel_FromHost;
+signal aud2_tohost : DMAChannel_ToHost;
+signal aud3_fromhost : DMAChannel_FromHost;
+signal aud3_tohost : DMAChannel_ToHost;
+
+signal audio_reg_req : std_logic;
+
+
+-- Timer register block signals
+signal timer_reg_req : std_logic;
+signal timer_tick : std_logic;
+
+
 -- VGA register block signals
 
 signal vga_reg_addr : std_logic_vector(11 downto 0);
@@ -202,7 +221,7 @@ begin
 
 sdr_cke <='1';
 --audio_l <= X"0000";
-audio_r <= X"0000";
+--audio_r <= X"0000";
 
 
 -- ROM
@@ -361,9 +380,17 @@ spi : entity work.spi_interface
 
 			channels_from_host(0) => vgachannel_fromhost,
 			channels_from_host(1) => spr0channel_fromhost,
+			channels_from_host(2) => aud0_fromhost,
+			channels_from_host(3) => aud1_fromhost,
+			channels_from_host(4) => aud2_fromhost,
+			channels_from_host(5) => aud3_fromhost,
 			
 			channels_to_host(0) => vgachannel_tohost,
 			channels_to_host(1) => spr0channel_tohost,
+			channels_to_host(2) => aud0_tohost,
+			channels_to_host(3) => aud1_tohost,
+			channels_to_host(4) => aud2_tohost,
+			channels_to_host(5) => aud3_tohost,
 
 			data_out => dma_data,
 
@@ -421,8 +448,7 @@ mysdram : entity work.sdram_cached
 		wrU1 => sdram_wrU, -- upper byte
 		wrU2 => sdram_wrU2, -- upper halfword, only written on longword accesses
 		dataout1 => sdram_read,
-		dtack1 => sdram_ack,
-		unsigned(debug) => audio_l(2 downto 0)
+		dtack1 => sdram_ack
 	);
 
 	
@@ -460,6 +486,52 @@ mysdram : entity work.sdram_cached
 		vga_window => vga_window
 	);
 
+	
+	myaudio : entity work.sound_wrapper
+		generic map(
+			clk_frequency => sysclk_frequency -- Prescale incoming clock
+		)
+	port map (
+		clk => clk,
+		reset => reset,
+
+		reg_addr_in => mem_addr(7 downto 0),
+		reg_data_in => mem_write,
+		reg_rw => '0', -- we never read from the sound controller
+		reg_req => audio_reg_req,
+
+		dma_data => dma_data,
+		channel0_fromhost => aud0_fromhost,
+		channel0_tohost => aud0_tohost,
+		channel1_fromhost => aud1_fromhost,
+		channel1_tohost => aud1_tohost,
+		channel2_fromhost => aud2_fromhost,
+		channel2_tohost => aud2_tohost,
+		channel3_fromhost => aud3_fromhost,
+		channel3_tohost => aud3_tohost,
+
+		audio_l => audio_l,
+		audio_r => audio_r
+	);
+
+
+mytimer : entity work.timer_controller
+  generic map(
+		prescale => sysclk_frequency, -- Prescale incoming clock
+		timers => 0
+  )
+  port map (
+		clk => clk,
+		reset => reset,
+
+		reg_addr_in => mem_addr(7 downto 0),
+		reg_data_in => mem_write,
+		reg_rw => '0', -- we never read from the timers
+		reg_req => timer_reg_req,
+
+		ticks(0) => timer_tick -- Tick signal is used to trigger an interrupt
+	);
+
 
 -- Interrupt controller
 
@@ -476,7 +548,7 @@ port map (
 	status => int_status
 );
 
-int_triggers<=(0=>'0',
+int_triggers<=(0=>timer_tick,
 					1=>ps2_int,
 					others => '0');
 
@@ -533,6 +605,8 @@ begin
 		int_ack<='0';
 		kbdsendtrigger<='0';
 		mousesendtrigger<='0';
+		audio_reg_req<='0';
+		timer_reg_req<='0';
 
 		-- Write from CPU?
 		if mem_writeEnable='1' then
@@ -540,6 +614,12 @@ begin
 				when X"E" =>	-- VGA controller at 0xFFFFFE00
 					vga_reg_rw<='0';
 					vga_reg_req<='1';
+					mem_busy<='0';
+				when X"D" => -- Audio controller at 0xFFFFFD00
+					audio_reg_req<='1';
+					mem_busy<='0'; 	-- Audio controller never blocks the CPU
+				when X"C" =>	-- Timer controller at 0xFFFFFC00
+					timer_reg_req<='1';
 					mem_busy<='0';
 				when X"F" =>	-- Peripherals at 0xFFFFFFF00
 					case mem_addr(7 downto 0) is

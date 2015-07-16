@@ -10,10 +10,14 @@
 ../RTL/DMA/DMACache_pkg.vhd
 ../RTL/DMA/FIFO_Counter.vhd
 ../RTL/DMA/DMACacheRAM.vhd
+../RTL/Sound/sound_wrapper.vhd
+../RTL/Sound/sound_controller.vhd
 ../RTL/Peripherals/simple_uart.vhd
 ../RTL/Peripherals/spi.vhd
 ../RTL/Peripherals/io_ps2_com.vhd
 ../RTL/Peripherals/interrupt_controller.vhd
+../RTL/Peripherals/timer_controller.vhd
+../RTL/Util/risingedge_divider.vhd
 RTL/Toplevel_Config.vhd
 RTL/Virtual_Toplevel.vhd
 RTL/DMACache_config.vhd
