@@ -44,7 +44,9 @@ char *LoadFile(const char *filename)
 int main(int argc, char **argv)
 {
 	char *ptr;
-	if((ptr=LoadFile("JOYRIDE MOD")))
+//	if((ptr=LoadFile("JOYRIDE MOD")))
+//	if((ptr=LoadFile("ENIGMA     ")))
+	if((ptr=LoadFile("GUITAR~1   ")))
 	{
 		printf("File successfully loaded to %d\n",ptr);
 		ptBuddyPlay(ptr,0);

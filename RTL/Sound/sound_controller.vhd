@@ -122,7 +122,11 @@ begin
 					when X"0c" => -- Period
 						period <= reg_data_in(15 downto 0);
 					when X"10" => -- Volume
-						volume(5 downto 0) <= signed(reg_data_in(5 downto 0));
+						if reg_data_in(6)='1' then -- Yes, I know, 0x40 and 0x3f shouldn't be the same
+							volume(5 downto 0)<=(others=>'1');
+						else
+							volume(5 downto 0) <= signed(reg_data_in(5 downto 0));
+						end if;
 					when others =>
 				end case;
 			end if;
