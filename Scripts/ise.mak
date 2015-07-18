@@ -17,12 +17,9 @@ $(TARGET).xise: $(PROJECTDIR) $(MANIFEST) $(BOARDDIR)/template.xise
 	cp $(BOARDDIR)/template.xise $(TARGET).xise
 	echo >${TARGET}_addfiles.tcl project open ${PROJECT}.xise
 	bash $(SCRIPTSDIR)/expandtemplate_ise.sh $(MANIFEST) >>$(TARGET)_addfiles.tcl
-#	cat ${MANIFEST} | while read a; \
-#		do echo >>$(TARGET)_addfiles.tcl xfile add \"../../$${a}\" ; \
-#	done
-	echo >>${TARGET}_addfiles.tcl project save
-	echo >>${TARGET}_addfiles.tcl project close
-	cd ${PROJECTDIR}; xtclsh ${PROJECT}_addfiles.tcl
+	@echo >>${TARGET}_addfiles.tcl project save
+	@echo >>${TARGET}_addfiles.tcl project close
+	@cd ${PROJECTDIR}; command -v xtclsh ${PROJECT}_addfiles.tcl || echo "xtclsh not found - skipping Xilinx project generation."
 
 $(PROJECTDIR):
 	mkdir $(PROJECTDIR)
