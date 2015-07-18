@@ -696,6 +696,8 @@ begin
 								mem_read(7 downto 0)<=sdram_read(15 downto 8);
 							when "11" =>
 								mem_read(7 downto 0)<=sdram_read(7 downto 0);
+							when others =>
+								null;
 						end case;
 					else
 						mem_read<=sdram_read;

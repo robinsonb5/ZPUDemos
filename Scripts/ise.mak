@@ -19,7 +19,7 @@ $(TARGET).xise: $(PROJECTDIR) $(MANIFEST) $(BOARDDIR)/template.xise
 	bash $(SCRIPTSDIR)/expandtemplate_ise.sh $(MANIFEST) >>$(TARGET)_addfiles.tcl
 	@echo >>${TARGET}_addfiles.tcl project save
 	@echo >>${TARGET}_addfiles.tcl project close
-	@cd ${PROJECTDIR}; command -v xtclsh ${PROJECT}_addfiles.tcl || echo "xtclsh not found - skipping Xilinx project generation."
+	@cd ${PROJECTDIR}; command -v xtclsh && xtclsh ${PROJECT}_addfiles.tcl || echo "xtclsh not found - skipping Xilinx project generation."
 
 $(PROJECTDIR):
 	mkdir $(PROJECTDIR)
