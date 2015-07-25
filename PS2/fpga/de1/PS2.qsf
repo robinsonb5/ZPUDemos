@@ -547,12 +547,12 @@ set_global_assignment -name VHDL_FILE ../../../Board/de1/DE1_Toplevel.vhd
 set_global_assignment -name QIP_FILE ../../../Board/de1/Clock_50to100.qip
 
 
-set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/interrupt_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/timer_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/io_ps2_com.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/PS2_VirtualToplevel.vhd
 set_global_assignment -name VHDL_FILE ../../Firmware/PS2_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/PS2_VirtualToplevel.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd

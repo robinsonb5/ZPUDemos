@@ -1,0 +1,10 @@
+../ZPUFlex/RTL/zpupkg.vhd
+../ZPUFlex/RTL/zpu_core_flex.vhd
+../RTL/Peripherals/simple_uart.vhd
+../RTL/Peripherals/interrupt_controller.vhd
+../RTL/Peripherals/timer_controller.vhd
+../RTL/Peripherals/io_ps2_com.vhd
+Firmware/PS2_ROM.vhd
+RTL/PS2_VirtualToplevel.vhd
+RTL/Toplevel_Config.vhd
+

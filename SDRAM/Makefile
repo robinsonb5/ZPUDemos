@@ -1,18 +1,11 @@
 PROJECT=SDRAMTest
 MANIFEST=manifest.rtl
-BOARDS = de1 de2 coreboard chameleon64 mist
-ALL: fpga
-	make -C Firmware
-	for BOARD in ${BOARDS}; do \
-		make -f ../Scripts/quartus.mak PROJECT=$(PROJECT) MANIFEST=$(MANIFEST) BOARD=$$BOARD; \
-	done
+BOARDS_ALTERA = "de1 de2 coreboard chameleon64 mist"
+BOARDS_XILINX = "ems11_bb37"
+
+all:
+	make -f ../Scripts/standard.mak PROJECT=$(PROJECT) BOARDS_ALTERA=$(BOARDS_ALTERA) BOARDS_XILINX=$(BOARDS_XILINX)
 
 clean:
-	make -C Firmware clean
-	for BOARD in ${BOARDS}; do \
-		make -f ../Scripts/quartus.mak PROJECT=$(PROJECT) MANIFEST=$(MANIFEST) BOARD=$$BOARD clean; \
-	done
-
-fpga:
-	mkdir fpga
+	make -f ../Scripts/standard.mak PROJECT=$(PROJECT) BOARDS_ALTERA=$(BOARDS_ALTERA) BOARDS_XILINX=$(BOARDS_XILINX) clean
 

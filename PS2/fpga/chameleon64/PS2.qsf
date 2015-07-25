@@ -254,12 +254,12 @@ set_global_assignment -name SDC_FILE ../../../Board/chameleon64/constraints.sdc
 set_global_assignment -name QIP_FILE ../../../Board/chameleon64/Clock_8to100Split.qip
 set_global_assignment -name VHDL_FILE ../../../Board/chameleon64/chameleon_toplevel.vhd
 
-set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpupkg.vhd
 set_global_assignment -name VHDL_FILE ../../../ZPUFlex/RTL/zpu_core_flex.vhd
+set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/simple_uart.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/interrupt_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/timer_controller.vhd
 set_global_assignment -name VHDL_FILE ../../../RTL/Peripherals/io_ps2_com.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
-set_global_assignment -name VHDL_FILE ../../RTL/PS2_VirtualToplevel.vhd
 set_global_assignment -name VHDL_FILE ../../Firmware/PS2_ROM.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/PS2_VirtualToplevel.vhd
+set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
