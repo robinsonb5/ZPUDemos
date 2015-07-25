@@ -1,17 +1,28 @@
+BOARDS_ALTERA_BRAM = "\"de1 de2 coreboard chameleon64 mist c3board\""
+BOARDS_ALTERA_SDRAM = "\"de1 de2 coreboard chameleon64 mist c3board\""
+BOARDS_XILINX_BRAM = "\"minimig ems11_bb37\""
+BOARDS_XILINX_SDRAM = "\"ems11_bb37\""
 
-all:
+all: bram sdram utils
+
+utils:
 	make -C ZPUSim
-	make -C Dhrystone_fast
-	make -C Dhrystone_min
-	make -C HelloTinyROM
-	make -C HelloWorld
-	make -C HelloTinyZPU
-	make -C Interrupt
-	make -C RS232Bootstrap
-	make -C SDBootstrap
-	make -C SDRAM
-	make -C VGA
 	make -C Apps
+
+bram:
+	# Projects that don't require SDRAM first.
+	make -C Dhrystone_fast BOARDS_ALTERA=$(BOARDS_ALTERA_BRAM) BOARDS_XILINX=$(BOARDS_XILINX_BRAM)
+	make -C Dhrystone_min BOARDS_ALTERA=$(BOARDS_ALTERA_BRAM) BOARDS_XILINX=$(BOARDS_XILINX_BRAM)
+	make -C HelloTinyROM BOARDS_ALTERA=$(BOARDS_ALTERA_BRAM) BOARDS_XILINX=$(BOARDS_XILINX_BRAM)
+	make -C HelloWorld BOARDS_ALTERA=$(BOARDS_ALTERA_BRAM) BOARDS_XILINX=$(BOARDS_XILINX_BRAM)
+	make -C HelloTinyZPU BOARDS_ALTERA=$(BOARDS_ALTERA_BRAM) BOARDS_XILINX=$(BOARDS_XILINX_BRAM)
+	make -C Interrupt BOARDS_ALTERA=$(BOARDS_ALTERA_BRAM) BOARDS_XILINX=$(BOARDS_XILINX_BRAM)
+
+sdram:
+	make -C RS232Bootstrap BOARDS_ALTERA=$(BOARDS_ALTERA_SDRAM) BOARDS_XILINX=$(BOARDS_XILINX_SDRAM)
+	make -C SDBootstrap BOARDS_ALTERA=$(BOARDS_ALTERA_SDRAM) BOARDS_XILINX=$(BOARDS_XILINX_SDRAM)
+	make -C SDRAM BOARDS_ALTERA=$(BOARDS_ALTERA_SDRAM) BOARDS_XILINX=$(BOARDS_XILINX_SDRAM)
+	make -C VGA BOARDS_ALTERA=$(BOARDS_ALTERA_SDRAM) BOARDS_XILINX=$(BOARDS_XILINX_SDRAM)
 
 clean:
 	make -C ZPUSim clean
