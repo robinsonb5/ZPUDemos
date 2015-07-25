@@ -253,4 +253,5 @@ set_global_assignment -name VHDL_FILE ../../../Board/chameleon64/chameleon_1khz.
 set_global_assignment -name SDC_FILE ../../../Board/chameleon64/constraints.sdc
 set_global_assignment -name QIP_FILE ../../../Board/chameleon64/Clock_8to100Split.qip
 set_global_assignment -name VHDL_FILE ../../../Board/chameleon64/chameleon_toplevel.vhd
+set_global_assignment -name VERILOG_FILE ../../../RTL/Sound/hybrid_pwm_sd.v
 
