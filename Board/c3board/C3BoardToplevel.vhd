@@ -313,7 +313,7 @@ begin
 		)
 		port map(
 			clk => clk_fast,
-			reset_in => reset_n and pll1_locked and pll2_locked,
+			reset_in => reset_n and power_button and pll1_locked and pll2_locked,
 			
 			-- SDRAM - presenting a single interface to both chips.
 			sdr_addr => sdr_addr,

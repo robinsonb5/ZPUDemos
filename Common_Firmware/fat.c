@@ -70,6 +70,14 @@ unsigned long fat_size;                 // size of fat
 
 unsigned char sector_buffer[1024];       // sector buffer - room for two consecutive sectors...
 
+#ifndef DISABLE_LONG_FILENAMES
+char longfilename[260];
+#endif
+
+unsigned int current_directory_cluster=0;
+unsigned int current_directory_start=0;
+
+
 struct PartitionEntry partitions[4];	// lbastart and sectors will be byteswapped as necessary
 int partitioncount;
 
@@ -284,6 +292,7 @@ unsigned int FindDrive(void)
     printf("data_start: %lu\r", data_start);
     printf("cluster_size: %u\r", cluster_size);
     printf("cluster_mask: %08lX\r", cluster_mask);
+	ChangeDirectory(0);
 
     return(1);
 }
@@ -995,11 +1004,6 @@ int ScanDirectory(unsigned long mode, char *extension, unsigned char options)
     return rc;
 }
 
-void ChangeDirectory(unsigned long iStartCluster)
-{
-    iPreviousDirectory = iCurrentDirectory;
-    iCurrentDirectory = iStartCluster;
-}
 
 unsigned long GetFATLink(unsigned long cluster)
 {
@@ -1393,4 +1397,92 @@ unsigned int UpdateEntry(fileTYPE *file)
     return(1);
 }
 
+
+DIRENTRY *NextDirEntry(int init)
+{
+    unsigned long  iDirectory = 0;       // only root directory is supported
+    DIRENTRY      *pEntry = NULL;        // pointer to current entry in sector buffer
+    unsigned long  iDirectorySector;     // current sector of directory entries table
+    unsigned long  iEntry;               // entry index in directory cluster or FAT16 root directory
+	static int prevlfn=0;
+	static int prev;
+
+	if(init)
+		prev=0;
+
+	// FIXME traverse clusters if necessary
+
+	while(prev<dir_entries)
+	{
+
+    iDirectorySector = current_directory_start+(prev>>4);
+
+	if ((prev & 0x0F) == 0) // first entry in sector, load the sector
+	{
+		sd_read_sector(iDirectorySector, sector_buffer); // root directory is linear
+	}
+	pEntry = (DIRENTRY*)sector_buffer;
+	pEntry+=(prev&0xf);
+	++prev;
+	if (pEntry->Name[0] != SLOT_EMPTY && pEntry->Name[0] != SLOT_DELETED) // valid entry??
+	{
+		if (!(pEntry->Attributes & ATTR_VOLUME)) // not a volume
+		{
+			if(!prevlfn)
+				longfilename[0]=0;
+			prevlfn=0;
+			// FIXME - should check the lfn checksum here.
+			return(pEntry);
+		}
+#ifndef DISABLE_LONG_FILENAMES
+		else if (pEntry->Attributes == ATTR_LFN)	// Do we have a long filename entry?
+		{
+			unsigned char *p=&pEntry->Name[0];
+			int seq=p[0];
+			int offset=((seq&0x1f)-1)*13;
+			char *o=&longfilename[offset];
+			*o++=p[1];
+			*o++=p[3];
+			*o++=p[5];
+			*o++=p[7];
+			*o++=p[9];
+
+			*o++=p[0xe];
+			*o++=p[0x10];
+			*o++=p[0x12];
+			*o++=p[0x14];
+			*o++=p[0x16];
+			*o++=p[0x18];
+
+			*o++=p[0x1c];
+			*o++=p[0x1e];
+			prevlfn=1;
+		}
+#endif
+	}
+	}
+	return((DIRENTRY *)0);
+}
+
+
+void ChangeDirectory(DIRENTRY *p)
+{
+	// FIXME - save previous directory?
+	if(p)
+	{
+		current_directory_cluster = SwapBB(p->StartCluster);
+		current_directory_cluster |= fat32 ? (SwapBB(p->HighCluster) & 0x0FFF) << 16 : 0;
+	}
+	if(current_directory_cluster)
+	{	
+	    current_directory_start = data_start + cluster_size * (current_directory_cluster - 2);
+		dir_entries = cluster_size << 4;
+	}
+	else
+	{
+		current_directory_cluster = root_directory_cluster;
+		current_directory_start = root_directory_start;
+		dir_entries = fat32 ?  cluster_size << 4 : root_directory_size << 4; // 16 entries per sector
+	}
+}
 

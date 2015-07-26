@@ -85,6 +85,7 @@ typedef union {
 // global sector buffer, data for read/write actions is stored here.
 // BEWARE, this buffer is also used and thus trashed by all other functions
 extern unsigned char sector_buffer[1024]; // sector buffer - room for 2 sectors, to ease reading data not sector-aligned...
+extern char longfilename[260];
 extern unsigned char cluster_size;
 extern unsigned long cluster_mask;
 extern unsigned char fat32;
@@ -126,7 +127,9 @@ unsigned int FileCreate(unsigned long iDirectory, fileTYPE *file);
 unsigned int UpdateEntry(fileTYPE *file);
 
 int ScanDirectory(unsigned long mode, char *extension, unsigned char options);
-void ChangeDirectory(unsigned long iStartCluster);
+void ChangeDirectory(DIRENTRY *p);
+
+DIRENTRY *NextDirEntry(int prev); // Must be called in ascending sequence, starting with 0
 
 #ifdef __cplusplus
 }

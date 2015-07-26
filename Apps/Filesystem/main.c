@@ -44,6 +44,16 @@ int main(int argc, char **argv)
 {
 	char *ptr;
 
+	DIRENTRY *dir=0;
+	printf("Scanning directory\n");
+	while((dir=NextDirEntry(dir==0)))
+	{
+		if (dir->Name[0] != SLOT_EMPTY && dir->Name[0] != SLOT_DELETED) // valid entry??
+		{
+			printf("%s (%s)\n",dir->Name,longfilename);
+		}
+	}
+
 	if((ptr=LoadFile("A320X480RAW")))
 		printf("File successfully loaded to %d\n",ptr);
 	else
