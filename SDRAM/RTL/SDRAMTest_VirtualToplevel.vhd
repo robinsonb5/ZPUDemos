@@ -351,16 +351,15 @@ begin
 						mem_read(31 downto 8) <= (others=>'0');
 						case mem_Addr(1 downto 0) is
 							when "00" =>
---						if mem_Addr(0)='0' then -- even address
 								mem_read(7 downto 0)<=sdram_read(31 downto 24);
---						else
 							when "01" =>
 								mem_read(7 downto 0)<=sdram_read(23 downto 16);
 							when "10" =>
 								mem_read(7 downto 0)<=sdram_read(15 downto 8);
 							when "11" =>
 								mem_read(7 downto 0)<=sdram_read(7 downto 0);
---						end if;
+							when others =>
+								null;
 						end case;
 					else
 						mem_read<=sdram_read;
