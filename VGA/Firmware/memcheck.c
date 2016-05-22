@@ -94,7 +94,7 @@ int bytecheck(volatile int *base,int cachesize)
 int lfsrcheck(volatile int *base,unsigned int size)
 {
 	int result;
-	int cycles=127;
+	int cycles=3;
 	int goodreads=0;
 	// Shift left 20 bits to convert to megabytes, then 2 bits right since we're dealing with longwords
 	unsigned int mask=(size<<18)-1;
@@ -114,16 +114,16 @@ int lfsrcheck(volatile int *base,unsigned int size)
 		lfsrtemp=lfsr;
 		for(i=0;i<262144;++i)
 		{
-			unsigned int w=lfsr&0xfffff;
-			unsigned int j=lfsr&0xfffff;
+			unsigned int w=lfsr&mask;
+			unsigned int j=lfsr&mask;
 			base[j^addrmask]=w;
 			CYCLE_LFSR;
 		}
 		lfsr=lfsrtemp;
 		for(i=0;i<262144;++i)
 		{
-			unsigned int w=lfsr&0xfffff;
-			unsigned int j=lfsr&0xfffff;
+			unsigned int w=lfsr&mask;
+			unsigned int j=lfsr&mask;
 			unsigned int jr;
 			jr=base[j^addrmask];
 			if(jr!=w)

@@ -288,6 +288,7 @@ if cache=false generate
 				else '0';
 	dataout1<=longword;
 	cache_ready<='1';
+	readcache_busy<='0';
 end generate;
 
 -------------------------------------------------------------------------

@@ -150,6 +150,11 @@ signal sdram_state : sdram_states;
 
 begin
 
+-- safe defaults for unused signals
+spi_mosi <= '1';
+spi_clk <= '1';
+spi_cs <='1';
+
 sdr_cke <='1';
 --audio_l <= X"0000";
 audio_r <= X"0000";
@@ -355,6 +360,9 @@ mysdram : entity work.sdram_cached
 process(clk)
 begin
 	if reset='0' then
+		sdram_state<=idle;
+		sdram_req<='0';
+		sdram_wr<='1';
 	elsif rising_edge(clk) then
 		mem_busy<='1';
 		ser_txgo<='0';
