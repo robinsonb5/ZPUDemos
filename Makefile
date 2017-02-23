@@ -1,5 +1,5 @@
-BOARDS_ALTERA_BRAM = "\"de1 de2 coreboard chameleon64 mist c3board\""
-BOARDS_ALTERA_SDRAM = "\"de1 de2 coreboard chameleon64 mist c3board\""
+BOARDS_ALTERA_BRAM = "\"de0 de0_nano de1 de2 coreboard chameleon64 mist c3board\""
+BOARDS_ALTERA_SDRAM = "\"de0 de0_nano de1 de2 coreboard chameleon64 mist c3board\""
 BOARDS_XILINX_BRAM = "\"minimig ems11_bb37\""
 BOARDS_XILINX_SDRAM = "\"ems11_bb37\""
 

@@ -273,6 +273,7 @@ set_global_assignment -name VERILOG_FILE ../../../Board/mist/osd.v
 set_global_assignment -name VERILOG_FILE ../../../Board/mist/mist_console.v
 set_global_assignment -name VERILOG_FILE ../../../RTL/Sound/hybrid_pwm_sd.v
 set_global_assignment -name QIP_FILE ../../../Board/mist/PLL.qip
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name VHDL_FILE ../../../RTL/RAM/DualPortRAM.vhd
 set_global_assignment -name VERILOG_FILE ../../../RTL/RAM/TwoWayCache.v
 set_global_assignment -name VHDL_FILE ../../../RTL/RAM/sdram_cached.vhd
@@ -297,5 +298,3 @@ set_global_assignment -name VHDL_FILE ../../RTL/Toplevel_Config.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/Virtual_Toplevel.vhd
 set_global_assignment -name VHDL_FILE ../../RTL/DMACache_config.vhd
 set_global_assignment -name VHDL_FILE ../../Firmware/SDBootstrap_ROM.vhd
-
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

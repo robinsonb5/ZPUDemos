@@ -384,4 +384,5 @@ set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_
 set_global_assignment -name VHDL_FILE ../../../Board/de0_nano/DE0_nano_Toplevel.vhd
 set_global_assignment -name QIP_FILE ../../../Board/de0_nano/Clock_50to100.qip
 
+set_global_assignment -name SDC_FILE ../../../Board/de1/constraints.sdc
 
