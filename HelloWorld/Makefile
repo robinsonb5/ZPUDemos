@@ -1,5 +1,5 @@
 PROJECT=HelloWorld
-BOARDS_ALTERA = "de1 de2 coreboard chameleon64 mist"
+BOARDS_ALTERA = "de0 de1 de2 coreboard chameleon64 mist"
 BOARDS_XILINX = "minimig ems11_bb37"
 
 all:
