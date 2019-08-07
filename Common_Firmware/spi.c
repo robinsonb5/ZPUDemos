@@ -18,6 +18,7 @@ int SDHCtype;
 #define cmd_read(x) cmd_write(0xff0051,x)
 
 #define cmd_CMD8(x) cmd_write(0x870048,0x1AA)
+#define cmd_CMD9(x) cmd_write(0xff0049,0)
 #define cmd_CMD16(x) cmd_write(0xFF0050,x)
 #define cmd_CMD41(x) cmd_write(0x870069,0x40000000)
 #define cmd_CMD55(x) cmd_write(0xff0077,0)
@@ -25,8 +26,10 @@ int SDHCtype;
 
 #ifdef SPI_DEBUG
 #define DBG(x) puts(x)
+#define PDBG(x,y) printf(x,y)
 #else
-#define DBG(X)
+#define DBG(x)
+#define PDBG(x,y)
 #endif
 
 unsigned char SPI_R1[6];
@@ -51,27 +54,21 @@ int cmd_write(unsigned long cmd, unsigned long lba)
 	int ctr;
 	int result=0xff;
 
-	DBG("In cmd_write\n");
+	PDBG("SD CMD %x ",cmd&255);
 
 	SPI(cmd & 255);
-
-	DBG("Command sent\n");
 
 	if(!SDHCtype)	// If normal SD then we have to use byte offset rather than LBA offset.
 		lba<<=9;
 
-	DBG("Sending LBA!\n");
+	PDBG("LBA %x, ",lba);
 
 	SPI((lba>>24)&255);
-	DBG("Sent 1st byte\n");
 	SPI((lba>>16)&255);
-	DBG("Sent 2nd byte\n");
 	SPI((lba>>8)&255);
-	DBG("Sent 3rd byte\n");
 	SPI(lba&255);
-	DBG("Sent 4th byte\n");
 
-	DBG("Sending CRC - if any\n");
+	PDBG("'CRC' %x  -> ",(cmd>>16)&255);
 
 	SPI((cmd>>16)&255); // CRC, if any
 
@@ -83,11 +80,7 @@ int cmd_write(unsigned long cmd, unsigned long lba)
 		SPI(0xff);
 		result=SPI_READ();
 	}
-	#ifdef SPI_DEBUG
-	putchar('0'+(result>>4));
-	putchar('0'+(result&15));
-	#endif
-//	printf("Got result %d \n",result);
+	PDBG("%x\n",result);
 
 	return(result);
 }
@@ -112,20 +105,18 @@ int wait_initV2()
 	{
 		if((r=cmd_CMD55())==1)
 		{
-//			printf("CMD55 %d\n",r);
 			SPI(0xff);
 			if((r=cmd_CMD41())==0)
 			{
-//				printf("CMD41 %d\n",r);
 				SPI(0xff);
 				return(1);
 			}
-//			else
-//				printf("CMD41 %d\n",r);
 			spi_spin();
 		}
-//		else
-//			printf("CMD55 %d\n",r);
+		else
+		{
+			PDBG("CMD55 %d\n",r);
+		}
 	}
 	return(0);
 }
@@ -136,7 +127,7 @@ int wait_init()
 	int i=20;
 	int r;
 	SPI(0xff);
-	puts("Cmd_init\n");
+	puts("CMD");
 	while(--i)
 	{
 		if((r=cmd_init())==0)
@@ -145,8 +136,10 @@ int wait_init()
 			SPI(0xff);
 			return(1);
 		}
-//		else
-//			printf("init %d\n  ",r);
+		else
+		{
+			PDBG("init %d\n  ",r);
+		}
 		spi_spin();
 	}
 	return(0);
@@ -163,19 +156,24 @@ int is_sdhc()
 	printf("cmd_CMD8 response: %d\n",r);
 	if(r!=1)
 	{
+		PDBG("CMD8_4 response: %d\n",r);
 		wait_init();
+		DBG("CMD8 -> Not a V2 card\n");
 		return(0);
 	}
 
 	r=SPI_PUMP();
 	if((r&0xffff)!=0x01aa)
 	{
-		printf("CMD8_4 response: %d\n",r);
+		PDBG("CMD8_4 response: %d\n",r);
 		wait_init();
+		DBG("Not a V2 card\n");
 		return(0);
 	}
 
 	SPI(0xff);
+
+	DBG("V2 card - is it SHDC?  ");
 
 	// If we get this far we have a V2 card, which may or may not be SDHC...
 
@@ -195,9 +193,15 @@ int is_sdhc()
 				SPI(0xff);
 				SPI(0xff);
 				if(r&0x40)
+				{
+					DBG("Yes\n");
 					return(1);
+				}
 				else
+				{
+					DBG("No\n");
 					return(0);
+				}
 			}
 			else
 				printf("CMD58 %d\n  ",r);
@@ -219,7 +223,7 @@ int spi_init()
 	SDHCtype=1;
 	SPI_CS(0);	// Disable CS
 	spi_spin();
-	puts("SPI Init()\n");
+	puts("SPI");
 	DBG("Activating CS\n");
 	SPI_CS(1);
 	i=8;
@@ -244,6 +248,11 @@ int spi_init()
 		cmd_CMD16(1);
 	}
 	SPI(0xFF);
+
+	i=sd_get_size();
+	printf("SD card size is %d\n",i);
+
+
 	SPI_CS(0);
 	SPI(0xFF);
 	DBG("Init done\n");
@@ -260,6 +269,52 @@ int sd_write_sector(unsigned long lba,unsigned char *buf) // FIXME - Stub
 
 extern void spi_readsector(long *buf);
 
+int spi_checksum;
+
+static int sd_read(unsigned char *buf,int bytes)
+{
+	int result=0;
+	int i=1500000;
+	while(--i)
+	{
+		int v;
+		SPI(0xff);
+//		SPI_WAIT();
+		v=SPI_READ();
+		if(v==0xfe)
+		{
+//			puts("Reading sector data\n");
+//			spi_readsector((long *)buf);
+			int j;
+//			SPI(0xff);
+			spi_checksum=0;
+			for(;bytes>=4;bytes-=4)
+			{
+				int t,v;
+
+				t=SPI_PUMP();
+				*(int *)buf=t;
+//				printf("%d: %d\n",buf,t);
+				buf+=4;
+				spi_checksum+=t;
+			}
+			for(;bytes>0;--bytes)
+			{
+				int t,v;
+
+				t=SPI(0xff);
+				*buf++=t;
+//				printf("%d: %d\n",buf,t);
+				spi_checksum+=t;
+			}
+
+			i=1; // break out of the loop
+			result=1;
+		}
+	}
+	SPI(0xff);
+	return(result);
+}
 
 int sd_read_sector(unsigned long lba,unsigned char *buf)
 {
@@ -277,37 +332,49 @@ int sd_read_sector(unsigned long lba,unsigned char *buf)
 		printf("Read command failed at %d (%d)\n",lba,r);
 		return(result);
 	}
+	result=sd_read(buf,512);
 
-	i=1500000;
-	while(--i)
-	{
-		int v;
-		SPI(0xff);
-//		SPI_WAIT();
-		v=SPI_READ();
-		if(v==0xfe)
-		{
-//			puts("Reading sector data\n");
-//			spi_readsector((long *)buf);
-			int j;
-//			SPI(0xff);
-
-			for(j=0;j<128;++j)
-			{
-				int t,v;
-
-				t=SPI_PUMP();
-				*(int *)buf=t;
-//				printf("%d: %d\n",buf,t);
-				buf+=4;
-			}
-
-			i=1; // break out of the loop
-			result=1;
-		}
-	}
-	SPI(0xff);
 	SPI_CS(0);
 	return(result);
+}
+
+unsigned char sizebuf[18];
+int sd_get_size()
+{
+	// Reading the card size is much easier for SDHC than regular SD.
+	int r;
+	r=cmd_CMD9();
+	PDBG("CMD9 response: %x\n",r);
+	sd_read(sizebuf,18);
+	for(r=0;r<18;++r)
+	{
+		PDBG("%x, ",sizebuf[r]);
+	}
+	DBG("\n");
+	r=0;
+	if((sizebuf[0]&0xc0)==0x40)	// V2 CSD
+	{
+		r=1+(((sizebuf[7]<<16)|(sizebuf[8]<<8)|sizebuf[9])&0x3fffff);
+		r<<=10;	// Scale to the number of 512-byte blocks
+	}
+	else
+	{	// Whatever were they smoking when they designed the V1 CSD?
+		int c_size_mult=((sizebuf[9]<<1)&6)|(sizebuf[10]>>7);
+		int read_bl_len=sizebuf[5]&15;
+		int csize=((sizebuf[6]&3)<<10) | sizebuf[7]<<2 | ((sizebuf[8]&0xc0)>>6);
+		printf("c_size_mult: %d, read_bl_len: %d, csize: %d\n",c_size_mult,read_bl_len,csize);
+		c_size_mult=1<<(2+c_size_mult);
+		printf("Mult %d\n",c_size_mult);
+		read_bl_len=1<<(read_bl_len);
+		r=(csize+1)*c_size_mult;
+		printf("%d blocks of size %d\n",r,read_bl_len);
+		while(read_bl_len>512)
+		{
+			r<<=1;
+			read_bl_len>>=1;
+		}
+		printf("%d blocks of 512 bytes\n",r);
+	}
+	return(r);
 }
 

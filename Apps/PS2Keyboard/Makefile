@@ -17,7 +17,7 @@ RTL_DIR = $(ZPUFLEXDIR)/RTL/
 # we use printf from here
 COMMON_DIR = ../../Common_Firmware
 
-BUILD_DIR=zpu_obj
+BUILD_DIR=mips_obj
 
 STARTUP_SRC = $(STARTUP_DIR)/crt0.s $(STARTUP_DIR)/premain.s
 STARTUP_OBJ = $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/%.o,$(STARTUP_SRC))
@@ -29,8 +29,8 @@ MAIN_PRJ = PS2Keyboard
 MAIN_SRC = main.c
 MAIN_OBJ = $(COMMON_OBJ) $(patsubst %.c,$(BUILD_DIR)/%.o,$(MAIN_SRC))
 
-#LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
-LINKMAP  = standalone_simple_debug.ld
+LINKMAP  = $(ZPUFLEXDIR)/Firmware/standalone_simple.ld
+#LINKMAP  = standalone_simple_debug.ld
 
 
 # Commandline options for each tool.
