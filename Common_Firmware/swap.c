@@ -3,7 +3,7 @@ unsigned int SwapBBBB(unsigned int i)
 	unsigned int result=(i>>24)&0xff;
 	result|=(i>>8)&0xff00;
 	result|=(i<<8)&0xff0000;
-	result|=(i<<24)&0xff00000;
+	result|=(i<<24)&0xff000000;
 	return(result);
 }
 
